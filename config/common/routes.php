@@ -86,6 +86,30 @@ return [
                 ->name('kamar/delete'),
         ),
 
+    // Konsulat Group protected by RBAC middleware
+    Group::create('/konsulat')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Konsulat\KonsulatController::class, 'index'])
+                ->name('konsulat/index'),
+            Route::get('/create')
+                ->action([Web\Konsulat\KonsulatController::class, 'create'])
+                ->name('konsulat/create'),
+            Route::post('/create')
+                ->action([Web\Konsulat\KonsulatController::class, 'create'])
+                ->name('konsulat/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Konsulat\KonsulatController::class, 'update'])
+                ->name('konsulat/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Konsulat\KonsulatController::class, 'update'])
+                ->name('konsulat/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Konsulat\KonsulatController::class, 'delete'])
+                ->name('konsulat/delete'),
+        ),
+
     // RBAC Group protected by RBAC middleware
     Group::create('/rbac')
         ->middleware(RbacAccessControlMiddleware::class)

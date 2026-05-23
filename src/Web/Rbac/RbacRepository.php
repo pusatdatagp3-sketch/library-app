@@ -191,6 +191,46 @@ final class RbacRepository
                 $routeInsertStmt->execute($mapping);
             }
         }
+
+        // Seed Konsulat Permissions jika belum ada
+        $konsulatPermissions = [
+            ['name' => 'view_konsulat', 'description' => 'Melihat daftar dan detail data Konsulat.'],
+            ['name' => 'create_konsulat', 'description' => 'Menambahkan data Konsulat baru.'],
+            ['name' => 'update_konsulat', 'description' => 'Mengubah detail data Konsulat.'],
+            ['name' => 'delete_konsulat', 'description' => 'Menghapus data Konsulat.'],
+        ];
+        foreach ($konsulatPermissions as $perm) {
+            $checkStmt->execute(['name' => $perm['name']]);
+            if ($checkStmt->fetchColumn() == 0) {
+                $insertPermStmt->execute($perm);
+                
+                // Tambahkan relasi hak akses ke Admin secara default
+                $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Admin', :perm)")
+                    ->execute(['perm' => $perm['name']]);
+                
+                // Tambahkan relasi hak akses ke Operator secara default (kecuali delete)
+                if ($perm['name'] !== 'delete_konsulat') {
+                    $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Operator', :perm)")
+                        ->execute(['perm' => $perm['name']]);
+                }
+            }
+        }
+
+        // Seed Konsulat Route Mappings jika belum ada
+        $konsulatRouteMappings = [
+            ['route_name' => 'konsulat/index', 'permission_name' => 'view_konsulat'],
+            ['route_name' => 'konsulat/create', 'permission_name' => 'create_konsulat'],
+            ['route_name' => 'konsulat/create/post', 'permission_name' => 'create_konsulat'],
+            ['route_name' => 'konsulat/update', 'permission_name' => 'update_konsulat'],
+            ['route_name' => 'konsulat/update/post', 'permission_name' => 'update_konsulat'],
+            ['route_name' => 'konsulat/delete', 'permission_name' => 'delete_konsulat'],
+        ];
+        foreach ($konsulatRouteMappings as $mapping) {
+            $routeCheckStmt->execute(['route_name' => $mapping['route_name']]);
+            if ($routeCheckStmt->fetchColumn() == 0) {
+                $routeInsertStmt->execute($mapping);
+            }
+        }
     }
 
     public function getAllRoles(): array
