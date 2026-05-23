@@ -559,3 +559,358 @@ body {
     font-size: 0.9rem;
     font-weight: 500;
 }
+
+/* ==========================================================================
+   RBAC & Authentication Styles
+   ========================================================================== */
+
+/* Login Page Styling */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 36px;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    border-radius: 16px;
+    background: #ffffff;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 8px 0;
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+    margin-top: 10px;
+}
+
+.login-footer {
+    margin-top: 28px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.login-footer p {
+    color: var(--text-muted);
+    margin: 0 0 10px 0;
+}
+
+.demo-accounts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.demo-badge {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    border: 1px solid var(--border);
+}
+
+/* User Profile Badge in Nav Header */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    padding: 6px 12px 6px 6px;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.user-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-meta .username {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.user-meta .role {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.logout-btn-nav {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.logout-btn-nav:hover {
+    color: var(--danger);
+    background: #fee2e2;
+}
+
+.logout-btn-nav svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-login-nav {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+/* RBAC Management Dashboard Grid */
+.rbac-grid {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 992px) {
+    .rbac-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card-header-styled {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+}
+
+.card-header-styled h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.card-header-styled p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Table Matrix switch controls */
+.table-matrix td {
+    padding: 12px 16px !important;
+}
+
+.perm-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.perm-info strong {
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.perm-info small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Custom Switch/Slider Styling */
+.switch-container {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.switch-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.switch-container input:checked + .switch-slider {
+    background-color: var(--primary);
+}
+
+.switch-container input:checked + .switch-slider:before {
+    transform: translateX(22px);
+}
+
+/* Badges for User Roles */
+.badge-role {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    border-radius: 9999px;
+}
+
+.badge-role-admin {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+
+.badge-role-operator {
+    background-color: #ccfbf1;
+    color: #0f766e;
+}
+
+.badge-role-guru {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+/* User avatars in table */
+.user-avatar-initials {
+    width: 32px;
+    height: 32px;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    border: 1px solid var(--border);
+}
+
+/* 403 Forbidden Screen */
+.error-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 65vh;
+    padding: 20px;
+}
+
+.error-card {
+    max-width: 480px;
+    width: 100%;
+    padding: 48px 36px;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}
+
+.error-icon-container {
+    width: 72px;
+    height: 72px;
+    background: #fef2f2;
+    color: var(--danger);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+}
+
+.error-illustration {
+    width: 36px;
+    height: 36px;
+}
+
+.error-code {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.error-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #334155;
+    margin: 0 0 12px 0;
+}
+
+.error-description {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0 0 28px 0;
+}
+
+.error-actions {
+    display: flex;
+    justify-content: center;
+}
+

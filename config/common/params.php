@@ -25,6 +25,7 @@ return [
             'aliases' => Reference::to(Aliases::class),
             'urlGenerator' => Reference::to(UrlGeneratorInterface::class),
             'currentRoute' => Reference::to(CurrentRoute::class),
+            'userSession' => Reference::to(App\Web\Auth\UserSession::class),
         ],
     ],
 

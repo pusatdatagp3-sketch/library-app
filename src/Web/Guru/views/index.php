@@ -13,6 +13,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var string|null $csrf
  * @var string|null $successMsg
  * @var array $errorMsgs
+ * @var \App\Web\Auth\UserSession $userSession
  */
 
 $this->setTitle('Data Guru - List');
@@ -49,41 +50,45 @@ $this->setTitle('Data Guru - List');
             <h1 class="crud-title">Data Guru</h1>
             <p class="crud-subtitle">Kelola informasi guru pondok pesantren dengan mudah dan cepat.</p>
         </div>
-        <a href="<?= $urlGenerator->generate('guru/create') ?>" class="btn btn-primary">
-            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Tambah Guru
-        </a>
+        <?php if ($userSession->hasPermission('create_guru')): ?>
+            <a href="<?= $urlGenerator->generate('guru/create') ?>" class="btn btn-primary">
+                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Tambah Guru
+            </a>
+        <?php endif; ?>
     </div>
 
     <!-- Card Import Excel Premium -->
-    <div class="card import-card" style="margin-bottom: 24px;">
-        <div class="import-card-header">
-            <h3 class="import-card-title">Import Massal via Excel</h3>
-            <a href="<?= $urlGenerator->generate('guru/download-template') ?>" class="btn-link">
-                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-                Unduh Template Excel
-            </a>
-        </div>
-        <form action="<?= $urlGenerator->generate('guru/upload') ?>" method="POST" enctype="multipart/form-data" class="import-form">
-            <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
-            <div class="import-input-group">
-                <div class="file-input-wrapper">
-                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
-                    <span class="file-input-label">Pilih file Excel (.xlsx, .xls, .csv)...</span>
-                </div>
-                <button type="submit" class="btn btn-secondary">
-                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+    <?php if ($userSession->hasPermission('create_guru')): ?>
+        <div class="card import-card" style="margin-bottom: 24px;">
+            <div class="import-card-header">
+                <h3 class="import-card-title">Import Massal via Excel</h3>
+                <a href="<?= $urlGenerator->generate('guru/download-template') ?>" class="btn-link">
+                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                     </svg>
-                    Proses Import (Upsert)
-                </button>
+                    Unduh Template Excel
+                </a>
             </div>
-        </form>
-    </div>
+            <form action="<?= $urlGenerator->generate('guru/upload') ?>" method="POST" enctype="multipart/form-data" class="import-form">
+                <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
+                <div class="import-input-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                        <span class="file-input-label">Pilih file Excel (.xlsx, .xls, .csv)...</span>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">
+                        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        Proses Import (Upsert)
+                    </button>
+                </div>
+            </form>
+        </div>
+    <?php endif; ?>
 
     <?php if (empty($guruList)): ?>
         <div class="empty-state">
@@ -105,7 +110,9 @@ $this->setTitle('Data Guru - List');
                         <th>Konsulat</th>
                         <th>Email</th>
                         <th>Nomor Telefon</th>
-                        <th class="text-center">Aksi</th>
+                        <?php if ($userSession->hasPermission('update_guru') || $userSession->hasPermission('delete_guru')): ?>
+                            <th class="text-center">Aksi</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,25 +125,31 @@ $this->setTitle('Data Guru - List');
                             <td><?= Html::encode($guru->konsulat) ?></td>
                             <td><span class="email-text"><?= Html::encode($guru->email) ?></span></td>
                             <td><?= Html::encode($guru->noTelp) ?></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="<?= $urlGenerator->generate('guru/update', ['kdg' => $guru->kdg]) ?>" class="btn-action btn-edit" title="Edit Guru">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                        </svg>
-                                        Edit
-                                    </a>
-                                    <form action="<?= $urlGenerator->generate('guru/delete', ['kdg' => $guru->kdg]) ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru ini?');" style="display:inline;">
-                                        <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
-                                        <button type="submit" class="btn-action btn-delete" title="Hapus Guru">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                            </svg>
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+                            <?php if ($userSession->hasPermission('update_guru') || $userSession->hasPermission('delete_guru')): ?>
+                                <td>
+                                    <div class="action-buttons">
+                                        <?php if ($userSession->hasPermission('update_guru')): ?>
+                                            <a href="<?= $urlGenerator->generate('guru/update', ['kdg' => $guru->kdg]) ?>" class="btn-action btn-edit" title="Edit Guru">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                </svg>
+                                                Edit
+                                            </a>
+                                        <?php endif; ?>
+                                        <?php if ($userSession->hasPermission('delete_guru')): ?>
+                                            <form action="<?= $urlGenerator->generate('guru/delete', ['kdg' => $guru->kdg]) ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru ini?');" style="display:inline;">
+                                                <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
+                                                <button type="submit" class="btn-action btn-delete" title="Hapus Guru">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
