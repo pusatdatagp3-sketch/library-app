@@ -213,16 +213,16 @@ body {
 }
 
 .sidebar-toggle {
-    display: none;
+    display: flex;
     background: transparent;
     border: none;
     cursor: pointer;
     color: var(--text-main);
     padding: 6px;
     border-radius: 6px;
-    display: none;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s ease;
 }
 
 .sidebar-toggle:hover {
@@ -648,10 +648,6 @@ body {
 
     body.sidebar-open .sidebar-overlay {
         display: block;
-    }
-
-    .sidebar-toggle {
-        display: flex;
     }
 
     .admin-header {
@@ -1153,4 +1149,42 @@ body {
     display: flex;
     justify-content: center;
 }
+
+/* Sidebar Collapse on Desktop */
+@media (min-width: 1025px) {
+    .admin-sidebar {
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.sidebar-collapsed .admin-sidebar {
+        width: 70px;
+    }
+
+    body.sidebar-collapsed .sidebar-brand {
+        padding: 0;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    body.sidebar-collapsed .sidebar-brand .brand-text {
+        display: none;
+    }
+
+    body.sidebar-collapsed .nav-group-title {
+        display: none;
+    }
+
+    body.sidebar-collapsed .sidebar-menu a {
+        justify-content: center;
+        padding: 10px 0;
+        margin: 0 10px;
+        gap: 0;
+        overflow: hidden;
+    }
+
+    body.sidebar-collapsed .sidebar-menu a span {
+        display: none;
+    }
+}
+
 

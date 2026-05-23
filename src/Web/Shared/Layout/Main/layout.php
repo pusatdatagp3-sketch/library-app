@@ -41,6 +41,11 @@ $this->beginPage()
     (function() {
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.body.setAttribute('data-theme', savedTheme);
+        
+        const sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        if (sidebarCollapsed && window.innerWidth > 1024) {
+            document.body.classList.add('sidebar-collapsed');
+        }
     })();
 </script>
 <?php $this->beginBody() ?>
@@ -63,7 +68,7 @@ $this->beginPage()
                     <path d="M-115.623-336.617c.215-6.016-4.07-11.074-8.349-14.917-9.513-8.546-25.864-14.245-25.864-14.245 1.682-2.738 3.349-6.138 4.604-8.861 7.519-16.305 11.701-38.841 11.71-38.871.003-.01 4.657 6.62 7.685 13.703 3.029 7.085 9.248 19.584 10.71 38.869.425 5.625.859 10.005-.496 24.322z" style="fill:#7fb93c" transform="translate(245.403 498.558)"/>
                 </g>
             </svg>
-            <span style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em;">TEQIC Admin</span>
+            <span class="brand-text" style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em;">TEQIC Admin</span>
         </div>
 
         <!-- Sidebar Navigation -->
@@ -72,17 +77,17 @@ $this->beginPage()
             <div class="nav-group">
                 <span class="nav-group-title">Utama</span>
                 <div class="sidebar-menu">
-                    <a href="<?= $urlGenerator->generate('home') ?>" class="<?= $currentRoute->getName() === 'home' ? 'active' : '' ?>">
+                    <a href="<?= $urlGenerator->generate('home') ?>" class="<?= $currentRoute->getName() === 'home' ? 'active' : '' ?>" title="Home">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                         </svg>
-                        Home
+                        <span>Home</span>
                     </a>
-                    <a href="<?= $urlGenerator->generate('hello') ?>" class="<?= $currentRoute->getName() === 'hello' ? 'active' : '' ?>">
+                    <a href="<?= $urlGenerator->generate('hello') ?>" class="<?= $currentRoute->getName() === 'hello' ? 'active' : '' ?>" title="Hello">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.625.625 0 11-1.25 0 .625.625 0 011.25 0zm4.5 0a.625.625 0 11-1.25 0 .625.625 0 011.25 0zm4.5 0a.625.625 0 11-1.25 0 .625.625 0 011.25 0zM12 3c5.385 0 9.75 3.62 9.75 8.082 0 2.2-1.077 4.195-2.817 5.568-.135.107-.218.271-.218.445v2.87a.3.3 0 01-.482.24l-3.47-2.603a.75.75 0 00-.45-.148H12c-5.385 0-9.75-3.62-9.75-8.082C2.25 6.62 6.615 3 12 3z" />
                         </svg>
-                        Hello
+                        <span>Hello</span>
                     </a>
                 </div>
             </div>
@@ -91,46 +96,46 @@ $this->beginPage()
             <div class="nav-group">
                 <span class="nav-group-title">Data Master</span>
                 <div class="sidebar-menu">
-                    <a href="<?= $urlGenerator->generate('guru/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'guru') ? 'active' : '' ?>">
+                    <a href="<?= $urlGenerator->generate('guru/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'guru') ? 'active' : '' ?>" title="Data Guru">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 019.918 5.84 50.45 50.45 0 00-2.658.813m-15.482 0A50.703 50.703 0 0112 12.056c1.777 0 3.513-.198 5.178-.577m-15.482 0a50.56 50.56 0 00-2.91 4.594M21.75 10.147a50.56 50.56 0 012.91 4.594m-2.91-4.594a50.703 50.703 0 01-5.178 1.332m-2.909 6.275a50.4 50.4 0 01-5.178-1.332m5.178 1.332l-.001.002a24.272 24.272 0 01-3.447-.894m3.448.892a24.277 24.277 0 003.448-.892m0 0a23.953 23.953 0 005.178-1.332m-5.178 1.332v1.54c0 .641-.31 1.24-.826 1.603a11.506 11.506 0 01-6.7 1.63 11.506 11.506 0 01-6.7-1.63 2.002 2.002 0 01-.826-1.603v-1.54z" />
                         </svg>
-                        Data Guru
+                        <span>Data Guru</span>
                     </a>
 
                     <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_kamar')): ?>
-                        <a href="<?= $urlGenerator->generate('kamar/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'kamar') ? 'active' : '' ?>">
+                        <a href="<?= $urlGenerator->generate('kamar/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'kamar') ? 'active' : '' ?>" title="Data Kamar">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M2.25 21h19.5M3 10h18M3 7h18M3 4h18" />
                             </svg>
-                            Data Kamar
+                            <span>Data Kamar</span>
                         </a>
                     <?php endif; ?>
 
                     <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_konsulat')): ?>
-                        <a href="<?= $urlGenerator->generate('konsulat/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'konsulat') ? 'active' : '' ?>">
+                        <a href="<?= $urlGenerator->generate('konsulat/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'konsulat') ? 'active' : '' ?>" title="Data Konsulat">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
                             </svg>
-                            Data Konsulat
+                            <span>Data Konsulat</span>
                         </a>
                     <?php endif; ?>
 
                     <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_santri')): ?>
-                        <a href="<?= $urlGenerator->generate('santri/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'santri') ? 'active' : '' ?>">
+                        <a href="<?= $urlGenerator->generate('santri/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'santri') ? 'active' : '' ?>" title="Data Santri">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
-                            Data Santri
+                            <span>Data Santri</span>
                         </a>
                     <?php endif; ?>
 
                     <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_pelanggaran')): ?>
-                        <a href="<?= $urlGenerator->generate('pelanggaran/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'pelanggaran') ? 'active' : '' ?>">
+                        <a href="<?= $urlGenerator->generate('pelanggaran/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'pelanggaran') ? 'active' : '' ?>" title="Data Pelanggaran">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
-                            Data Pelanggaran
+                            <span>Data Pelanggaran</span>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -142,20 +147,20 @@ $this->beginPage()
                     <span class="nav-group-title">Sistem</span>
                     <div class="sidebar-menu">
                         <?php if ($userSession->hasPermission('manage_gii')): ?>
-                            <a href="<?= $urlGenerator->generate('gii/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'gii') ? 'active' : '' ?>">
+                            <a href="<?= $urlGenerator->generate('gii/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'gii') ? 'active' : '' ?>" title="Gii Generator">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                                 </svg>
-                                Gii Generator
+                                <span>Gii Generator</span>
                             </a>
                         <?php endif; ?>
 
                         <?php if ($userSession->hasPermission('manage_rbac')): ?>
-                            <a href="<?= $urlGenerator->generate('rbac/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'rbac') ? 'active' : '' ?>">
+                            <a href="<?= $urlGenerator->generate('rbac/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'rbac') ? 'active' : '' ?>" title="Manajemen RBAC">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                                 </svg>
-                                Manajemen RBAC
+                                <span>Manajemen RBAC</span>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -272,15 +277,23 @@ $this->beginPage()
             updateToggleIcons(activeTheme);
         });
 
-        // Mobile sidebar toggling
+        // Sidebar toggling (Mobile Overlay vs Desktop Collapse)
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-        if (sidebarToggle && sidebarOverlay) {
+        if (sidebarToggle) {
             sidebarToggle.addEventListener('click', function() {
-                document.body.classList.toggle('sidebar-open');
+                if (window.innerWidth > 1024) {
+                    document.body.classList.toggle('sidebar-collapsed');
+                    const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+                    localStorage.setItem('sidebar-collapsed', isCollapsed ? 'true' : 'false');
+                } else {
+                    document.body.classList.toggle('sidebar-open');
+                }
             });
+        }
 
+        if (sidebarOverlay) {
             sidebarOverlay.addEventListener('click', function() {
                 document.body.classList.remove('sidebar-open');
             });
