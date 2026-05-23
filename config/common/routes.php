@@ -19,4 +19,23 @@ return [
                 ->action([Web\Hello\HelloController::class, 'index'])
                 ->name('hello'),
         ),
+    Group::create('/guru')
+        ->routes(
+            Route::get('')
+                ->action([Web\Guru\GuruController::class, 'index'])
+                ->name('guru/index'),
+            Route::get('/create')
+                ->action([Web\Guru\GuruController::class, 'create'])
+                ->name('guru/create'),
+            Route::post('/create')
+                ->action([Web\Guru\GuruController::class, 'create']),
+            Route::get('/update/{kdg:\d+}')
+                ->action([Web\Guru\GuruController::class, 'update'])
+                ->name('guru/update'),
+            Route::post('/update/{kdg:\d+}')
+                ->action([Web\Guru\GuruController::class, 'update']),
+            Route::post('/delete/{kdg:\d+}')
+                ->action([Web\Guru\GuruController::class, 'delete'])
+                ->name('guru/delete'),
+        ),
 ];

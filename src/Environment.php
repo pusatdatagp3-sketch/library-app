@@ -29,6 +29,11 @@ final class Environment
         self::setBoolean('APP_C3', false);
         self::setBoolean('APP_DEBUG', false);
         self::setNonEmptyStringOrNull('APP_HOST_PATH', null);
+        self::setString('DB_HOST', '127.0.0.1');
+        self::setString('DB_PORT', '3306');
+        self::setString('DB_NAME', 'teqic_yii3');
+        self::setString('DB_USER', 'root');
+        self::setString('DB_PASSWORD', 'dummy1!');
     }
 
     /**
@@ -74,6 +79,31 @@ final class Environment
     {
         /** @var bool */
         return self::$values['APP_DEBUG'];
+    }
+
+    public static function dbHost(): string
+    {
+        return (string) self::$values['DB_HOST'];
+    }
+
+    public static function dbPort(): string
+    {
+        return (string) self::$values['DB_PORT'];
+    }
+
+    public static function dbName(): string
+    {
+        return (string) self::$values['DB_NAME'];
+    }
+
+    public static function dbUser(): string
+    {
+        return (string) self::$values['DB_USER'];
+    }
+
+    public static function dbPassword(): string
+    {
+        return (string) self::$values['DB_PASSWORD'];
     }
 
     private static function setEnvironment(): void

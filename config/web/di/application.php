@@ -16,6 +16,7 @@ use Yiisoft\RequestProvider\RequestCatcherMiddleware;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Session\SessionMiddleware;
 use Yiisoft\Yii\Http\Application;
+use Yiisoft\Yii\Middleware\Subfolder;
 
 /** @var array $params */
 
@@ -30,6 +31,7 @@ return [
                         SessionMiddleware::class,
                         CsrfTokenMiddleware::class,
                         RequestCatcherMiddleware::class,
+                        Subfolder::class,
                         Router::class,
                     ],
                 ],

@@ -65,6 +65,11 @@ $this->beginPage()
             </g>
         </svg>
     </a>
+    <div class="nav-menu">
+        <a href="<?= $urlGenerator->generate('home') ?>" class="<?= $currentRoute->getName() === 'home' ? 'active' : '' ?>">Home</a>
+        <a href="<?= $urlGenerator->generate('hello') ?>" class="<?= $currentRoute->getName() === 'hello' ? 'active' : '' ?>">Hello</a>
+        <a href="<?= $urlGenerator->generate('guru/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'guru') ? 'active' : '' ?>">Data Guru</a>
+    </div>
 </div>
 
 <div class="content">
