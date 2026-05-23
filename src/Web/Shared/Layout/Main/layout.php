@@ -77,6 +77,15 @@ $this->beginPage()
             <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_konsulat')): ?>
                 <a href="<?= $urlGenerator->generate('konsulat/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'konsulat') ? 'active' : '' ?>">Data Konsulat</a>
             <?php endif; ?>
+            <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_santri')): ?>
+                <a href="<?= $urlGenerator->generate('santri/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'santri') ? 'active' : '' ?>">Data Santri</a>
+            <?php endif; ?>
+            <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_pelanggaran')): ?>
+                <a href="<?= $urlGenerator->generate('pelanggaran/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'pelanggaran') ? 'active' : '' ?>">Data Pelanggaran</a>
+            <?php endif; ?>
+            <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('manage_gii')): ?>
+                <a href="<?= $urlGenerator->generate('gii/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'gii') ? 'active' : '' ?>">Gii Generator</a>
+            <?php endif; ?>
             <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('manage_rbac')): ?>
                 <a href="<?= $urlGenerator->generate('rbac/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'rbac') ? 'active' : '' ?>">Manajemen RBAC</a>
             <?php endif; ?>

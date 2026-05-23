@@ -110,6 +110,65 @@ return [
                 ->name('konsulat/delete'),
         ),
 
+    // Gii Group protected by RBAC middleware
+    Group::create('/gii')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Gii\GiiController::class, 'index'])
+                ->name('gii/index'),
+            Route::post('/generate')
+                ->action([Web\Gii\GiiController::class, 'generate'])
+                ->name('gii/generate'),
+        ),
+
+    // Pelanggaran Group protected by RBAC middleware
+    Group::create('/pelanggaran')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Pelanggaran\PelanggaranController::class, 'index'])
+                ->name('pelanggaran/index'),
+            Route::get('/create')
+                ->action([Web\Pelanggaran\PelanggaranController::class, 'create'])
+                ->name('pelanggaran/create'),
+            Route::post('/create')
+                ->action([Web\Pelanggaran\PelanggaranController::class, 'create'])
+                ->name('pelanggaran/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Pelanggaran\PelanggaranController::class, 'update'])
+                ->name('pelanggaran/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Pelanggaran\PelanggaranController::class, 'update'])
+                ->name('pelanggaran/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Pelanggaran\PelanggaranController::class, 'delete'])
+                ->name('pelanggaran/delete'),
+        ),
+
+    // Santri Group protected by RBAC middleware
+    Group::create('/santri')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Santri\SantriController::class, 'index'])
+                ->name('santri/index'),
+            Route::get('/create')
+                ->action([Web\Santri\SantriController::class, 'create'])
+                ->name('santri/create'),
+            Route::post('/create')
+                ->action([Web\Santri\SantriController::class, 'create'])
+                ->name('santri/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Santri\SantriController::class, 'update'])
+                ->name('santri/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Santri\SantriController::class, 'update'])
+                ->name('santri/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Santri\SantriController::class, 'delete'])
+                ->name('santri/delete'),
+        ),
     // RBAC Group protected by RBAC middleware
     Group::create('/rbac')
         ->middleware(RbacAccessControlMiddleware::class)

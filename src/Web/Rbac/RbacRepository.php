@@ -231,6 +231,97 @@ final class RbacRepository
                 $routeInsertStmt->execute($mapping);
             }
         }
+
+        // Seed Gii Permissions
+        $giiPermissions = [
+            ['name' => 'manage_gii', 'description' => 'Akses dan penggunaan Gii Generator.'],
+        ];
+        foreach ($giiPermissions as $perm) {
+            $checkStmt->execute(['name' => $perm['name']]);
+            if ($checkStmt->fetchColumn() == 0) {
+                $insertPermStmt->execute($perm);
+                $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Admin', :perm)")
+                    ->execute(['perm' => $perm['name']]);
+            }
+        }
+        $giiRouteMappings = [
+            ['route_name' => 'gii/index', 'permission_name' => 'manage_gii'],
+            ['route_name' => 'gii/generate', 'permission_name' => 'manage_gii'],
+        ];
+        foreach ($giiRouteMappings as $mapping) {
+            $routeCheckStmt->execute(['route_name' => $mapping['route_name']]);
+            if ($routeCheckStmt->fetchColumn() == 0) {
+                $routeInsertStmt->execute($mapping);
+            }
+        }
+
+        // Seed Pelanggaran Permissions jika belum ada
+        $pelanggaranPermissions = [
+            ['name' => 'view_pelanggaran', 'description' => 'Melihat daftar dan detail data Pelanggaran.'],
+            ['name' => 'create_pelanggaran', 'description' => 'Menambahkan data Pelanggaran baru.'],
+            ['name' => 'update_pelanggaran', 'description' => 'Mengubah detail data Pelanggaran.'],
+            ['name' => 'delete_pelanggaran', 'description' => 'Menghapus data Pelanggaran.'],
+        ];
+        foreach ($pelanggaranPermissions as $perm) {
+            $checkStmt->execute(['name' => $perm['name']]);
+            if ($checkStmt->fetchColumn() == 0) {
+                $insertPermStmt->execute($perm);
+                $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Admin', :perm)")
+                    ->execute(['perm' => $perm['name']]);
+                if ($perm['name'] !== 'delete_pelanggaran') {
+                    $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Operator', :perm)")
+                        ->execute(['perm' => $perm['name']]);
+                }
+            }
+        }
+        $pelanggaranRouteMappings = [
+            ['route_name' => 'pelanggaran/index', 'permission_name' => 'view_pelanggaran'],
+            ['route_name' => 'pelanggaran/create', 'permission_name' => 'create_pelanggaran'],
+            ['route_name' => 'pelanggaran/create/post', 'permission_name' => 'create_pelanggaran'],
+            ['route_name' => 'pelanggaran/update', 'permission_name' => 'update_pelanggaran'],
+            ['route_name' => 'pelanggaran/update/post', 'permission_name' => 'update_pelanggaran'],
+            ['route_name' => 'pelanggaran/delete', 'permission_name' => 'delete_pelanggaran'],
+        ];
+        foreach ($pelanggaranRouteMappings as $mapping) {
+            $routeCheckStmt->execute(['route_name' => $mapping['route_name']]);
+            if ($routeCheckStmt->fetchColumn() == 0) {
+                $routeInsertStmt->execute($mapping);
+            }
+        }
+
+        // Seed Santri Permissions jika belum ada
+        $santriPermissions = [
+            ['name' => 'view_santri', 'description' => 'Melihat daftar dan detail data Santri.'],
+            ['name' => 'create_santri', 'description' => 'Menambahkan data Santri baru.'],
+            ['name' => 'update_santri', 'description' => 'Mengubah detail data Santri.'],
+            ['name' => 'delete_santri', 'description' => 'Menghapus data Santri.'],
+        ];
+        foreach ($santriPermissions as $perm) {
+            $checkStmt->execute(['name' => $perm['name']]);
+            if ($checkStmt->fetchColumn() == 0) {
+                $insertPermStmt->execute($perm);
+                $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Admin', :perm)")
+                    ->execute(['perm' => $perm['name']]);
+                if ($perm['name'] !== 'delete_santri') {
+                    $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Operator', :perm)")
+                        ->execute(['perm' => $perm['name']]);
+                }
+            }
+        }
+        $santriRouteMappings = [
+            ['route_name' => 'santri/index', 'permission_name' => 'view_santri'],
+            ['route_name' => 'santri/create', 'permission_name' => 'create_santri'],
+            ['route_name' => 'santri/create/post', 'permission_name' => 'create_santri'],
+            ['route_name' => 'santri/update', 'permission_name' => 'update_santri'],
+            ['route_name' => 'santri/update/post', 'permission_name' => 'update_santri'],
+            ['route_name' => 'santri/delete', 'permission_name' => 'delete_santri'],
+        ];
+        foreach ($santriRouteMappings as $mapping) {
+            $routeCheckStmt->execute(['route_name' => $mapping['route_name']]);
+            if ($routeCheckStmt->fetchColumn() == 0) {
+                $routeInsertStmt->execute($mapping);
+            }
+        }
     }
 
     public function getAllRoles(): array
