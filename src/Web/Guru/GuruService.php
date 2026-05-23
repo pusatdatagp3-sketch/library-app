@@ -53,6 +53,73 @@ final class GuruService
         return $this->guruRepository->delete($kdg);
     }
 
+    public function importExcel(string $filePath, array &$errors): int
+    {
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        } catch (\Throwable $e) {
+            $errors[] = "Gagal membaca file Excel: " . $e->getMessage();
+            return 0;
+        }
+
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+
+        $successCount = 0;
+        foreach ($rows as $index => $row) {
+            if ($index === 0) {
+                continue; // Skip header row
+            }
+
+            // Skip entirely empty rows
+            $hasData = false;
+            foreach ($row as $cell) {
+                if (trim((string)$cell) !== '') {
+                    $hasData = true;
+                    break;
+                }
+            }
+            if (!$hasData) {
+                continue;
+            }
+
+            $stambuk = trim((string)($row[0] ?? ''));
+            $nama = trim((string)($row[1] ?? ''));
+            $daerah = trim((string)($row[2] ?? ''));
+            $konsulat = trim((string)($row[3] ?? ''));
+            $email = trim((string)($row[4] ?? ''));
+            $noTelp = PhoneHelper::format(trim((string)($row[5] ?? '')));
+
+            $rowNum = $index + 1;
+
+            if ($stambuk === '') {
+                $errors[] = "Baris {$rowNum}: Stambuk tidak boleh kosong.";
+                continue;
+            }
+            if ($nama === '') {
+                $errors[] = "Baris {$rowNum}: Nama tidak boleh kosong.";
+                continue;
+            }
+            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Baris {$rowNum}: Format email '{$email}' tidak valid.";
+                continue;
+            }
+
+            $dto = new GuruDto($stambuk, $nama, $daerah, $konsulat, $email, $noTelp);
+
+            $existing = $this->guruRepository->getByStambuk($stambuk);
+            if ($existing !== null) {
+                $this->guruRepository->update((int)$existing->kdg, $dto);
+            } else {
+                $this->guruRepository->create($dto);
+            }
+
+            $successCount++;
+        }
+
+        return $successCount;
+    }
+
     private function createDtoFromRaw(array $rawData): GuruDto
     {
         $stambuk = trim($rawData['stambuk'] ?? '');

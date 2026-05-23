@@ -37,5 +37,11 @@ return [
             Route::post('/delete/{kdg:\d+}')
                 ->action([Web\Guru\GuruController::class, 'delete'])
                 ->name('guru/delete'),
+            Route::get('/download-template')
+                ->action([Web\Guru\GuruController::class, 'downloadTemplate'])
+                ->name('guru/download-template'),
+            Route::post('/upload')
+                ->action([Web\Guru\GuruController::class, 'upload'])
+                ->name('guru/upload'),
         ),
 ];

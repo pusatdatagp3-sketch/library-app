@@ -71,6 +71,14 @@ final class GuruRepository
         return $row ? GuruFactory::createFromRow($row) : null;
     }
 
+    public function getByStambuk(string $stambuk): ?GuruEntity
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM `guru` WHERE `stambuk` = :stambuk");
+        $stmt->execute(['stambuk' => $stambuk]);
+        $row = $stmt->fetch();
+        return $row ? GuruFactory::createFromRow($row) : null;
+    }
+
     public function create(GuruDto $dto): bool
     {
         $stmt = $this->pdo->prepare("

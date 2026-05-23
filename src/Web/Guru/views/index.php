@@ -8,15 +8,42 @@ use Yiisoft\Router\UrlGeneratorInterface;
 
 /**
  * @var WebView $this
- * @var array $guruList
+ * @var App\Web\Guru\GuruEntity[] $guruList
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $csrf
+ * @var string|null $successMsg
+ * @var array $errorMsgs
  */
 
 $this->setTitle('Data Guru - List');
 ?>
 
 <div class="crud-container">
+    <?php if (!empty($successMsg)): ?>
+        <div class="alert alert-success">
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="alert-content"><?= Html::encode($successMsg) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($errorMsgs)): ?>
+        <div class="alert alert-danger">
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div class="alert-content">
+                <strong style="display:block;margin-bottom:4px;">Gagal memproses beberapa data:</strong>
+                <ul style="margin:0;padding-left:16px;font-size:0.875rem;line-height:1.5;">
+                    <?php foreach ($errorMsgs as $err): ?>
+                        <li><?= Html::encode($err) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div class="crud-header">
         <div>
             <h1 class="crud-title">Data Guru</h1>
@@ -28,6 +55,34 @@ $this->setTitle('Data Guru - List');
             </svg>
             Tambah Guru
         </a>
+    </div>
+
+    <!-- Card Import Excel Premium -->
+    <div class="card import-card" style="margin-bottom: 24px;">
+        <div class="import-card-header">
+            <h3 class="import-card-title">Import Massal via Excel</h3>
+            <a href="<?= $urlGenerator->generate('guru/download-template') ?>" class="btn-link">
+                <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Unduh Template Excel
+            </a>
+        </div>
+        <form action="<?= $urlGenerator->generate('guru/upload') ?>" method="POST" enctype="multipart/form-data" class="import-form">
+            <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
+            <div class="import-input-group">
+                <div class="file-input-wrapper">
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" required>
+                    <span class="file-input-label">Pilih file Excel (.xlsx, .xls, .csv)...</span>
+                </div>
+                <button type="submit" class="btn btn-secondary">
+                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    Proses Import (Upsert)
+                </button>
+            </div>
+        </form>
     </div>
 
     <?php if (empty($guruList)): ?>
@@ -89,3 +144,10 @@ $this->setTitle('Data Guru - List');
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+document.getElementById('excel_file').addEventListener('change', function(e) {
+    var fileName = e.target.files[0] ? e.target.files[0].name : 'Pilih file Excel (.xlsx, .xls, .csv)...';
+    document.querySelector('.file-input-label').textContent = fileName;
+});
+</script>
