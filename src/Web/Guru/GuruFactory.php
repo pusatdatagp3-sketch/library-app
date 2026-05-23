@@ -15,7 +15,9 @@ final class GuruFactory
             daerah: (string) ($row['daerah'] ?? ''),
             konsulat: (string) ($row['konsulat'] ?? ''),
             email: (string) ($row['email'] ?? ''),
-            noTelp: (string) ($row['no_telp'] ?? '')
+            noTelp: (string) ($row['no_telp'] ?? ''),
+            kamarId: isset($row['kamar_id']) && $row['kamar_id'] !== '' ? (int) $row['kamar_id'] : null,
+            namaKamar: isset($row['nama_kamar']) ? (string) $row['nama_kamar'] : null
         );
     }
 }

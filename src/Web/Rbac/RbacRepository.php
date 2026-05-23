@@ -147,6 +147,50 @@ final class RbacRepository
                 $routeStmt->execute($mapping);
             }
         }
+
+        // Seed Kamar Permissions jika belum ada (untuk database yang sudah ter-seed sebelumnya)
+        $newPermissions = [
+            ['name' => 'view_kamar', 'description' => 'Melihat daftar dan detail data Kamar.'],
+            ['name' => 'create_kamar', 'description' => 'Menambahkan data Kamar baru.'],
+            ['name' => 'update_kamar', 'description' => 'Mengubah detail data Kamar.'],
+            ['name' => 'delete_kamar', 'description' => 'Menghapus data Kamar.'],
+        ];
+        $checkStmt = $this->pdo->prepare("SELECT COUNT(*) FROM `rbac_permissions` WHERE `name` = :name");
+        $insertPermStmt = $this->pdo->prepare("INSERT INTO `rbac_permissions` (`name`, `description`) VALUES (:name, :description)");
+        foreach ($newPermissions as $perm) {
+            $checkStmt->execute(['name' => $perm['name']]);
+            if ($checkStmt->fetchColumn() == 0) {
+                $insertPermStmt->execute($perm);
+                
+                // Tambahkan relasi hak akses ke Admin secara default
+                $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Admin', :perm)")
+                    ->execute(['perm' => $perm['name']]);
+                
+                // Tambahkan relasi hak akses ke Operator secara default (kecuali delete)
+                if ($perm['name'] !== 'delete_kamar') {
+                    $this->pdo->prepare("INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Operator', :perm)")
+                        ->execute(['perm' => $perm['name']]);
+                }
+            }
+        }
+
+        // Seed Kamar Route Mappings jika belum ada
+        $newRouteMappings = [
+            ['route_name' => 'kamar/index', 'permission_name' => 'view_kamar'],
+            ['route_name' => 'kamar/create', 'permission_name' => 'create_kamar'],
+            ['route_name' => 'kamar/create/post', 'permission_name' => 'create_kamar'],
+            ['route_name' => 'kamar/update', 'permission_name' => 'update_kamar'],
+            ['route_name' => 'kamar/update/post', 'permission_name' => 'update_kamar'],
+            ['route_name' => 'kamar/delete', 'permission_name' => 'delete_kamar'],
+        ];
+        $routeCheckStmt = $this->pdo->prepare("SELECT COUNT(*) FROM `rbac_route_permissions` WHERE `route_name` = :route_name");
+        $routeInsertStmt = $this->pdo->prepare("INSERT INTO `rbac_route_permissions` (`route_name`, `permission_name`) VALUES (:route_name, :permission_name)");
+        foreach ($newRouteMappings as $mapping) {
+            $routeCheckStmt->execute(['route_name' => $mapping['route_name']]);
+            if ($routeCheckStmt->fetchColumn() == 0) {
+                $routeInsertStmt->execute($mapping);
+            }
+        }
     }
 
     public function getAllRoles(): array

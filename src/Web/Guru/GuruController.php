@@ -12,11 +12,14 @@ use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 use Yiisoft\Session\Flash\FlashInterface;
 
+use App\Web\Kamar\KamarService;
+
 final class GuruController
 {
     public function __construct(
         private WebViewRenderer $viewRenderer,
         private GuruService $guruService,
+        private KamarService $kamarService,
         private UrlGeneratorInterface $urlGenerator,
         private ResponseFactoryInterface $responseFactory,
         private CurrentRoute $currentRoute,
@@ -44,6 +47,7 @@ final class GuruController
             'konsulat' => '',
             'email' => '',
             'no_telp' => '',
+            'kamar_id' => '',
         ];
 
         if ($request->getMethod() === 'POST') {
@@ -54,9 +58,12 @@ final class GuruController
             }
         }
 
+        $kamarList = $this->kamarService->getAllKamar();
+
         return $this->viewRenderer->render(__DIR__ . '/views/create', [
             'errors' => $errors,
             'data' => $data,
+            'kamarList' => $kamarList,
         ]);
     }
 
@@ -77,6 +84,7 @@ final class GuruController
             'konsulat' => $guru->konsulat,
             'email' => $guru->email,
             'no_telp' => $guru->noTelp,
+            'kamar_id' => (string) $guru->kamarId,
         ];
 
         if ($request->getMethod() === 'POST') {
@@ -87,10 +95,13 @@ final class GuruController
             }
         }
 
+        $kamarList = $this->kamarService->getAllKamar();
+
         return $this->viewRenderer->render(__DIR__ . '/views/update', [
             'guru' => $guru,
             'errors' => $errors,
             'data' => $data,
+            'kamarList' => $kamarList,
         ]);
     }
 

@@ -34,6 +34,15 @@ final class GuruRepository
 
     private function initializeTable(): void
     {
+        // Pastikan tabel kamar ada terlebih dahulu sebelum foreign key dipasang
+        $this->pdo->exec("
+            CREATE TABLE IF NOT EXISTS `kamar` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `nama_kamar` VARCHAR(100) NOT NULL UNIQUE,
+                `kapasitas` INT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
         $this->pdo->exec("
             CREATE TABLE IF NOT EXISTS `guru` (
                 `kdg` INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,9 +52,18 @@ final class GuruRepository
                 `konsulat` VARCHAR(100) NOT NULL,
                 `email` VARCHAR(100) NOT NULL,
                 `no_telp` VARCHAR(20) NOT NULL,
-                INDEX (`stambuk`)
+                `kamar_id` INT NULL,
+                INDEX (`stambuk`),
+                FOREIGN KEY (`kamar_id`) REFERENCES `kamar` (`id`) ON DELETE SET NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+
+        // Tambahkan kolom kamar_id jika belum ada di tabel guru lama
+        $columns = $this->pdo->query("SHOW COLUMNS FROM `guru` LIKE 'kamar_id'")->fetchAll();
+        if (empty($columns)) {
+            $this->pdo->exec("ALTER TABLE `guru` ADD COLUMN `kamar_id` INT NULL");
+            $this->pdo->exec("ALTER TABLE `guru` ADD CONSTRAINT `fk_guru_kamar` FOREIGN KEY (`kamar_id`) REFERENCES `kamar` (`id`) ON DELETE SET NULL");
+        }
     }
 
     /**
@@ -53,7 +71,12 @@ final class GuruRepository
      */
     public function getAll(): array
     {
-        $stmt = $this->pdo->query("SELECT * FROM `guru` ORDER BY `kdg` DESC");
+        $stmt = $this->pdo->query("
+            SELECT g.*, k.nama_kamar 
+            FROM `guru` g 
+            LEFT JOIN `kamar` k ON g.kamar_id = k.id 
+            ORDER BY g.kdg DESC
+        ");
         $rows = $stmt->fetchAll();
 
         $entities = [];
@@ -65,7 +88,12 @@ final class GuruRepository
 
     public function getById(int $kdg): ?GuruEntity
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM `guru` WHERE `kdg` = :kdg");
+        $stmt = $this->pdo->prepare("
+            SELECT g.*, k.nama_kamar 
+            FROM `guru` g 
+            LEFT JOIN `kamar` k ON g.kamar_id = k.id 
+            WHERE g.kdg = :kdg
+        ");
         $stmt->execute(['kdg' => $kdg]);
         $row = $stmt->fetch();
         return $row ? GuruFactory::createFromRow($row) : null;
@@ -73,7 +101,12 @@ final class GuruRepository
 
     public function getByStambuk(string $stambuk): ?GuruEntity
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM `guru` WHERE `stambuk` = :stambuk");
+        $stmt = $this->pdo->prepare("
+            SELECT g.*, k.nama_kamar 
+            FROM `guru` g 
+            LEFT JOIN `kamar` k ON g.kamar_id = k.id 
+            WHERE g.stambuk = :stambuk
+        ");
         $stmt->execute(['stambuk' => $stambuk]);
         $row = $stmt->fetch();
         return $row ? GuruFactory::createFromRow($row) : null;
@@ -82,8 +115,8 @@ final class GuruRepository
     public function create(GuruDto $dto): bool
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO `guru` (`stambuk`, `nama`, `daerah`, `konsulat`, `email`, `no_telp`)
-            VALUES (:stambuk, :nama, :daerah, :konsulat, :email, :no_telp)
+            INSERT INTO `guru` (`stambuk`, `nama`, `daerah`, `konsulat`, `email`, `no_telp`, `kamar_id`)
+            VALUES (:stambuk, :nama, :daerah, :konsulat, :email, :no_telp, :kamar_id)
         ");
         return $stmt->execute([
             'stambuk' => $dto->stambuk,
@@ -92,6 +125,7 @@ final class GuruRepository
             'konsulat' => $dto->konsulat,
             'email' => $dto->email,
             'no_telp' => $dto->noTelp,
+            'kamar_id' => $dto->kamarId,
         ]);
     }
 
@@ -104,7 +138,8 @@ final class GuruRepository
                 `daerah` = :daerah,
                 `konsulat` = :konsulat,
                 `email` = :email,
-                `no_telp` = :no_telp
+                `no_telp` = :no_telp,
+                `kamar_id` = :kamar_id
             WHERE `kdg` = :kdg
         ");
         return $stmt->execute([
@@ -115,6 +150,7 @@ final class GuruRepository
             'konsulat' => $dto->konsulat,
             'email' => $dto->email,
             'no_telp' => $dto->noTelp,
+            'kamar_id' => $dto->kamarId,
         ]);
     }
 

@@ -110,6 +110,7 @@ $this->setTitle('Data Guru - List');
                         <th>Konsulat</th>
                         <th>Email</th>
                         <th>Nomor Telefon</th>
+                        <th>Kamar</th>
                         <?php if ($userSession->hasPermission('update_guru') || $userSession->hasPermission('delete_guru')): ?>
                             <th class="text-center">Aksi</th>
                         <?php endif; ?>
@@ -125,6 +126,15 @@ $this->setTitle('Data Guru - List');
                             <td><?= Html::encode($guru->konsulat) ?></td>
                             <td><span class="email-text"><?= Html::encode($guru->email) ?></span></td>
                             <td><?= Html::encode($guru->noTelp) ?></td>
+                            <td>
+                                <?php if ($guru->namaKamar): ?>
+                                    <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 600; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">
+                                        <?= Html::encode($guru->namaKamar) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-muted" style="font-size: 0.8rem; font-style: italic;">Belum Diatur</span>
+                                <?php endif; ?>
+                            </td>
                             <?php if ($userSession->hasPermission('update_guru') || $userSession->hasPermission('delete_guru')): ?>
                                 <td>
                                     <div class="action-buttons">

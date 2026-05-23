@@ -12,6 +12,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var array $data
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $csrf
+ * @var App\Web\Kamar\Kamar[] $kamarList
  */
 
 $this->setTitle('Tambah Guru Baru');
@@ -80,6 +81,21 @@ $this->setTitle('Tambah Guru Baru');
                 <input type="text" id="no_telp" name="no_telp" class="form-control <?= isset($errors['no_telp']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['no_telp'] ?? '') ?>" placeholder="Contoh: 081234567890">
                 <?php if (isset($errors['no_telp'])): ?>
                     <div class="invalid-feedback"><?= Html::encode($errors['no_telp']) ?></div>
+                <?php endif; ?>
+            </div>
+
+            <div class="form-group">
+                <label for="kamar_id" class="form-label">Kamar (Asosiasi)</label>
+                <select id="kamar_id" name="kamar_id" class="form-control <?= isset($errors['kamar_id']) ? 'is-invalid' : '' ?>">
+                    <option value="">-- Pilih Kamar (Opsional) --</option>
+                    <?php foreach ($kamarList as $kamar): ?>
+                        <option value="<?= Html::encode((string)$kamar->id) ?>" <?= (string)($data['kamar_id'] ?? '') === (string)$kamar->id ? 'selected' : '' ?>>
+                            <?= Html::encode($kamar->namaKamar) ?> (Kapasitas: <?= Html::encode((string)$kamar->kapasitas) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if (isset($errors['kamar_id'])): ?>
+                    <div class="invalid-feedback"><?= Html::encode($errors['kamar_id']) ?></div>
                 <?php endif; ?>
             </div>
 

@@ -13,7 +13,9 @@ final class GuruEntity
         public string $daerah,
         public string $konsulat,
         public string $email,
-        public string $noTelp
+        public string $noTelp,
+        public ?int $kamarId = null,
+        public ?string $namaKamar = null
     ) {
     }
 }

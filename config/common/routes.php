@@ -62,6 +62,30 @@ return [
                 ->name('guru/upload'),
         ),
 
+    // Kamar Group protected by RBAC middleware
+    Group::create('/kamar')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Kamar\KamarController::class, 'index'])
+                ->name('kamar/index'),
+            Route::get('/create')
+                ->action([Web\Kamar\KamarController::class, 'create'])
+                ->name('kamar/create'),
+            Route::post('/create')
+                ->action([Web\Kamar\KamarController::class, 'create'])
+                ->name('kamar/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Kamar\KamarController::class, 'update'])
+                ->name('kamar/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Kamar\KamarController::class, 'update'])
+                ->name('kamar/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Kamar\KamarController::class, 'delete'])
+                ->name('kamar/delete'),
+        ),
+
     // RBAC Group protected by RBAC middleware
     Group::create('/rbac')
         ->middleware(RbacAccessControlMiddleware::class)

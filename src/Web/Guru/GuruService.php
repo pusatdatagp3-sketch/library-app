@@ -130,8 +130,9 @@ final class GuruService
         
         // Membersihkan nomor telepon menggunakan PhoneHelper
         $noTelp = isset($rawData['no_telp']) ? PhoneHelper::format($rawData['no_telp']) : '';
+        $kamarId = isset($rawData['kamar_id']) && $rawData['kamar_id'] !== '' ? (int) $rawData['kamar_id'] : null;
 
-        return new GuruDto($stambuk, $nama, $daerah, $konsulat, $email, $noTelp);
+        return new GuruDto($stambuk, $nama, $daerah, $konsulat, $email, $noTelp, $kamarId);
     }
 
     private function validateDto(GuruDto $dto): array
