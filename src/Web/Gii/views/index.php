@@ -68,12 +68,20 @@ $csrf = $this->getParameter('csrf');
                 <small class="text-muted" style="display:block; margin-top: 4px;">Nama ini akan digunakan sebagai nama Model, Controller, nama Folder, dan Namespace.</small>
             </div>
 
+            <div class="form-group">
+                <label for="architecture" class="form-label">Pilih Arsitektur</label>
+                <select id="architecture" name="architecture" class="form-control" required>
+                    <option value="mvc">MVC (seperti Santri dan Pelanggaran)</option>
+                    <option value="ddd">DDD (seperti Guru dan Kamar)</option>
+                </select>
+                <small class="text-muted" style="display:block; margin-top: 4px;">Pola struktur file yang akan dihasilkan.</small>
+            </div>
+
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin: 8px 0; font-size: 0.85rem; color: #475569;">
                 <h5 style="margin: 0 0 6px 0; color: #1e293b; font-weight: 600;">Opsi Auto-Generate:</h5>
                 <ul style="margin: 0; padding-left: 20px; line-height: 1.4;">
-                    <li>Membuat Model `src/Web/{ModelName}/{ModelName}.php`</li>
-                    <li>Membuat Controller `src/Web/{ModelName}/{ModelName}Controller.php`</li>
-                    <li>Membuat subfolder `views/` beserta file `index`, `create`, dan `update`</li>
+                    <li><strong>MVC:</strong> Model ActiveRecord-like, Controller, dan Views</li>
+                    <li><strong>DDD:</strong> Entity, DTO, Factory, Repository, Service, Controller, dan Views</li>
                     <li>Menambahkan route otomatis di `config/common/routes.php`</li>
                     <li>Seeding dynamic RBAC permissions & route mapping</li>
                     <li>Membuat link menu di navbar layout secara dinamis</li>

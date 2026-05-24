@@ -42,15 +42,16 @@ final class GiiController
         $data = (array) $request->getParsedBody();
         $table = trim((string)($data['table'] ?? ''));
         $modelName = trim((string)($data['modelName'] ?? ''));
+        $architecture = trim((string)($data['architecture'] ?? 'mvc'));
 
-        if ($table === '' || $modelName === '') {
+        if ($table === '' || $modelName === '' || $architecture === '') {
             $this->flash->set('error', 'Semua kolom input wajib diisi.');
             return $this->responseFactory->createResponse(302)
                 ->withHeader('Location', $this->urlGenerator->generate('gii/index'));
         }
 
         $logs = [];
-        $success = $this->giiService->generate($table, $modelName, $logs);
+        $success = $this->giiService->generate($table, $modelName, $architecture, $logs);
 
         if ($success) {
             $this->flash->set('success', 'Modul ' . $modelName . ' berhasil di-generate secara otomatis!');
