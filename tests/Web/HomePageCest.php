@@ -11,6 +11,10 @@ final class HomePageCest
     public function base(WebTester $I): void
     {
         $I->wantTo('home page works.');
+        $I->amOnPage('/login');
+        $I->fillField('username', 'admin');
+        $I->fillField('password', 'admin123');
+        $I->click('Masuk Aplikasi');
         $I->amOnPage('/');
         $I->expectTo('see page home.');
         $I->see('Hello!');

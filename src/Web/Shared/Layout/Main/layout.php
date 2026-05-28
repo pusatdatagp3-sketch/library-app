@@ -14,7 +14,7 @@ use Yiisoft\Html\Html;
  * @var Yiisoft\View\WebView $this
  * @var Yiisoft\Router\CurrentRoute $currentRoute
  * @var Yiisoft\Router\UrlGeneratorInterface $urlGenerator
- * @var \App\Web\Auth\UserSession $userSession
+ * @var \App\Web\Auth\Model\UserSession $userSession
  */
 
 $assetManager->register(MainAsset::class);
@@ -165,13 +165,35 @@ $this->beginPage()
                                 <span>Gii Generator</span>
                             </a>
                         <?php endif; ?>
-
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <span class="nav-group-title">Akun</span>
+                    <div class="sidebar-menu">
                         <?php if ($userSession->hasPermission('manage_rbac')): ?>
-                            <a href="<?= $urlGenerator->generate('rbac/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'rbac') ? 'active' : '' ?>" title="Manajemen RBAC">
+                            <a href="<?= $urlGenerator->generate('users/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'users') ? 'active' : '' ?>" title="Manajemen Pengguna">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 21c-2.916 0-5.643-.917-7.869-2.49.173-.408.48-.73.9-.882a12.022 12.022 0 0110.17-1.455c.382.1.747.25 1.09.45M18 10.5a3 3 0 11-6 0 3 3 0 016 0zM6 6a3 3 0 120 6 3 3 0 020-6z" />
                                 </svg>
-                                <span>Manajemen RBAC</span>
+                                <span>Users</span>
+                            </a>
+                            <a href="<?= $urlGenerator->generate('roles/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'roles') ? 'active' : '' ?>" title="Manajemen Peran & Matriks">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                </svg>
+                                <span>Roles & Matrix</span>
+                            </a>
+                            <a href="<?= $urlGenerator->generate('permissions/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'permissions') ? 'active' : '' ?>" title="Manajemen Izin Akses">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span>Permissions</span>
+                            </a>
+                            <a href="<?= $urlGenerator->generate('routes/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'routes') ? 'active' : '' ?>" title="Proteksi Rute Dinamis">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                </svg>
+                                <span>Route Protection</span>
                             </a>
                         <?php endif; ?>
                     </div>

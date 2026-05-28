@@ -61,6 +61,7 @@
         "yiisoft/session": "^3.0.1",
         "yiisoft/view": "^12.2.4",
         "yiisoft/yii-console": "^2.4.2",
+        "yiisoft/yii-cycle": "2.0.x-dev",
         "yiisoft/yii-http": "^1.1.1",
         "yiisoft/yii-middleware": "^1.1",
         "yiisoft/yii-runner-console": "^2.2.1",

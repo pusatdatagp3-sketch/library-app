@@ -9,8 +9,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
-use App\Web\Auth\UserSession;
-use App\Web\Rbac\RbacRepository;
+use App\Web\Auth\Model\UserSession;
+use App\Web\Rbac\Model\RbacRepository;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
@@ -59,7 +59,7 @@ final class RbacAccessControlMiddleware implements MiddlewareInterface
                     }
 
                     // Jika GET (navigasi), tampilkan halaman error 403 yang cantik
-                    return $this->viewRenderer->render(__DIR__ . '/../Shared/views/error403');
+                    return $this->viewRenderer->render(__DIR__ . '/../Shared/View/error403');
                 }
             }
         }

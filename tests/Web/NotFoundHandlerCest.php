@@ -22,6 +22,10 @@ final class NotFoundHandlerCest
     public function returnHome(WebTester $I): void
     {
         $I->wantTo('check "Go Back Home" link.');
+        $I->amOnPage('/login');
+        $I->fillField('username', 'admin');
+        $I->fillField('password', 'admin123');
+        $I->click('Masuk Aplikasi');
         $I->amOnPage('/non-existent-page');
         $I->canSeeResponseCodeIs(404);
         $I->click('Go Back Home');

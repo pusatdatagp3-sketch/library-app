@@ -25,7 +25,7 @@ return [
             'aliases' => Reference::to(Aliases::class),
             'urlGenerator' => Reference::to(UrlGeneratorInterface::class),
             'currentRoute' => Reference::to(CurrentRoute::class),
-            'userSession' => Reference::to(App\Web\Auth\UserSession::class),
+            'userSession' => Reference::to(App\Web\Auth\Model\UserSession::class),
         ],
     ],
 
@@ -34,6 +34,46 @@ return [
         'layout' => '@src/Web/Shared/Layout/Main/layout.php',
         'injections' => [
             Reference::to(CsrfViewInjection::class),
+        ],
+    ],
+
+    'yiisoft/yii-cycle' => [
+        'dbal' => [
+            'default' => 'default',
+            'databases' => [
+                'default' => ['connection' => 'mysql'],
+            ],
+            'connections' => [
+                'mysql' => new \Cycle\Database\Config\MySQLDriverConfig(
+                    connection: new \Cycle\Database\Config\MySQL\DsnConnectionConfig(
+                        dsn: 'mysql:host=' . \App\Environment::dbHost() . ';port=' . \App\Environment::dbPort() . ';dbname=' . \App\Environment::dbName() . ';charset=utf8mb4',
+                        user: \App\Environment::dbUser(),
+                        password: \App\Environment::dbPassword()
+                    ),
+                    queryCache: true
+                ),
+            ],
+        ],
+        'schema-providers' => [
+            \Yiisoft\Yii\Cycle\Schema\Provider\FromConveyorSchemaProvider::class => [
+                'generators' => [
+                    \Cycle\Schema\Generator\ResetTables::class,
+                    \Cycle\Schema\Generator\GenerateRelations::class,
+                    \Cycle\Schema\Generator\ValidateEntities::class,
+                    \Cycle\Schema\Generator\RenderTables::class,
+                    \Cycle\Schema\Generator\RenderRelations::class,
+                    \Cycle\Schema\Generator\SyncTables::class,
+                    \Cycle\Schema\Generator\GenerateTypecast::class,
+                ],
+            ],
+        ],
+        'entity-paths' => [
+            '@src/Web/Auth/Model',
+            '@src/Web/Guru/Model',
+            '@src/Web/Kamar/Model',
+            '@src/Web/Konsulat/Model',
+            '@src/Web/Pelanggaran/Model',
+            '@src/Web/Santri/Model',
         ],
     ],
 ];
