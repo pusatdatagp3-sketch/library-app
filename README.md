@@ -325,8 +325,79 @@ Tersedia di `/gii` (hanya pada environment `dev`).
 
 ---
 
-## 📝 Catatan
+## 📝 Catatan untuk Developer Pemula
 
-- File `.env` **tidak di-commit** ke git (sudah ada di `.gitignore`)
-- Folder `runtime/` dan `public/assets/` di-generate otomatis, tidak perlu di-commit
-- Untuk production, set environment variable langsung di server (tanpa file `.env`)
+### 1. ⚠️ Jangan commit file `.env` ke Git
+
+File `.env` berisi informasi **sensitif** seperti password database. File ini sudah didaftarkan di `.gitignore` sehingga Git otomatis mengabaikannya dan tidak akan ter-upload ke GitHub.
+
+**Kenapa ini penting?**
+Kalau file `.env` sampai ter-upload ke GitHub (apalagi repo publik), siapa pun bisa membaca password database kamu. Ini adalah celah keamanan yang sangat serius.
+
+**Yang harus dilakukan setiap developer yang clone repo ini:**
+1. Buat file `.env` baru dari template: `cp .env.example .env`
+2. Isi dengan konfigurasi lokal masing-masing (password MySQL, dll)
+3. **Jangan pernah** menghapus `.env` dari `.gitignore`
+
+> 💡 Anggap `.env` seperti kunci rumah — setiap penghuni punya kuncinya sendiri, tidak dibagikan ke semua orang.
+
+---
+
+### 2. 🤖 Folder `runtime/` dan `public/assets/` di-generate otomatis
+
+Kedua folder ini **tidak perlu di-commit ke Git** karena isinya dibuat otomatis oleh aplikasi:
+
+**`runtime/sessions/`**
+- Berisi file-file session PHP (data login user yang sedang aktif)
+- Di-buat otomatis saat ada user yang login
+- Isinya berbeda di setiap komputer, jadi tidak ada gunanya di-commit
+- ⚠️ Folder ini **harus ada** secara fisik. Kalau belum ada, buat manual:
+  ```powershell
+  # Windows
+  New-Item -ItemType Directory -Path "runtime\sessions" -Force
+  ```
+
+**`public/assets/`**
+- Berisi file CSS dan JS yang sudah di-*publish* dan diberi nama unik (contoh: `site.8823ec3d.css`)
+- Di-generate otomatis oleh Yii Assets saat pertama kali halaman diakses
+- Nama file berubah setiap ada perubahan pada source asset — ini normal, namanya *cache busting*
+- Karena di-generate otomatis, tidak perlu (dan sebaiknya tidak) di-commit ke git
+
+> 💡 Kalau kamu clone repo ini dan `public/assets/` masih kosong, jangan panik — buka aplikasinya di browser dan folder itu akan terisi sendiri.
+
+---
+
+### 3. 🚀 Cara deploy ke production (tanpa file `.env`)
+
+Di server production (VPS, hosting), **jangan gunakan file `.env`**. Sebaiknya set konfigurasi langsung di server agar lebih aman.
+
+**Kenapa tidak pakai `.env` di production?**
+File `.env` bisa terbaca orang lain jika ada salah konfigurasi server (misalnya Apache menampilkan file sebagai teks biasa). Set langsung di server jauh lebih aman.
+
+**Cara set di Apache (`VirtualHost`):**
+```apache
+<VirtualHost *:80>
+    ServerName namadomain.com
+    DocumentRoot /var/www/yii3-pmdg/public
+
+    SetEnv APP_ENV prod
+    SetEnv APP_DEBUG false
+    SetEnv DB_HOST 127.0.0.1
+    SetEnv DB_NAME teqic_yii3
+    SetEnv DB_USER root
+    SetEnv DB_PASSWORD password_production_kamu
+</VirtualHost>
+```
+
+**Cara set di Docker (`docker-compose.yml`):**
+```yaml
+environment:
+  APP_ENV: prod
+  APP_DEBUG: "false"
+  DB_HOST: db
+  DB_NAME: teqic_yii3
+  DB_USER: root
+  DB_PASSWORD: password_production_kamu
+```
+
+> 💡 Untuk development lokal di Laragon/XAMPP, tetap gunakan file `.env` seperti biasa — praktis dan mudah.
