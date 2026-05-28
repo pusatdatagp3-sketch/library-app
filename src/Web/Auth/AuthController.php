@@ -33,6 +33,12 @@ final class AuthController
         $error = null;
         $username = '';
 
+        // Ambil dan hapus flash errors dari session agar tidak bocor ke halaman berikutnya
+        $flashErrors = $this->flash->get('errors');
+        if (!empty($flashErrors) && $request->getMethod() !== 'POST') {
+            $error = is_array($flashErrors) ? implode(', ', $flashErrors) : (string) $flashErrors;
+        }
+
         if ($request->getMethod() === 'POST') {
             $body = (array) $request->getParsedBody();
             $username = trim((string) ($body['username'] ?? ''));
@@ -44,6 +50,7 @@ final class AuthController
                 $user = $this->authRepository->findByUsername($username);
                 if ($user !== null && password_verify($password, $user['password_hash'])) {
                     $this->userSession->login($user);
+                    $this->flash->remove('errors'); // Pastikan flash errors benar-benar bersih
                     $this->flash->set('success', 'Selamat datang kembali, ' . HtmlHelper::encode($user['username']) . '!');
                     return $this->responseFactory->createResponse(302)
                         ->withHeader('Location', $this->urlGenerator->generate('guru/index'));
@@ -53,7 +60,9 @@ final class AuthController
             }
         }
 
-        return $this->viewRenderer->render(__DIR__ . '/views/login', [
+        return $this->viewRenderer
+           ->withLayout('@src/Web/Shared/Layout/Login/login-layout.php')
+           ->render(__DIR__ . '/views/login', [
             'error' => $error,
             'username' => $username,
         ]);

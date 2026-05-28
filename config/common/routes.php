@@ -17,6 +17,7 @@ return [
                 ->name('home'),
         ),
     Group::create()
+        ->middleware(RbacAccessControlMiddleware::class)
         ->routes(
             Route::get('/hello')
                 ->action([Web\Hello\HelloController::class, 'index'])

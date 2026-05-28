@@ -1166,6 +1166,14 @@ body {
         overflow: hidden;
     }
 
+    body.sidebar-collapsed .sidebar-brand .logo-full {
+        display: none !important;
+    }
+
+    body.sidebar-collapsed .sidebar-brand .logo-icon {
+        display: block !important;
+    }
+
     body.sidebar-collapsed .sidebar-brand .brand-text {
         display: none;
     }
