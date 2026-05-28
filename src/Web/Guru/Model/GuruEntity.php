@@ -8,6 +8,7 @@ use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
 use Cycle\Annotated\Annotation\Relation\BelongsTo;
 use App\Web\Kamar\Model\Kamar;
+use App\Web\Konsulat\Model\Konsulat;
 
 #[Entity(role: 'guru', table: 'guru', repository: GuruRepository::class)]
 class GuruEntity
@@ -24,8 +25,11 @@ class GuruEntity
     #[Column(type: 'string(100)')]
     public string $daerah = '';
 
-    #[Column(type: 'string(100)')]
-    public string $konsulat = '';
+    #[Column(type: 'integer', name: 'konsulat_id', nullable: true)]
+    public ?int $konsulatId = null;
+
+    #[BelongsTo(target: Konsulat::class, innerKey: 'konsulatId', fkAction: 'SET NULL', nullable: true, load: 'eager')]
+    public ?Konsulat $konsulat = null;
 
     #[Column(type: 'string(100)')]
     public string $email = '';
@@ -44,7 +48,7 @@ class GuruEntity
         string $stambuk = '',
         string $nama = '',
         string $daerah = '',
-        string $konsulat = '',
+        ?int $konsulatId = null,
         string $email = '',
         string $noTelp = '',
         ?int $kamarId = null
@@ -53,7 +57,7 @@ class GuruEntity
         $this->stambuk = $stambuk;
         $this->nama = $nama;
         $this->daerah = $daerah;
-        $this->konsulat = $konsulat;
+        $this->konsulatId = $konsulatId;
         $this->email = $email;
         $this->noTelp = $noTelp;
         $this->kamarId = $kamarId;
@@ -64,6 +68,9 @@ class GuruEntity
         if ($name === 'namaKamar') {
             return $this->kamar?->namaKamar;
         }
+        if ($name === 'namaKonsulat') {
+            return $this->konsulat?->konsulat;
+        }
         return null;
     }
 
@@ -71,6 +78,9 @@ class GuruEntity
     {
         if ($name === 'namaKamar') {
             return $this->kamar !== null;
+        }
+        if ($name === 'namaKonsulat') {
+            return $this->konsulat !== null;
         }
         return false;
     }

@@ -32,7 +32,7 @@ CREATE TABLE `guru` (
   `stambuk` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `nama` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `daerah` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `konsulat` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `konsulat_id` int DEFAULT NULL,
   `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `no_telp` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `kamar_id` int DEFAULT NULL
@@ -42,12 +42,12 @@ CREATE TABLE `guru` (
 -- Dumping data for table `guru`
 --
 
-INSERT INTO `guru` (`kdg`, `stambuk`, `nama`, `daerah`, `konsulat`, `email`, `no_telp`, `kamar_id`) VALUES
-(1, '20261001', 'Ruba Fana', 'Karawang', 'Bekasi', 'ruba@gmail.com', '081234567890', 3),
-(2, '20269999', 'Guru Baru Excel Diubah', 'Jawa Barat', 'Gontor 2', 'newexcel@gmail.com', '085544443333', 1),
-(3, '20260001', 'Ahmad Fauzi', 'Jawa Timur', 'Gontor 1', 'ahmad@gmail.com', '081234567890', 2),
-(4, '23487985', 'Kakanya', 'Banyuwangi', 'Besuki', 'Kimak@gmail.com', '321654987', 4),
-(5, '20269999', 'Test Guru Kamar', 'Jatim', 'Ponorogo', 'testkamar@teqic.com', '089999999999', 5);
+INSERT INTO `guru` (`kdg`, `stambuk`, `nama`, `daerah`, `konsulat_id`, `email`, `no_telp`, `kamar_id`) VALUES
+(1, '20261001', 'Ruba Fana', 'Karawang', NULL, 'ruba@gmail.com', '081234567890', 3),
+(2, '20269999', 'Guru Baru Excel Diubah', 'Jawa Barat', NULL, 'newexcel@gmail.com', '085544443333', 1),
+(3, '20260001', 'Ahmad Fauzi', 'Jawa Timur', 6, 'ahmad@gmail.com', '081234567890', 2),
+(4, '23487985', 'Kakanya', 'Banyuwangi', 5, 'Kimak@gmail.com', '321654987', 4),
+(5, '20269999', 'Test Guru Kamar', 'Jatim', NULL, 'testkamar@teqic.com', '089999999999', 5);
 
 -- --------------------------------------------------------
 
@@ -370,7 +370,8 @@ INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `create
 --
 ALTER TABLE `guru`
   ADD PRIMARY KEY (`kdg`),
-  ADD KEY `fk_guru_kamar` (`kamar_id`);
+  ADD KEY `fk_guru_kamar` (`kamar_id`),
+  ADD KEY `fk_guru_konsulat` (`konsulat_id`);
 
 --
 -- Indexes for table `kamar`
@@ -488,7 +489,8 @@ ALTER TABLE `users`
 -- Constraints for table `guru`
 --
 ALTER TABLE `guru`
-  ADD CONSTRAINT `fk_guru_kamar` FOREIGN KEY (`kamar_id`) REFERENCES `kamar` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `fk_guru_kamar` FOREIGN KEY (`kamar_id`) REFERENCES `kamar` (`id`) ON DELETE SET NULL ON UPDATE SET NULL,
+  ADD CONSTRAINT `fk_guru_konsulat` FOREIGN KEY (`konsulat_id`) REFERENCES `konsulat` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `rbac_role_permissions`

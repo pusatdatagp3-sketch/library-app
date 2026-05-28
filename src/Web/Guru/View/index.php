@@ -123,7 +123,7 @@ $this->setTitle('Data Guru - List');
                             <td><strong><?= Html::encode($guru->stambuk) ?></strong></td>
                             <td><?= Html::encode($guru->nama) ?></td>
                             <td><?= Html::encode($guru->daerah) ?></td>
-                            <td><?= Html::encode($guru->konsulat) ?></td>
+                            <td><?= $guru->namaKonsulat ? Html::encode($guru->namaKonsulat) : '<span class="text-muted" style="font-size:0.8rem;font-style:italic;">Belum Diatur</span>' ?></td>
                             <td><span class="email-text"><?= Html::encode($guru->email) ?></span></td>
                             <td><?= Html::encode($guru->noTelp) ?></td>
                             <td>

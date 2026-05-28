@@ -15,6 +15,7 @@ class GuruRepository extends Repository
     {
         return $this->select()
             ->load('kamar')
+            ->load('konsulat')
             ->orderBy('guru.kdg', 'DESC')
             ->fetchAll();
     }
@@ -23,6 +24,7 @@ class GuruRepository extends Repository
     {
         return $this->select()
             ->load('kamar')
+            ->load('konsulat')
             ->where('guru.kdg', $kdg)
             ->fetchOne();
     }
@@ -31,6 +33,7 @@ class GuruRepository extends Repository
     {
         return $this->select()
             ->load('kamar')
+            ->load('konsulat')
             ->where('guru.stambuk', $stambuk)
             ->fetchOne();
     }

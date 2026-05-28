@@ -13,6 +13,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $csrf
  * @var App\Web\Kamar\Model\Kamar[] $kamarList
+ * @var App\Web\Konsulat\Model\Konsulat[] $konsulatList
  */
 
 $this->setTitle('Tambah Guru Baru');
@@ -61,10 +62,17 @@ $this->setTitle('Tambah Guru Baru');
             </div>
 
             <div class="form-group">
-                <label for="konsulat" class="form-label">Konsulat</label>
-                <input type="text" id="konsulat" name="konsulat" class="form-control <?= isset($errors['konsulat']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['konsulat'] ?? '') ?>" placeholder="Contoh: Gontor">
-                <?php if (isset($errors['konsulat'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['konsulat']) ?></div>
+                <label for="konsulat_id" class="form-label">Konsulat</label>
+                <select id="konsulat_id" name="konsulat_id" class="form-control <?= isset($errors['konsulat_id']) ? 'is-invalid' : '' ?>">
+                    <option value="">-- Pilih Konsulat (Opsional) --</option>
+                    <?php foreach ($konsulatList as $k): ?>
+                        <option value="<?= Html::encode((string)$k->id) ?>" <?= (string)($data['konsulat_id'] ?? '') === (string)$k->id ? 'selected' : '' ?>>
+                            <?= Html::encode($k->konsulat) ?> (<?= Html::encode($k->kampus) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if (isset($errors['konsulat_id'])): ?>
+                    <div class="invalid-feedback"><?= Html::encode($errors['konsulat_id']) ?></div>
                 <?php endif; ?>
             </div>
 

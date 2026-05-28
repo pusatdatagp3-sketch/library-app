@@ -10,7 +10,7 @@ final class GuruDto
         public string $stambuk,
         public string $nama,
         public string $daerah,
-        public string $konsulat,
+        public ?int $konsulatId,
         public string $email,
         public string $noTelp,
         public ?int $kamarId = null

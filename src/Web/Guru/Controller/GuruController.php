@@ -8,6 +8,8 @@ use App\Web\Guru\Model\GuruEntity;
 use App\Web\Guru\Model\GuruDto;
 use App\Web\Guru\Service\GuruService;
 use App\Web\Kamar\Service\KamarService;
+use App\Web\Konsulat\Model\Konsulat;
+use Cycle\ORM\ORMInterface;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,6 +25,7 @@ final class GuruController
         private WebViewRenderer $viewRenderer,
         private GuruService $guruService,
         private KamarService $kamarService,
+        private ORMInterface $orm,
         private UrlGeneratorInterface $urlGenerator,
         private ResponseFactoryInterface $responseFactory,
         private CurrentRoute $currentRoute,
@@ -44,13 +47,13 @@ final class GuruController
     {
         $errors = [];
         $data = [
-            'stambuk' => '',
-            'nama' => '',
-            'daerah' => '',
-            'konsulat' => '',
-            'email' => '',
-            'no_telp' => '',
-            'kamar_id' => '',
+            'stambuk'     => '',
+            'nama'        => '',
+            'daerah'      => '',
+            'konsulat_id' => '',
+            'email'       => '',
+            'no_telp'     => '',
+            'kamar_id'    => '',
         ];
 
         if ($request->getMethod() === 'POST') {
@@ -61,12 +64,14 @@ final class GuruController
             }
         }
 
-        $kamarList = $this->kamarService->getAllKamar();
+        $kamarList    = $this->kamarService->getAllKamar();
+        $konsulatList = $this->orm->getRepository(Konsulat::class)->select()->orderBy('konsulat', 'ASC')->fetchAll();
 
         return $this->viewRenderer->render(__DIR__ . '/../View/create', [
-            'errors' => $errors,
-            'data' => $data,
-            'kamarList' => $kamarList,
+            'errors'       => $errors,
+            'data'         => $data,
+            'kamarList'    => $kamarList,
+            'konsulatList' => $konsulatList,
         ]);
     }
 
@@ -81,13 +86,13 @@ final class GuruController
 
         $errors = [];
         $data = [
-            'stambuk' => $guru->stambuk,
-            'nama' => $guru->nama,
-            'daerah' => $guru->daerah,
-            'konsulat' => $guru->konsulat,
-            'email' => $guru->email,
-            'no_telp' => $guru->noTelp,
-            'kamar_id' => (string) $guru->kamarId,
+            'stambuk'     => $guru->stambuk,
+            'nama'        => $guru->nama,
+            'daerah'      => $guru->daerah,
+            'konsulat_id' => (string) $guru->konsulatId,
+            'email'       => $guru->email,
+            'no_telp'     => $guru->noTelp,
+            'kamar_id'    => (string) $guru->kamarId,
         ];
 
         if ($request->getMethod() === 'POST') {
@@ -98,13 +103,15 @@ final class GuruController
             }
         }
 
-        $kamarList = $this->kamarService->getAllKamar();
+        $kamarList    = $this->kamarService->getAllKamar();
+        $konsulatList = $this->orm->getRepository(Konsulat::class)->select()->orderBy('konsulat', 'ASC')->fetchAll();
 
         return $this->viewRenderer->render(__DIR__ . '/../View/update', [
-            'guru' => $guru,
-            'errors' => $errors,
-            'data' => $data,
-            'kamarList' => $kamarList,
+            'guru'         => $guru,
+            'errors'       => $errors,
+            'data'         => $data,
+            'kamarList'    => $kamarList,
+            'konsulatList' => $konsulatList,
         ]);
     }
 

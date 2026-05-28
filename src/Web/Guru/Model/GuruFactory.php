@@ -13,11 +13,10 @@ final class GuruFactory
             stambuk: (string) ($row['stambuk'] ?? ''),
             nama: (string) ($row['nama'] ?? ''),
             daerah: (string) ($row['daerah'] ?? ''),
-            konsulat: (string) ($row['konsulat'] ?? ''),
+            konsulatId: isset($row['konsulat_id']) && $row['konsulat_id'] !== '' ? (int) $row['konsulat_id'] : null,
             email: (string) ($row['email'] ?? ''),
             noTelp: (string) ($row['no_telp'] ?? ''),
             kamarId: isset($row['kamar_id']) && $row['kamar_id'] !== '' ? (int) $row['kamar_id'] : null,
-            namaKamar: isset($row['nama_kamar']) ? (string) $row['nama_kamar'] : null
         );
     }
 }

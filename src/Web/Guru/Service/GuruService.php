@@ -8,6 +8,8 @@ use App\Web\Guru\Model\GuruEntity;
 use App\Web\Guru\Model\GuruDto;
 use App\Web\Guru\Model\GuruRepository;
 use App\Web\Kamar\Model\Kamar;
+use App\Web\Konsulat\Model\Konsulat;
+use App\Web\Guru\Model\PhoneHelper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
 
@@ -47,7 +49,7 @@ final class GuruService
             $dto->stambuk,
             $dto->nama,
             $dto->daerah,
-            $dto->konsulat,
+            $dto->konsulatId,
             $dto->email,
             $dto->noTelp,
             $dto->kamarId
@@ -56,6 +58,11 @@ final class GuruService
         if ($dto->kamarId !== null) {
             $kamar = $this->orm->getRepository(Kamar::class)->findByPK($dto->kamarId);
             $entity->kamar = $kamar;
+        }
+
+        if ($dto->konsulatId !== null) {
+            $konsulat = $this->orm->getRepository(Konsulat::class)->findByPK($dto->konsulatId);
+            $entity->konsulat = $konsulat;
         }
 
         $this->entityManager->persist($entity)->run();
@@ -77,19 +84,26 @@ final class GuruService
             return false;
         }
 
-        $entity->stambuk  = $dto->stambuk;
-        $entity->nama     = $dto->nama;
-        $entity->daerah   = $dto->daerah;
-        $entity->konsulat = $dto->konsulat;
-        $entity->email    = $dto->email;
-        $entity->noTelp   = $dto->noTelp;
-        $entity->kamarId  = $dto->kamarId;
+        $entity->stambuk    = $dto->stambuk;
+        $entity->nama        = $dto->nama;
+        $entity->daerah      = $dto->daerah;
+        $entity->konsulatId  = $dto->konsulatId;
+        $entity->email       = $dto->email;
+        $entity->noTelp      = $dto->noTelp;
+        $entity->kamarId     = $dto->kamarId;
 
         if ($dto->kamarId !== null) {
             $kamar = $this->orm->getRepository(Kamar::class)->findByPK($dto->kamarId);
             $entity->kamar = $kamar;
         } else {
             $entity->kamar = null;
+        }
+
+        if ($dto->konsulatId !== null) {
+            $konsulat = $this->orm->getRepository(Konsulat::class)->findByPK($dto->konsulatId);
+            $entity->konsulat = $konsulat;
+        } else {
+            $entity->konsulat = null;
         }
 
         $this->entityManager->persist($entity)->run();
@@ -150,19 +164,19 @@ final class GuruService
                 continue;
             }
 
-            $dto = new GuruDto($stambuk, $nama, $daerah, $konsulat, $email, $noTelp);
+            $dto = new GuruDto($stambuk, $nama, $daerah, null, $email, $noTelp);
 
             $existing = $this->guruRepository->getByStambuk($stambuk);
             if ($existing !== null) {
-                $existing->stambuk  = $dto->stambuk;
-                $existing->nama     = $dto->nama;
-                $existing->daerah   = $dto->daerah;
-                $existing->konsulat = $dto->konsulat;
-                $existing->email    = $dto->email;
-                $existing->noTelp   = $dto->noTelp;
+                $existing->stambuk    = $dto->stambuk;
+                $existing->nama       = $dto->nama;
+                $existing->daerah     = $dto->daerah;
+                $existing->konsulatId = $dto->konsulatId;
+                $existing->email      = $dto->email;
+                $existing->noTelp     = $dto->noTelp;
                 $this->entityManager->persist($existing);
             } else {
-                $entity = new GuruEntity(null, $stambuk, $nama, $daerah, $konsulat, $email, $noTelp);
+                $entity = new GuruEntity(null, $stambuk, $nama, $daerah, null, $email, $noTelp);
                 $this->entityManager->persist($entity);
             }
             $successCount++;
@@ -177,15 +191,15 @@ final class GuruService
 
     private function createDtoFromRaw(array $rawData): GuruDto
     {
-        $stambuk  = trim($rawData['stambuk'] ?? '');
-        $nama     = trim($rawData['nama'] ?? '');
-        $daerah   = trim($rawData['daerah'] ?? '');
-        $konsulat = trim($rawData['konsulat'] ?? '');
-        $email    = trim($rawData['email'] ?? '');
-        $noTelp   = isset($rawData['no_telp']) ? PhoneHelper::format($rawData['no_telp']) : '';
-        $kamarId  = isset($rawData['kamar_id']) && $rawData['kamar_id'] !== '' ? (int) $rawData['kamar_id'] : null;
+        $stambuk    = trim($rawData['stambuk'] ?? '');
+        $nama       = trim($rawData['nama'] ?? '');
+        $daerah     = trim($rawData['daerah'] ?? '');
+        $konsulatId = isset($rawData['konsulat_id']) && $rawData['konsulat_id'] !== '' ? (int) $rawData['konsulat_id'] : null;
+        $email      = trim($rawData['email'] ?? '');
+        $noTelp     = isset($rawData['no_telp']) ? PhoneHelper::format($rawData['no_telp']) : '';
+        $kamarId    = isset($rawData['kamar_id']) && $rawData['kamar_id'] !== '' ? (int) $rawData['kamar_id'] : null;
 
-        return new GuruDto($stambuk, $nama, $daerah, $konsulat, $email, $noTelp, $kamarId);
+        return new GuruDto($stambuk, $nama, $daerah, $konsulatId, $email, $noTelp, $kamarId);
     }
 
     private function validateDto(GuruDto $dto): array
@@ -194,7 +208,6 @@ final class GuruService
         if ($dto->stambuk === '')  { $errors['stambuk']  = 'Stambuk tidak boleh kosong.'; }
         if ($dto->nama === '')     { $errors['nama']     = 'Nama tidak boleh kosong.'; }
         if ($dto->daerah === '')   { $errors['daerah']   = 'Daerah tidak boleh kosong.'; }
-        if ($dto->konsulat === '') { $errors['konsulat'] = 'Konsulat tidak boleh kosong.'; }
         if ($dto->email === '') {
             $errors['email'] = 'Email tidak boleh kosong.';
         } elseif (!filter_var($dto->email, FILTER_VALIDATE_EMAIL)) {
