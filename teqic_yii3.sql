@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 28, 2026 at 03:44 AM
+-- Generation Time: May 29, 2026 at 09:07 AM
 -- Server version: 8.0.45-0ubuntu0.24.04.1
--- PHP Version: 8.5.5
+-- PHP Version: 8.5.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,22 +32,22 @@ CREATE TABLE `guru` (
   `stambuk` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `nama` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
   `daerah` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `konsulat_id` int DEFAULT NULL,
   `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `no_telp` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `kamar_id` int DEFAULT NULL
+  `kamar_id` int DEFAULT NULL,
+  `konsulat_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `guru`
 --
 
-INSERT INTO `guru` (`kdg`, `stambuk`, `nama`, `daerah`, `konsulat_id`, `email`, `no_telp`, `kamar_id`) VALUES
-(1, '20261001', 'Ruba Fana', 'Karawang', NULL, 'ruba@gmail.com', '081234567890', 3),
-(2, '20269999', 'Guru Baru Excel Diubah', 'Jawa Barat', NULL, 'newexcel@gmail.com', '085544443333', 1),
-(3, '20260001', 'Ahmad Fauzi', 'Jawa Timur', 6, 'ahmad@gmail.com', '081234567890', 2),
-(4, '23487985', 'Kakanya', 'Banyuwangi', 5, 'Kimak@gmail.com', '321654987', 4),
-(5, '20269999', 'Test Guru Kamar', 'Jatim', NULL, 'testkamar@teqic.com', '089999999999', 5);
+INSERT INTO `guru` (`kdg`, `stambuk`, `nama`, `daerah`, `email`, `no_telp`, `kamar_id`, `konsulat_id`) VALUES
+(1, '20261001', 'Ruba Fana', 'Karawang', 'ruba@gmail.com', '081234567890', 3, NULL),
+(2, '20269999', 'Guru Baru Excel Diubah', 'Jawa Barat', 'newexcel@gmail.com', '085544443333', 1, NULL),
+(3, '20260001', 'Ahmad Fauzi', 'Jawa Timur', 'ahmad@gmail.com', '081234567890', 2, NULL),
+(4, '23487985', 'Kakanya', 'Banyuwangi', 'Kimak@gmail.com', '321654987', 4, NULL),
+(5, '20269999', 'Test Guru Kamar', 'Jatim', 'testkamar@teqic.com', '089999999999', 5, 5);
 
 -- --------------------------------------------------------
 
@@ -66,11 +66,12 @@ CREATE TABLE `kamar` (
 --
 
 INSERT INTO `kamar` (`id`, `nama_kamar`, `kapasitas`) VALUES
-(1, 'Kamar Abu Bakar', 10),
+(1, 'Kamar Abu Bakir', 4),
 (2, 'Kamar Umar bin Khattab', 12),
 (3, 'Kamar Utsman bin Affan', 8),
 (4, 'Kamar Ali bin Abi Thalib', 15),
-(5, 'Kamar Al-Ghazali', 20);
+(5, 'Kamar Al-Ghazali', 20),
+(6, 'ICT', 20);
 
 -- --------------------------------------------------------
 
@@ -124,6 +125,45 @@ CREATE TABLE `pelanggaran` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `perizinan`
+--
+
+CREATE TABLE `perizinan` (
+  `id` int NOT NULL,
+  `kemana` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sama_siapa` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `berapa_orang` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `perizinan`
+--
+
+INSERT INTO `perizinan` (`id`, `kemana`, `sama_siapa`, `berapa_orang`) VALUES
+(1, 'hahaa', 'ahaha', 'haaa');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rayon`
+--
+
+CREATE TABLE `rayon` (
+  `id` int NOT NULL,
+  `nama_rayon` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `zona` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `rayon`
+--
+
+INSERT INTO `rayon` (`id`, `nama_rayon`, `zona`) VALUES
+(3, 'Aligarh', 'Baru');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `rbac_permissions`
 --
 
@@ -141,11 +181,15 @@ INSERT INTO `rbac_permissions` (`name`, `description`) VALUES
 ('create_kamar', 'Menambahkan data Kamar baru.'),
 ('create_konsulat', 'Menambahkan data Konsulat baru.'),
 ('create_pelanggaran', 'Menambahkan data Pelanggaran baru.'),
+('create_perizinan', 'Menambahkan data Perizinan baru.'),
+('create_rayon', 'Menambahkan data Rayon baru.'),
 ('create_santri', 'Menambahkan data Santri baru.'),
 ('delete_guru', 'Menghapus data Guru.'),
 ('delete_kamar', 'Menghapus data Kamar.'),
 ('delete_konsulat', 'Menghapus data Konsulat.'),
 ('delete_pelanggaran', 'Menghapus data Pelanggaran.'),
+('delete_perizinan', 'Menghapus data Perizinan.'),
+('delete_rayon', 'Menghapus data Rayon.'),
 ('delete_santri', 'Menghapus data Santri.'),
 ('manage_gii', 'Akses dan penggunaan Gii Generator.'),
 ('manage_rbac', 'Mengelola RBAC (Peran, Hak Akses, Matrix, & Pengguna).'),
@@ -153,11 +197,15 @@ INSERT INTO `rbac_permissions` (`name`, `description`) VALUES
 ('update_kamar', 'Mengubah detail data Kamar.'),
 ('update_konsulat', 'Mengubah detail data Konsulat.'),
 ('update_pelanggaran', 'Mengubah detail data Pelanggaran.'),
+('update_perizinan', 'Mengubah detail data Perizinan.'),
+('update_rayon', 'Mengubah detail data Rayon.'),
 ('update_santri', 'Mengubah detail data Santri.'),
 ('view_guru', 'Melihat daftar dan detail data Guru.'),
 ('view_kamar', 'Melihat daftar dan detail data Kamar.'),
 ('view_konsulat', 'Melihat daftar dan detail data Konsulat.'),
 ('view_pelanggaran', 'Melihat daftar dan detail data Pelanggaran.'),
+('view_perizinan', 'Melihat daftar dan detail data Perizinan.'),
+('view_rayon', 'Melihat daftar dan detail data Rayon.'),
 ('view_santri', 'Melihat daftar dan detail data Santri.');
 
 -- --------------------------------------------------------
@@ -204,6 +252,8 @@ INSERT INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES
 ('Operator', 'create_konsulat'),
 ('Admin', 'create_pelanggaran'),
 ('Operator', 'create_pelanggaran'),
+('Admin', 'create_perizinan'),
+('Admin', 'create_rayon'),
 ('Admin', 'create_santri'),
 ('Operator', 'create_santri'),
 ('Admin', 'delete_guru'),
@@ -211,6 +261,8 @@ INSERT INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES
 ('Admin', 'delete_kamar'),
 ('Admin', 'delete_konsulat'),
 ('Admin', 'delete_pelanggaran'),
+('Admin', 'delete_perizinan'),
+('Admin', 'delete_rayon'),
 ('Admin', 'delete_santri'),
 ('Admin', 'manage_gii'),
 ('Admin', 'manage_rbac'),
@@ -222,6 +274,8 @@ INSERT INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES
 ('Operator', 'update_konsulat'),
 ('Admin', 'update_pelanggaran'),
 ('Operator', 'update_pelanggaran'),
+('Admin', 'update_perizinan'),
+('Admin', 'update_rayon'),
 ('Admin', 'update_santri'),
 ('Operator', 'update_santri'),
 ('Admin', 'view_guru'),
@@ -233,6 +287,8 @@ INSERT INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES
 ('Operator', 'view_konsulat'),
 ('Admin', 'view_pelanggaran'),
 ('Operator', 'view_pelanggaran'),
+('Admin', 'view_perizinan'),
+('Admin', 'view_rayon'),
 ('Admin', 'view_santri'),
 ('Operator', 'view_santri');
 
@@ -256,6 +312,18 @@ INSERT INTO `rbac_route_permissions` (`route_name`, `permission_name`) VALUES
 ('home', NULL),
 ('login', NULL),
 ('logout', NULL),
+('testsiswaddd/create', NULL),
+('testsiswaddd/create/post', NULL),
+('testsiswaddd/delete', NULL),
+('testsiswaddd/index', NULL),
+('testsiswaddd/update', NULL),
+('testsiswaddd/update/post', NULL),
+('testsiswanew/create', NULL),
+('testsiswanew/create/post', NULL),
+('testsiswanew/delete', NULL),
+('testsiswanew/index', NULL),
+('testsiswanew/update', NULL),
+('testsiswanew/update/post', NULL),
 ('guru/create', 'create_guru'),
 ('guru/create/post', 'create_guru'),
 ('guru/upload', 'create_guru'),
@@ -265,12 +333,18 @@ INSERT INTO `rbac_route_permissions` (`route_name`, `permission_name`) VALUES
 ('konsulat/create/post', 'create_konsulat'),
 ('pelanggaran/create', 'create_pelanggaran'),
 ('pelanggaran/create/post', 'create_pelanggaran'),
+('perizinan/create', 'create_perizinan'),
+('perizinan/create/post', 'create_perizinan'),
+('rayon/create', 'create_rayon'),
+('rayon/create/post', 'create_rayon'),
 ('santri/create', 'create_santri'),
 ('santri/create/post', 'create_santri'),
 ('guru/delete', 'delete_guru'),
 ('kamar/delete', 'delete_kamar'),
 ('konsulat/delete', 'delete_konsulat'),
 ('pelanggaran/delete', 'delete_pelanggaran'),
+('perizinan/delete', 'delete_perizinan'),
+('rayon/delete', 'delete_rayon'),
 ('santri/delete', 'delete_santri'),
 ('gii/generate', 'manage_gii'),
 ('gii/index', 'manage_gii'),
@@ -308,6 +382,10 @@ INSERT INTO `rbac_route_permissions` (`route_name`, `permission_name`) VALUES
 ('konsulat/update/post', 'update_konsulat'),
 ('pelanggaran/update', 'update_pelanggaran'),
 ('pelanggaran/update/post', 'update_pelanggaran'),
+('perizinan/update', 'update_perizinan'),
+('perizinan/update/post', 'update_perizinan'),
+('rayon/update', 'update_rayon'),
+('rayon/update/post', 'update_rayon'),
 ('santri/update', 'update_santri'),
 ('santri/update/post', 'update_santri'),
 ('guru/download-template', 'view_guru'),
@@ -315,6 +393,8 @@ INSERT INTO `rbac_route_permissions` (`route_name`, `permission_name`) VALUES
 ('kamar/index', 'view_kamar'),
 ('konsulat/index', 'view_konsulat'),
 ('pelanggaran/index', 'view_pelanggaran'),
+('perizinan/index', 'view_perizinan'),
+('rayon/index', 'view_rayon'),
 ('santri/index', 'view_santri');
 
 -- --------------------------------------------------------
@@ -370,8 +450,8 @@ INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `create
 --
 ALTER TABLE `guru`
   ADD PRIMARY KEY (`kdg`),
-  ADD KEY `fk_guru_kamar` (`kamar_id`),
-  ADD KEY `fk_guru_konsulat` (`konsulat_id`);
+  ADD KEY `guru_index_konsulat_id_6a19538235a0f` (`konsulat_id`),
+  ADD KEY `guru_index_kamar_id_6a19538235a32` (`kamar_id`);
 
 --
 -- Indexes for table `kamar`
@@ -395,6 +475,18 @@ ALTER TABLE `konsulat`
 -- Indexes for table `pelanggaran`
 --
 ALTER TABLE `pelanggaran`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `perizinan`
+--
+ALTER TABLE `perizinan`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `rayon`
+--
+ALTER TABLE `rayon`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -449,7 +541,7 @@ ALTER TABLE `guru`
 -- AUTO_INCREMENT for table `kamar`
 --
 ALTER TABLE `kamar`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `kategori`
@@ -468,6 +560,18 @@ ALTER TABLE `konsulat`
 --
 ALTER TABLE `pelanggaran`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `perizinan`
+--
+ALTER TABLE `perizinan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `rayon`
+--
+ALTER TABLE `rayon`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `santri`
@@ -489,8 +593,8 @@ ALTER TABLE `users`
 -- Constraints for table `guru`
 --
 ALTER TABLE `guru`
-  ADD CONSTRAINT `fk_guru_kamar` FOREIGN KEY (`kamar_id`) REFERENCES `kamar` (`id`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `fk_guru_konsulat` FOREIGN KEY (`konsulat_id`) REFERENCES `konsulat` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `guru_foreign_kamar_id_6a19538235a39` FOREIGN KEY (`kamar_id`) REFERENCES `kamar` (`id`) ON DELETE SET NULL ON UPDATE SET NULL,
+  ADD CONSTRAINT `guru_foreign_konsulat_id_6a19538235a19` FOREIGN KEY (`konsulat_id`) REFERENCES `konsulat` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
 
 --
 -- Constraints for table `rbac_role_permissions`
