@@ -33,89 +33,15 @@ $this->setTitle('Tambah Guru Baru');
         </a>
     </div>
 
-    <div class="card">
-        <form action="<?= $urlGenerator->generate('guru/create') ?>" method="POST" class="form-grid">
-            <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
-
-            <div class="form-group">
-                <label for="stambuk" class="form-label">Stambuk</label>
-                <input type="text" id="stambuk" name="stambuk" class="form-control <?= isset($errors['stambuk']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['stambuk'] ?? '') ?>" placeholder="Contoh: 20261001">
-                <?php if (isset($errors['stambuk'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['stambuk']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="nama" class="form-label">Nama Lengkap</label>
-                <input type="text" id="nama" name="nama" class="form-control <?= isset($errors['nama']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['nama'] ?? '') ?>" placeholder="Contoh: Ahmad Fauzi">
-                <?php if (isset($errors['nama'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['nama']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="daerah" class="form-label">Daerah</label>
-                <input type="text" id="daerah" name="daerah" class="form-control <?= isset($errors['daerah']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['daerah'] ?? '') ?>" placeholder="Contoh: Jawa Timur">
-                <?php if (isset($errors['daerah'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['daerah']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="konsulat_id" class="form-label">Konsulat</label>
-                <select id="konsulat_id" name="konsulat_id" class="form-control <?= isset($errors['konsulat_id']) ? 'is-invalid' : '' ?>">
-                    <option value="">-- Pilih Konsulat (Opsional) --</option>
-                    <?php foreach ($konsulatList as $k): ?>
-                        <option value="<?= Html::encode((string)$k->id) ?>" <?= (string)($data['konsulat_id'] ?? '') === (string)$k->id ? 'selected' : '' ?>>
-                            <?= Html::encode($k->konsulat) ?> (<?= Html::encode($k->kampus) ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <?php if (isset($errors['konsulat_id'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['konsulat_id']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" name="email" class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['email'] ?? '') ?>" placeholder="Contoh: ahmad@gmail.com">
-                <?php if (isset($errors['email'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['email']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="no_telp" class="form-label">Nomor Telefon</label>
-                <input type="text" id="no_telp" name="no_telp" class="form-control <?= isset($errors['no_telp']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($data['no_telp'] ?? '') ?>" placeholder="Contoh: 081234567890">
-                <?php if (isset($errors['no_telp'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['no_telp']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="kamar_id" class="form-label">Kamar (Asosiasi)</label>
-                <select id="kamar_id" name="kamar_id" class="form-control <?= isset($errors['kamar_id']) ? 'is-invalid' : '' ?>">
-                    <option value="">-- Pilih Kamar (Opsional) --</option>
-                    <?php foreach ($kamarList as $kamar): ?>
-                        <option value="<?= Html::encode((string)$kamar->id) ?>" <?= (string)($data['kamar_id'] ?? '') === (string)$kamar->id ? 'selected' : '' ?>>
-                            <?= Html::encode($kamar->namaKamar) ?> (Kapasitas: <?= Html::encode((string)$kamar->kapasitas) ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <?php if (isset($errors['kamar_id'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($errors['kamar_id']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-actions">
-                <button type="reset" class="btn btn-secondary">Reset</button>
-                <button type="submit" class="btn btn-primary">
-                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    Simpan Guru
-                </button>
-            </div>
-        </form>
-    </div>
+    <?= $this->render('./_form', [
+        'errors' => $errors,
+        'data' => $data,
+        'csrf' => $csrf,
+        'kamarList' => $kamarList,
+        'konsulatList' => $konsulatList,
+        'formAction' => $urlGenerator->generate('guru/create'),
+        'submitLabel' => 'Simpan Guru',
+        'showReset' => true,
+        'cancelUrl' => $urlGenerator->generate('guru/index'),
+    ]) ?>
 </div>

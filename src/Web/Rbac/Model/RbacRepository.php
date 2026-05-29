@@ -84,6 +84,14 @@ final class RbacRepository
             ['name' => 'create_santri',        'description' => 'Menambahkan data Santri baru.'],
             ['name' => 'update_santri',        'description' => 'Mengubah detail data Santri.'],
             ['name' => 'delete_santri',        'description' => 'Menghapus data Santri.'],
+            ['name' => 'view_rayon',           'description' => 'Melihat daftar dan detail data Rayon.'],
+            ['name' => 'create_rayon',         'description' => 'Menambahkan data Rayon baru.'],
+            ['name' => 'update_rayon',         'description' => 'Mengubah detail data Rayon.'],
+            ['name' => 'delete_rayon',         'description' => 'Menghapus data Rayon.'],
+            ['name' => 'view_perizinan',           'description' => 'Melihat daftar dan detail data Perizinan.'],
+            ['name' => 'create_perizinan',         'description' => 'Menambahkan data Perizinan baru.'],
+            ['name' => 'update_perizinan',         'description' => 'Mengubah detail data Perizinan.'],
+            ['name' => 'delete_perizinan',         'description' => 'Menghapus data Perizinan.'],
         ];
         foreach ($allPermissions as $perm) {
             $exists = (int)$this->db->query("SELECT COUNT(*) FROM `rbac_permissions` WHERE `name` = ?", [$perm['name']])->fetchColumn();
@@ -95,8 +103,8 @@ final class RbacRepository
         // Seed Role Permissions matrix
         if ((int)$this->db->query("SELECT COUNT(*) FROM `rbac_role_permissions`")->fetchColumn() === 0) {
             $matrix = [
-                'Admin'    => ['view_guru','create_guru','update_guru','delete_guru','manage_rbac','view_kamar','create_kamar','update_kamar','delete_kamar','view_konsulat','create_konsulat','update_konsulat','delete_konsulat','manage_gii','view_pelanggaran','create_pelanggaran','update_pelanggaran','delete_pelanggaran','view_santri','create_santri','update_santri','delete_santri'],
-                'Operator' => ['view_guru','create_guru','update_guru','delete_guru','view_kamar','create_kamar','update_kamar','view_konsulat','create_konsulat','update_konsulat','view_pelanggaran','create_pelanggaran','update_pelanggaran','view_santri','create_santri','update_santri'],
+                'Admin'    => ['view_guru','create_guru','update_guru','delete_guru','manage_rbac','view_kamar','create_kamar','update_kamar','delete_kamar','view_konsulat','create_konsulat','update_konsulat','delete_konsulat','manage_gii','view_pelanggaran','create_pelanggaran','update_pelanggaran','delete_pelanggaran','view_santri','create_santri','update_santri','delete_santri','view_rayon','create_rayon','update_rayon','delete_rayon','view_perizinan','create_perizinan','update_perizinan','delete_perizinan'],
+                'Operator' => ['view_guru','create_guru','update_guru','delete_guru','view_kamar','create_kamar','update_kamar','view_konsulat','create_konsulat','update_konsulat','view_pelanggaran','create_pelanggaran','update_pelanggaran','view_santri','create_santri','update_santri','view_rayon','create_rayon','update_rayon','view_perizinan','create_perizinan','update_perizinan'],
                 'Guru'     => ['view_guru'],
             ];
             foreach ($matrix as $roleName => $perms) {
@@ -163,6 +171,18 @@ final class RbacRepository
             ['route_name' => 'permissions/delete',           'permission_name' => 'manage_rbac'],
             ['route_name' => 'routes/index',                 'permission_name' => 'manage_rbac'],
             ['route_name' => 'routes/save-route-permissions','permission_name' => 'manage_rbac'],
+            ['route_name' => 'rayon/index',                 'permission_name' => 'view_rayon'],
+            ['route_name' => 'rayon/create',                'permission_name' => 'create_rayon'],
+            ['route_name' => 'rayon/create/post',           'permission_name' => 'create_rayon'],
+            ['route_name' => 'rayon/update',                'permission_name' => 'update_rayon'],
+            ['route_name' => 'rayon/update/post',           'permission_name' => 'update_rayon'],
+            ['route_name' => 'rayon/delete',                'permission_name' => 'delete_rayon'],
+            ['route_name' => 'perizinan/index',                 'permission_name' => 'view_perizinan'],
+            ['route_name' => 'perizinan/create',                'permission_name' => 'create_perizinan'],
+            ['route_name' => 'perizinan/create/post',           'permission_name' => 'create_perizinan'],
+            ['route_name' => 'perizinan/update',                'permission_name' => 'update_perizinan'],
+            ['route_name' => 'perizinan/update/post',           'permission_name' => 'update_perizinan'],
+            ['route_name' => 'perizinan/delete',                'permission_name' => 'delete_perizinan'],
         ];
         foreach ($allRoutes as $mapping) {
             $exists = (int)$this->db->query("SELECT COUNT(*) FROM `rbac_route_permissions` WHERE `route_name` = ?", [$mapping['route_name']])->fetchColumn();

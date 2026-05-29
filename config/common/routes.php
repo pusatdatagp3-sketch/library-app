@@ -19,13 +19,7 @@ return [
                 ->action(Web\HomePage\Controller\Action::class)
                 ->name('home'),
         ),
-    Group::create()
-        ->middleware(RbacAccessControlMiddleware::class)
-        ->routes(
-            Route::get('/hello')
-                ->action([Web\Hello\Controller\HelloController::class, 'index'])
-                ->name('hello'),
-        ),
+
     // Auth Routes
     Route::get('/login')
         ->action([AuthController::class, 'login'])
@@ -248,6 +242,54 @@ return [
                 ->name('permissions/delete'),
         ),
 
+
+    // Rayon Group protected by RBAC middleware
+    Group::create('/rayon')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Rayon\Controller\RayonController::class, 'index'])
+                ->name('rayon/index'),
+            Route::get('/create')
+                ->action([Web\Rayon\Controller\RayonController::class, 'create'])
+                ->name('rayon/create'),
+            Route::post('/create')
+                ->action([Web\Rayon\Controller\RayonController::class, 'create'])
+                ->name('rayon/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Rayon\Controller\RayonController::class, 'update'])
+                ->name('rayon/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Rayon\Controller\RayonController::class, 'update'])
+                ->name('rayon/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Rayon\Controller\RayonController::class, 'delete'])
+                ->name('rayon/delete'),
+        ),
+
+    // Perizinan Group protected by RBAC middleware
+    Group::create('/perizinan')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Perizinan\Controller\PerizinanController::class, 'index'])
+                ->name('perizinan/index'),
+            Route::get('/create')
+                ->action([Web\Perizinan\Controller\PerizinanController::class, 'create'])
+                ->name('perizinan/create'),
+            Route::post('/create')
+                ->action([Web\Perizinan\Controller\PerizinanController::class, 'create'])
+                ->name('perizinan/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Perizinan\Controller\PerizinanController::class, 'update'])
+                ->name('perizinan/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Perizinan\Controller\PerizinanController::class, 'update'])
+                ->name('perizinan/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Perizinan\Controller\PerizinanController::class, 'delete'])
+                ->name('perizinan/delete'),
+        ),
     // Routes Protection Group protected by RBAC middleware
     Group::create('/routes')
         ->middleware(RbacAccessControlMiddleware::class)

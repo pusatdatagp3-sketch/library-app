@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Yiisoft\Html\Html;
 use Yiisoft\View\WebView;
 use Yiisoft\Router\UrlGeneratorInterface;
 
@@ -26,40 +25,11 @@ $this->setTitle('Edit Data Santri');
         </a>
     </div>
 
-    <div class="card">
-        <form action="<?= $urlGenerator->generate('santri/update', ['id' => $model->kds]) ?>" method="POST" class="form-grid">
-            <input type="hidden" name="_csrf" value="<?= Html::encode((string)$this->getParameter('csrf')) ?>">
-
-            <div class="form-group">
-                <label for="nama" class="form-label">Nama</label>
-                <input type="text" id="nama" name="nama" class="form-control <?= isset($model->errors['nama']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($model->nama) ?>">
-                <?php if (isset($model->errors['nama'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($model->errors['nama']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="kelas" class="form-label">Kelas</label>
-                <input type="text" id="kelas" name="kelas" class="form-control <?= isset($model->errors['kelas']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($model->kelas) ?>">
-                <?php if (isset($model->errors['kelas'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($model->errors['kelas']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group">
-                <label for="daerah" class="form-label">Daerah</label>
-                <input type="text" id="daerah" name="daerah" class="form-control <?= isset($model->errors['daerah']) ? 'is-invalid' : '' ?>" value="<?= Html::encode($model->daerah) ?>">
-                <?php if (isset($model->errors['daerah'])): ?>
-                    <div class="invalid-feedback"><?= Html::encode($model->errors['daerah']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-actions">
-                <a href="<?= $urlGenerator->generate('santri/index') ?>" class="btn btn-secondary">Batal</a>
-                <button type="submit" class="btn btn-primary">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </div>
+    <?= $this->render('./_form', [
+        'model' => $model,
+        'formAction' => $urlGenerator->generate('santri/update', ['id' => $model->kds]),
+        'submitLabel' => 'Simpan Perubahan',
+        'showReset' => false,
+        'cancelUrl' => $urlGenerator->generate('santri/index'),
+    ]) ?>
 </div>

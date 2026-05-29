@@ -94,12 +94,6 @@ $this->beginPage()
                         </svg>
                         <span>Home</span>
                     </a>
-                    <a href="<?= $urlGenerator->generate('hello') ?>" class="<?= $currentRoute->getName() === 'hello' ? 'active' : '' ?>" title="Hello">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.625.625 0 11-1.25 0 .625.625 0 011.25 0zm4.5 0a.625.625 0 11-1.25 0 .625.625 0 011.25 0zm4.5 0a.625.625 0 11-1.25 0 .625.625 0 011.25 0zM12 3c5.385 0 9.75 3.62 9.75 8.082 0 2.2-1.077 4.195-2.817 5.568-.135.107-.218.271-.218.445v2.87a.3.3 0 01-.482.24l-3.47-2.603a.75.75 0 00-.45-.148H12c-5.385 0-9.75-3.62-9.75-8.082C2.25 6.62 6.615 3 12 3z" />
-                        </svg>
-                        <span>Hello</span>
-                    </a>
                 </div>
             </div>
 
@@ -129,6 +123,22 @@ $this->beginPage()
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
                             </svg>
                             <span>Data Konsulat</span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_perizinan')): ?>
+                        <a href="<?= $urlGenerator->generate('perizinan/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'perizinan') ? 'active' : '' ?>" title="Data Perizinan">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                            </svg>
+                            <span>Data Perizinan</span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($userSession->isLoggedIn() && $userSession->hasPermission('view_rayon')): ?>
+                        <a href="<?= $urlGenerator->generate('rayon/index') ?>" class="<?= str_starts_with((string)($currentRoute->getName() ?? ''), 'rayon') ? 'active' : '' ?>" title="Data Rayon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                            </svg>
+                            <span>Data Rayon</span>
                         </a>
                     <?php endif; ?>
 

@@ -1195,4 +1195,26 @@ body {
     }
 }
 
+/* Filter Row Styles */
+.filter-row {
+    background: var(--bg-hover);
+}
+
+.filter-row td {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid var(--border);
+}
+
+.filter-row .form-control {
+    padding: 6px 12px;
+    font-size: 0.825rem;
+    height: 34px;
+    border-radius: 6px;
+}
+
+.filter-row .gap-1 {
+    gap: 4px;
+}
+
+
 

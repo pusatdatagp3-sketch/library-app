@@ -23,29 +23,34 @@ final class MvcGenerator
         // 1. Generate Model
         $modelCode = $this->buildModelCode($table, $modelName, $columns, $primaryKey, $isAutoIncrement, $primaryKeyType);
         file_put_contents("{$dir}/Model/{$modelName}.php", $modelCode);
-        chmod("{$dir}/Model/{$modelName}.php", 0666);
+        @chmod("{$dir}/Model/{$modelName}.php", 0666);
         $logs[] = "File dibuat: src/Web/{$modelName}/Model/{$modelName}.php";
 
         // 2. Generate Controller
-        $controllerCode = $this->buildControllerCode($modelName, $lowerModel, $primaryKey, $primaryKeyType);
+        $controllerCode = $this->buildControllerCode($modelName, $lowerModel, $primaryKey, $primaryKeyType, $columns);
         file_put_contents("{$dir}/Controller/{$modelName}Controller.php", $controllerCode);
-        chmod("{$dir}/Controller/{$modelName}Controller.php", 0666);
+        @chmod("{$dir}/Controller/{$modelName}Controller.php", 0666);
         $logs[] = "File dibuat: src/Web/{$modelName}/Controller/{$modelName}Controller.php";
 
         // 3. Generate Views
         $indexCode = $this->buildIndexView($modelName, $lowerModel, $columns, $primaryKey);
         file_put_contents("{$dir}/View/index.php", $indexCode);
-        chmod("{$dir}/View/index.php", 0666);
+        @chmod("{$dir}/View/index.php", 0666);
         $logs[] = "File dibuat: src/Web/{$modelName}/View/index.php";
 
         $createCode = $this->buildCreateView($modelName, $lowerModel, $columns, $primaryKey, $isAutoIncrement);
         file_put_contents("{$dir}/View/create.php", $createCode);
-        chmod("{$dir}/View/create.php", 0666);
+        @chmod("{$dir}/View/create.php", 0666);
         $logs[] = "File dibuat: src/Web/{$modelName}/View/create.php";
+
+        $formCode = $this->buildFormView($modelName, $lowerModel, $columns, $primaryKey, $isAutoIncrement);
+        file_put_contents("{$dir}/View/_form.php", $formCode);
+        @chmod("{$dir}/View/_form.php", 0666);
+        $logs[] = "File dibuat: src/Web/{$modelName}/View/_form.php";
 
         $updateCode = $this->buildUpdateView($modelName, $lowerModel, $columns, $primaryKey, $isAutoIncrement);
         file_put_contents("{$dir}/View/update.php", $updateCode);
-        chmod("{$dir}/View/update.php", 0666);
+        @chmod("{$dir}/View/update.php", 0666);
         $logs[] = "File dibuat: src/Web/{$modelName}/View/update.php";
 
         return true;
@@ -62,10 +67,6 @@ final class MvcGenerator
         $properties = '';
         $loadFields = '';
         $validationRules = '';
-        $dbMappings = '';
-        $insertParams = [];
-        $insertBindings = [];
-        $updateBindings = [];
 
         foreach ($columns as $col) {
             $field = $col['Field'];
@@ -75,34 +76,49 @@ final class MvcGenerator
 
             // Property data type mapping
             $phpType = 'string';
+            $cycleType = 'string';
             if (str_contains($type, 'int')) {
                 $phpType = 'int';
-            } elseif (str_contains($type, 'float') || str_contains($type, 'double') || str_contains($type, 'decimal')) {
+                $cycleType = 'integer';
+            } elseif (str_contains($type, 'decimal') || str_contains($type, 'float') || str_contains($type, 'double')) {
                 $phpType = 'float';
+                $cycleType = 'float';
+            } else {
+                if (str_contains($type, 'varchar') || str_contains($type, 'char')) {
+                    preg_match('/\((\d+)\)/', $type, $matches);
+                    $length = isset($matches[1]) ? (int)$matches[1] : 255;
+                    $cycleType = "string({$length})";
+                } elseif (str_contains($type, 'text')) {
+                    $cycleType = 'text';
+                }
             }
 
             if ($field === $primaryKey) {
-                $properties .= "    public ?{$primaryKeyType} \${$primaryKey} = null;\n";
-                
-                // If not auto-increment, load and validate
+                $properties .= "    #[Column(type: 'primary')]\n";
+                $properties .= "    public ?{$primaryKeyType} \${$primaryKey} = null;\n\n";
+
+                // Load primary key if not auto-increment
                 if (!$isAutoIncrement) {
                     if ($primaryKeyType === 'int') {
                         $loadFields .= "        \$this->{$primaryKey} = isset(\$data['{$primaryKey}']) && \$data['{$primaryKey}'] !== '' ? (int)\$data['{$primaryKey}'] : null;\n";
                     } else {
                         $loadFields .= "        \$this->{$primaryKey} = isset(\$data['{$primaryKey}']) ? trim((string)\$data['{$primaryKey}']) : null;\n";
                     }
-                    
                     $validationRules .= "        if (\$this->{$primaryKey} === '' || \$this->{$primaryKey} === null) {\n";
                     $validationRules .= "            \$this->errors['{$primaryKey}'] = 'Kolom " . ucfirst($primaryKey) . " tidak boleh kosong.';\n";
                     $validationRules .= "        }\n";
-                    
-                    $insertParams[] = "`{$primaryKey}`";
-                    $insertBindings[] = ":{$primaryKey}";
                 }
             } else {
                 $defaultValue = $isNull ? 'null' : ($phpType === 'int' || $phpType === 'float' ? '0' : "''");
                 $nullablePrefix = $isNull ? '?' : '';
-                $properties .= "    public {$nullablePrefix}{$phpType} \${$field} = {$defaultValue};\n";
+                
+                $columnAttr = "type: '{$cycleType}'";
+                if ($isNull) {
+                    $columnAttr .= ", nullable: true";
+                }
+                
+                $properties .= "    #[Column({$columnAttr})]\n";
+                $properties .= "    public {$nullablePrefix}{$phpType} \${$field} = {$defaultValue};\n\n";
 
                 // Load mapping
                 if ($phpType === 'int') {
@@ -119,73 +135,19 @@ final class MvcGenerator
                     $validationRules .= "            \$this->errors['{$field}'] = 'Kolom " . ucfirst($field) . " tidak boleh kosong.';\n";
                     $validationRules .= "        }\n";
                 }
-
-                $insertParams[] = "`{$field}`";
-                $insertBindings[] = ":{$field}";
-                $updateBindings[] = "`{$field}` = :{$field}";
-            }
-
-            // DB Mapper from Row
-            if ($field === $primaryKey) {
-                $dbMappings .= "            \$model->{$primaryKey} = isset(\$row['{$primaryKey}']) ? ({$primaryKeyType}) \$row['{$primaryKey}'] : null;\n";
-            } else {
-                if ($phpType === 'int') {
-                    $dbMappings .= "            \$model->{$field} = isset(\$row['{$field}']) ? (int) \$row['{$field}'] : null;\n";
-                } elseif ($phpType === 'float') {
-                    $dbMappings .= "            \$model->{$field} = isset(\$row['{$field}']) ? (float) \$row['{$field}'] : null;\n";
-                } else {
-                    $dbMappings .= "            \$model->{$field} = (string) (\$row['{$field}'] ?? '');\n";
-                }
             }
         }
-
-        $insertParamsStr = implode(', ', $insertParams);
-        $insertBindingsStr = implode(', ', $insertBindings);
-        $updateBindingsStr = implode(', ', $updateBindings);
-
-        // Execute Bindings
-        $insertBindingsSql = '';
-        $updateBindingsSql = '';
-        foreach ($columns as $col) {
-            $field = $col['Field'];
-            if ($field === $primaryKey) {
-                if (!$isAutoIncrement) {
-                    $insertBindingsSql .= "                '{$field}' => \$this->{$field},\n";
-                }
-            } else {
-                $insertBindingsSql .= "                '{$field}' => \$this->{$field},\n";
-                $updateBindingsSql .= "                '{$field}' => \$this->{$field},\n";
-            }
-        }
-        $updateBindingsSql .= "                '{$primaryKey}' => \$this->{$primaryKey},\n";
 
         $code = "<?php\n\n";
         $code .= "declare(strict_types=1);\n\n";
         $code .= "namespace App\Web\\{$modelName}\\Model;\n\n";
-        $code .= "use App\Environment;\n";
-        $code .= "use PDO;\n\n";
-        $code .= "final class {$modelName}\n";
+        $code .= "use Cycle\Annotated\Annotation\Entity;\n";
+        $code .= "use Cycle\Annotated\Annotation\Column;\n\n";
+        $code .= "#[Entity(role: '{$table}', table: '{$table}')]\n";
+        $code .= "class {$modelName}\n";
         $code .= "{\n";
         $code .= $properties;
-        $code .= "\n    public bool \$isNewRecord = true;\n";
         $code .= "    public array \$errors = [];\n\n";
-        $code .= "    private static ?PDO \$pdo = null;\n\n";
-        $code .= "    private static function getDb(): PDO\n";
-        $code .= "    {\n";
-        $code .= "        if (self::\$pdo === null) {\n";
-        $code .= "            \$host = Environment::dbHost();\n";
-        $code .= "            \$port = Environment::dbPort();\n";
-        $code .= "            \$dbname = Environment::dbName();\n";
-        $code .= "            \$user = Environment::dbUser();\n";
-        $code .= "            \$password = Environment::dbPassword();\n\n";
-        $code .= "            \$dsn = \"mysql:host={\$host};port={\$port};dbname={\$dbname};charset=utf8mb4\";\n";
-        $code .= "            self::\$pdo = new PDO(\$dsn, \$user, \$password, [\n";
-        $code .= "                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n";
-        $code .= "                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n";
-        $code .= "            ]);\n";
-        $code .= "        }\n";
-        $code .= "        return self::\$pdo;\n";
-        $code .= "    }\n\n";
         $code .= "    public function load(array \$data): bool\n";
         $code .= "    {\n";
         $code .= $loadFields;
@@ -196,71 +158,6 @@ final class MvcGenerator
         $code .= "        \$this->errors = [];\n";
         $code .= $validationRules;
         $code .= "        return empty(\$this->errors);\n";
-        $code .= "    }\n\n";
-        $code .= "    public function save(): bool\n";
-        $code .= "    {\n";
-        $code .= "        if (!\$this->validate()) {\n";
-        $code .= "            return false;\n";
-        $code .= "        }\n\n";
-        $code .= "        \$db = self::getDb();\n";
-        $code .= "        if (\$this->isNewRecord) {\n";
-        $code .= "            \$stmt = \$db->prepare(\"INSERT INTO `{$table}` ({$insertParamsStr}) VALUES ({$insertBindingsStr})\");\n";
-        $code .= "            \$result = \$stmt->execute([\n";
-        $code .= $insertBindingsSql;
-        $code .= "            ]);\n";
-        $code .= "            if (\$result) {\n";
-        if ($isAutoIncrement) {
-            $code .= "                \$this->{$primaryKey} = (int) \$db->lastInsertId();\n";
-        }
-        $code .= "                \$this->isNewRecord = false;\n";
-        $code .= "                return true;\n";
-        $code .= "            }\n";
-        $code .= "            return false;\n";
-        $code .= "        }\n\n";
-        $code .= "        \$stmt = \$db->prepare(\"UPDATE `{$table}` SET {$updateBindingsStr} WHERE `{$primaryKey}` = :{$primaryKey}\");\n";
-        $code .= "        return \$stmt->execute([\n";
-        $code .= $updateBindingsSql;
-        $code .= "        ]);\n";
-        $code .= "    }\n\n";
-        $code .= "    public function delete(): bool\n";
-        $code .= "    {\n";
-        $code .= "        if (\$this->{$primaryKey} === null) {\n";
-        $code .= "            return false;\n";
-        $code .= "        }\n";
-        $code .= "        \$db = self::getDb();\n";
-        $code .= "        \$stmt = \$db->prepare(\"DELETE FROM `{$table}` WHERE `{$primaryKey}` = :{$primaryKey}\");\n";
-        $code .= "        return \$stmt->execute(['{$primaryKey}' => \$this->{$primaryKey}]);\n";
-        $code .= "    }\n\n";
-        $code .= "    /**\n";
-        $code .= "     * @return self[]\n";
-        $code .= "     */\n";
-        $code .= "    public static function find(): array\n";
-        $code .= "    {\n";
-        $code .= "        \$db = self::getDb();\n";
-        $code .= "        \$stmt = \$db->query(\"SELECT * FROM `{$table}` ORDER BY `{$primaryKey}` DESC\");\n";
-        $code .= "        \$rows = \$stmt->fetchAll();\n\n";
-        $code .= "        \$models = [];\n";
-        $code .= "        foreach (\$rows as \$row) {\n";
-        $code .= "            \$model = new self();\n";
-        $code .= "            \$model->isNewRecord = false;\n";
-        $code .= $dbMappings;
-        $code .= "            \$models[] = \$model;\n";
-        $code .= "        }\n";
-        $code .= "        return \$models;\n";
-        $code .= "    }\n\n";
-        $code .= "    public static function findOne({$primaryKeyType} \${$primaryKey}): ?self\n";
-        $code .= "    {\n";
-        $code .= "        \$db = self::getDb();\n";
-        $code .= "        \$stmt = \$db->prepare(\"SELECT * FROM `{$table}` WHERE `{$primaryKey}` = :{$primaryKey} LIMIT 1\");\n";
-        $code .= "        \$stmt->execute(['{$primaryKey}' => \${$primaryKey}]);\n";
-        $code .= "        \$row = \$stmt->fetch();\n\n";
-        $code .= "        if (!\$row) {\n";
-        $code .= "            return null;\n";
-        $code .= "        }\n\n";
-        $code .= "        \$model = new self();\n";
-        $code .= "        \$model->isNewRecord = false;\n";
-        $code .= $dbMappings;
-        $code .= "        return \$model;\n";
         $code .= "    }\n";
         $code .= "}\n";
 
@@ -271,7 +168,8 @@ final class MvcGenerator
         string $modelName,
         string $lowerModel,
         string $primaryKey,
-        string $primaryKeyType
+        string $primaryKeyType,
+        array $columns
     ): string {
         $pkCast = $primaryKeyType === 'int' ? '(int)' : '(string)';
 
@@ -279,6 +177,8 @@ final class MvcGenerator
         $code .= "declare(strict_types=1);\n\n";
         $code .= "namespace App\Web\\{$modelName}\\Controller;\n\n";
         $code .= "use App\Web\\{$modelName}\\Model\\{$modelName};\n";
+        $code .= "use Cycle\ORM\ORMInterface;\n";
+        $code .= "use Cycle\ORM\EntityManagerInterface;\n";
         $code .= "use Psr\Http\Message\ResponseInterface;\n";
         $code .= "use Psr\Http\Message\ServerRequestInterface;\n";
         $code .= "use Psr\Http\Message\ResponseFactoryInterface;\n";
@@ -288,19 +188,53 @@ final class MvcGenerator
         $code .= "use Yiisoft\Session\Flash\FlashInterface;\n\n";
         $code .= "final class {$modelName}Controller\n";
         $code .= "{\n";
+        $code .= "    private \$repository;\n\n";
         $code .= "    public function __construct(\n";
         $code .= "        private WebViewRenderer \$viewRenderer,\n";
         $code .= "        private UrlGeneratorInterface \$urlGenerator,\n";
         $code .= "        private ResponseFactoryInterface \$responseFactory,\n";
         $code .= "        private CurrentRoute \$currentRoute,\n";
-        $code .= "        private FlashInterface \$flash\n";
+        $code .= "        private FlashInterface \$flash,\n";
+        $code .= "        private ORMInterface \$orm,\n";
+        $code .= "        private EntityManagerInterface \$entityManager\n";
         $code .= "    ) {\n";
+        $code .= "        \$this->repository = \$orm->getRepository({$modelName}::class);\n";
         $code .= "    }\n\n";
-        $code .= "    public function index(): ResponseInterface\n";
+        $code .= "    public function index(ServerRequestInterface \$request): ResponseInterface\n";
         $code .= "    {\n";
-        $code .= "        \$models = {$modelName}::find();\n";
+        $code .= "        \$queryParams = \$request->getQueryParams();\n";
+        $code .= "        \$select = \$this->repository->select();\n\n";
+
+        foreach ($columns as $col) {
+            $field = $col['Field'];
+            $type = strtolower($col['Type']);
+            
+            if ($field === $primaryKey) {
+                $cast = $primaryKeyType === 'int' ? '(int)' : '';
+                $code .= "        if (!empty(\$queryParams['{$field}'])) {\n";
+                $code .= "            \$select = \$select->where('{$field}', '=', {$cast}\$queryParams['{$field}']);\n";
+                $code .= "        }\n";
+            } else {
+                if (str_contains($type, 'int') || str_contains($type, 'bool')) {
+                    $code .= "        if (isset(\$queryParams['{$field}']) && \$queryParams['{$field}'] !== '') {\n";
+                    $code .= "            \$select = \$select->where('{$field}', '=', (int)\$queryParams['{$field}']);\n";
+                    $code .= "        }\n";
+                } elseif (str_contains($type, 'decimal') || str_contains($type, 'float') || str_contains($type, 'double')) {
+                    $code .= "        if (isset(\$queryParams['{$field}']) && \$queryParams['{$field}'] !== '') {\n";
+                    $code .= "            \$select = \$select->where('{$field}', '=', (float)\$queryParams['{$field}']);\n";
+                    $code .= "        }\n";
+                } else {
+                    $code .= "        if (!empty(\$queryParams['{$field}'])) {\n";
+                    $code .= "            \$select = \$select->where('{$field}', 'like', '%' . \$queryParams['{$field}'] . '%');\n";
+                    $code .= "        }\n";
+                }
+            }
+        }
+
+        $code .= "\n        \$models = \$select->orderBy('{$primaryKey}', 'DESC')->fetchAll();\n";
         $code .= "        return \$this->viewRenderer->render(__DIR__ . '/../View/index', [\n";
         $code .= "            'models' => \$models,\n";
+        $code .= "            'filters' => \$queryParams,\n";
         $code .= "            'successMsg' => \$this->flash->get('success'),\n";
         $code .= "            'errorMsgs' => \$this->flash->get('errors') ?? [],\n";
         $code .= "        ]);\n";
@@ -311,7 +245,8 @@ final class MvcGenerator
         $code .= "        if (\$request->getMethod() === 'POST') {\n";
         $code .= "            \$data = (array) \$request->getParsedBody();\n";
         $code .= "            \$model->load(\$data);\n";
-        $code .= "            if (\$model->save()) {\n";
+        $code .= "            if (\$model->validate()) {\n";
+        $code .= "                \$this->entityManager->persist(\$model)->run();\n";
         $code .= "                \$this->flash->set('success', 'Data {$modelName} berhasil ditambahkan.');\n";
         $code .= "                return \$this->responseFactory->createResponse(302)\n";
         $code .= "                    ->withHeader('Location', \$this->urlGenerator->generate('{$lowerModel}/index'));\n";
@@ -324,14 +259,15 @@ final class MvcGenerator
         $code .= "    public function update(ServerRequestInterface \$request): ResponseInterface\n";
         $code .= "    {\n";
         $code .= "        \$id = {$pkCast} \$this->currentRoute->getArgument('id');\n";
-        $code .= "        \$model = {$modelName}::findOne(\$id);\n\n";
+        $code .= "        \$model = \$this->repository->findByPK(\$id);\n\n";
         $code .= "        if (\$model === null) {\n";
         $code .= "            return \$this->responseFactory->createResponse(404);\n";
         $code .= "        }\n\n";
         $code .= "        if (\$request->getMethod() === 'POST') {\n";
         $code .= "            \$data = (array) \$request->getParsedBody();\n";
         $code .= "            \$model->load(\$data);\n";
-        $code .= "            if (\$model->save()) {\n";
+        $code .= "            if (\$model->validate()) {\n";
+        $code .= "                \$this->entityManager->persist(\$model)->run();\n";
         $code .= "                \$this->flash->set('success', 'Data {$modelName} berhasil diperbarui.');\n";
         $code .= "                return \$this->responseFactory->createResponse(302)\n";
         $code .= "                    ->withHeader('Location', \$this->urlGenerator->generate('{$lowerModel}/index'));\n";
@@ -344,9 +280,9 @@ final class MvcGenerator
         $code .= "    public function delete(): ResponseInterface\n";
         $code .= "    {\n";
         $code .= "        \$id = {$pkCast} \$this->currentRoute->getArgument('id');\n";
-        $code .= "        \$model = {$modelName}::findOne(\$id);\n\n";
+        $code .= "        \$model = \$this->repository->findByPK(\$id);\n\n";
         $code .= "        if (\$model !== null) {\n";
-        $code .= "            \$model->delete();\n";
+        $code .= "            \$this->entityManager->delete(\$model)->run();\n";
         $code .= "            \$this->flash->set('success', 'Data {$modelName} berhasil dihapus.');\n";
         $code .= "        }\n\n";
         $code .= "        return \$this->responseFactory->createResponse(302)\n";
@@ -355,9 +291,7 @@ final class MvcGenerator
         $code .= "}\n";
 
         return $code;
-    }
-
-    private function buildIndexView(
+    }    private function buildIndexView(
         string $modelName,
         string $lowerModel,
         array $columns,
@@ -377,6 +311,35 @@ final class MvcGenerator
             }
         }
 
+        $filterCells = '';
+        foreach ($columns as $col) {
+            $field = $col['Field'];
+            $type = strtolower($col['Type']);
+            
+            $filterCells .= "                    <td>\n";
+            if ($field === $primaryKey) {
+                $filterCells .= "                        <input type=\"text\" name=\"{$field}\" form=\"filter-form\" value=\"<?= Html::encode(\$filters['{$field}'] ?? '') ?>\" class=\"form-control\" placeholder=\"Cari ID...\">\n";
+            } else {
+                if (str_contains($type, 'int') || str_contains($type, 'bool') || str_contains($type, 'decimal') || str_contains($type, 'float') || str_contains($type, 'double')) {
+                    $inputType = "number";
+                } else {
+                    $inputType = "text";
+                }
+                $label = ucfirst(str_replace('_', ' ', $field));
+                $filterCells .= "                        <input type=\"{$inputType}\" name=\"{$field}\" form=\"filter-form\" value=\"<?= Html::encode(\$filters['{$field}'] ?? '') ?>\" class=\"form-control\" placeholder=\"Cari {$label}...\">\n";
+            }
+            $filterCells .= "                    </td>\n";
+        }
+
+        $actionsFilterCell = "                        <?php if (\$userSession->hasPermission('update_{$lowerModel}') || \$userSession->hasPermission('delete_{$lowerModel}')): " . '?' . ">\n";
+        $actionsFilterCell .= "                            <td class=\"text-center\">\n";
+        $actionsFilterCell .= "                                <div class=\"d-flex gap-1 justify-content-center\">\n";
+        $actionsFilterCell .= "                                    <button type=\"submit\" form=\"filter-form\" class=\"btn btn-sm btn-primary\">Cari</button>\n";
+        $actionsFilterCell .= "                                    <a href=\"<?= \$urlGenerator->generate('{$lowerModel}/index') ?>\" class=\"btn btn-sm btn-secondary\">Reset</a>\n";
+        $actionsFilterCell .= "                                </div>\n";
+        $actionsFilterCell .= "                            </td>\n";
+        $actionsFilterCell .= "                        <?php endif; " . '?' . ">\n";
+
         $code = "<?php\n\n";
         $code .= "declare(strict_types=1);\n\n";
         $code .= "use Yiisoft\Html\Html;\n";
@@ -385,6 +348,7 @@ final class MvcGenerator
         $code .= "/**\n";
         $code .= " * @var WebView \$this\n";
         $code .= " * @var App\Web\\{$modelName}\\Model\\{$modelName}[] \$models\n";
+        $code .= " * @var array \$filters\n";
         $code .= " * @var UrlGeneratorInterface \$urlGenerator\n";
         $code .= " * @var \App\Web\Auth\Model\UserSession \$userSession\n";
         $code .= " * @var string|null \$successMsg\n";
@@ -416,7 +380,10 @@ final class MvcGenerator
         $code .= "            <div><?= Html::encode(\$successMsg) ?></div>\n";
         $code .= "        </div>\n";
         $code .= "    <?php endif; " . '?' . ">\n\n";
-        $code .= "    <?php if (empty(\$models)): " . '?' . ">\n";
+        
+        $code .= "    <form id=\"filter-form\" method=\"GET\" action=\"<?= \$urlGenerator->generate('{$lowerModel}/index') ?>\"></form>\n\n";
+
+        $code .= "    <?php if (empty(\$models) && empty(\$filters)): " . '?' . ">\n";
         $code .= "        <div class=\"card empty-state text-center\">\n";
         $code .= "            <svg class=\"empty-icon\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\">\n";
         $code .= "                <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v3m0 0h4.5V12c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v9\" />\n";
@@ -434,42 +401,73 @@ final class MvcGenerator
         $code .= "                            <th class=\"text-center\" style=\"width: 180px;\">Aksi</th>\n";
         $code .= "                        <?php endif; " . '?' . ">\n";
         $code .= "                    </tr>\n";
+        $code .= "                    <tr class=\"filter-row\">\n";
+        $code .= $filterCells;
+        $code .= $actionsFilterCell;
+        $code .= "                    </tr>\n";
         $code .= "                </thead>\n";
         $code .= "                <tbody>\n";
-        $code .= "                    <?php foreach (\$models as \$model): " . '?' . ">\n";
+        
+        $code .= "                    <?php if (empty(\$models)): " . '?' . ">\n";
+        $code .= "                        <?php \$colCount = " . count($columns) . " + (\$userSession->hasPermission('update_{$lowerModel}') || \$userSession->hasPermission('delete_{$lowerModel}') ? 1 : 0); " . '?' . ">\n";
         $code .= "                        <tr>\n";
-        $code .= $values;
-        $code .= "                            <?php if (\$userSession->hasPermission('update_{$lowerModel}') || \$userSession->hasPermission('delete_{$lowerModel}')): " . '?' . ">\n";
-        $code .= "                                <td>\n";
-        $code .= "                                    <div class=\"action-buttons\">\n";
-        $code .= "                                        <?php if (\$userSession->hasPermission('update_{$lowerModel}')): " . '?' . ">\n";
-        $code .= "                                            <a href=\"<?= \$urlGenerator->generate('{$lowerModel}/update', ['id' => \$model->{$primaryKey}]) ?>\" class=\"btn-action btn-edit\">\n";
-        $code .= "                                                Edit\n";
-        $code .= "                                            </a>\n";
-        $code .= "                                        <?php endif; " . '?' . ">\n\n";
-        $code .= "                                        <?php if (\$userSession->hasPermission('delete_{$lowerModel}')): " . '?' . ">\n";
-        $code .= "                                            <form action=\"<?= \$urlGenerator->generate('{$lowerModel}/delete', ['id' => \$model->{$primaryKey}]) ?>\" method=\"POST\" onsubmit=\"return confirm('Apakah Anda yakin ingin menghapus data ini?');\" style=\"display:inline;\">\n";
-        $code .= "                                                <input type=\"hidden\" name=\"_csrf\" value=\"<?= Html::encode(\$this->getParameter('csrf')) ?>\">\n";
-        $code .= "                                                <button type=\"submit\" class=\"btn-action btn-delete\">\n";
-        $code .= "                                                    Hapus\n";
-        $code .= "                                                </button>\n";
-        $code .= "                                            </form>\n";
-        $code .= "                                        <?php endif; " . '?' . ">\n";
-        $code .= "                                    </div>\n";
-        $code .= "                                </td>\n";
-        $code .= "                            <?php endif; " . '?' . ">\n";
+        $code .= "                            <td colspan=\"<?= \$colCount ?>\" class=\"text-center text-muted py-4\">\n";
+        $code .= "                                Tidak ada data yang cocok dengan pencarian.\n";
+        $code .= "                            </td>\n";
         $code .= "                        </tr>\n";
-        $code .= "                    <?php endforeach; " . '?' . ">\n";
+        $code .= "                    <?php else: " . '?' . ">\n";
+        
+        $code .= "                        <?php foreach (\$models as \$model): " . '?' . ">\n";
+        $code .= "                            <tr>\n";
+        $code .= $values;
+        $code .= "                                <?php if (\$userSession->hasPermission('update_{$lowerModel}') || \$userSession->hasPermission('delete_{$lowerModel}')): " . '?' . ">\n";
+        $code .= "                                    <td>\n";
+        $code .= "                                        <div class=\"action-buttons\">\n";
+        $code .= "                                            <?php if (\$userSession->hasPermission('update_{$lowerModel}')): " . '?' . ">\n";
+        $code .= "                                                <a href=\"<?= \$urlGenerator->generate('{$lowerModel}/update', ['id' => \$model->{$primaryKey}]) ?>\" class=\"btn-action btn-edit\">\n";
+        $code .= "                                                    Edit\n";
+        $code .= "                                                </a>\n";
+        $code .= "                                            <?php endif; " . '?' . ">\n\n";
+        $code .= "                                            <?php if (\$userSession->hasPermission('delete_{$lowerModel}')): " . '?' . ">\n";
+        $code .= "                                                <form action=\"<?= \$urlGenerator->generate('{$lowerModel}/delete', ['id' => \$model->{$primaryKey}]) ?>\" method=\"POST\" onsubmit=\"return confirm('Apakah Anda yakin ingin menghapus data ini?');\" style=\"display:inline;\">\n";
+        $code .= "                                                    <input type=\"hidden\" name=\"_csrf\" value=\"<?= Html::encode(\$this->getParameter('csrf')) ?>\">\n";
+        $code .= "                                                    <button type=\"submit\" class=\"btn-action btn-delete\">\n";
+        $code .= "                                                        Hapus\n";
+        $code .= "                                                    </button>\n";
+        $code .= "                                                </form>\n";
+        $code .= "                                            <?php endif; " . '?' . ">\n";
+        $code .= "                                        </div>\n";
+        $code .= "                                    </td>\n";
+        $code .= "                                <?php endif; " . '?' . ">\n";
+        $code .= "                            </tr>\n";
+        $code .= "                        <?php endforeach; " . '?' . ">\n";
+        $code .= "                    <?php endif; " . '?' . ">\n";
         $code .= "                </tbody>\n";
         $code .= "            </table>\n";
         $code .= "        </div>\n";
         $code .= "    <?php endif; " . '?' . ">\n";
-        $code .= "</div>\n";
+        $code .= "</div>\n\n";
+        
+        $code .= "<script>\n";
+        $code .= "document.querySelectorAll('[form=\"filter-form\"]').forEach(input => {\n";
+        $code .= "    input.addEventListener('keypress', function(e) {\n";
+        $code .= "        if (e.key === 'Enter') {\n";
+        $code .= "            document.getElementById('filter-form').submit();\n";
+        $code .= "        }\n";
+        $code .= "    });\n";
+        $code .= "    if (input.tagName === 'SELECT') {\n";
+        $code .= "        input.addEventListener('change', function() {\n";
+        $code .= "            document.getElementById('filter-form').submit();\n";
+        $code .= "        });\n";
+        $code .= "    }\n";
+        $code .= "});\n";
+        $code .= "</script>\n";
 
         return $code;
     }
 
-    private function buildCreateView(
+
+    private function buildFormView(
         string $modelName,
         string $lowerModel,
         array $columns,
@@ -484,15 +482,56 @@ final class MvcGenerator
             $fieldsHtml .= "            <div class=\"form-group\">\n";
             $fieldsHtml .= "                <label for=\"{$field}\" class=\"form-label\">" . ucfirst($field) . "</label>\n";
             $fieldsHtml .= "                <input type=\"text\" id=\"{$field}\" name=\"{$field}\" class=\"form-control <?= isset(\$model->errors['{$field}']) ? 'is-invalid' : '' ?>\" value=\"<?= Html::encode(\$model->{$field}) ?>\">\n";
-            $fieldsHtml .= "                <?php if (isset(\$model->errors['{$field}'])): " . '?' . ">\n";
+            $fieldsHtml .= "                <?php if (isset(\$model->errors['{$field}'])): ?>\n";
             $fieldsHtml .= "                    <div class=\"invalid-feedback\"><?= Html::encode(\$model->errors['{$field}']) ?></div>\n";
-            $fieldsHtml .= "                <?php endif; " . '?' . ">\n";
+            $fieldsHtml .= "                <?php endif; ?>\n";
             $fieldsHtml .= "            </div>\n\n";
         }
 
         $code = "<?php\n\n";
         $code .= "declare(strict_types=1);\n\n";
         $code .= "use Yiisoft\Html\Html;\n";
+        $code .= "use Yiisoft\View\WebView;\n";
+        $code .= "use Yiisoft\Router\UrlGeneratorInterface;\n\n";
+        $code .= "/**\n";
+        $code .= " * @var WebView \$this\n";
+        $code .= " * @var App\Web\\{$modelName}\\Model\\{$modelName} \$model\n";
+        $code .= " * @var UrlGeneratorInterface \$urlGenerator\n";
+        $code .= " * @var string \$formAction\n";
+        $code .= " * @var string \$submitLabel\n";
+        $code .= " * @var bool \$showReset\n";
+        $code .= " * @var string|null \$cancelUrl\n";
+        $code .= " */\n";
+        $code .= "?>\n\n";
+        $code .= "<div class=\"card\">\n";
+        $code .= "    <form action=\"<?= \$formAction ?>\" method=\"POST\" class=\"form-grid\">\n";
+        $code .= "        <input type=\"hidden\" name=\"_csrf\" value=\"<?= Html::encode((string)\$this->getParameter('csrf')) ?>\">\n\n";
+        $code .= $fieldsHtml;
+        $code .= "        <div class=\"form-actions\">\n";
+        $code .= "            <?php if (\$showReset): ?>\n";
+        $code .= "                <button type=\"reset\" class=\"btn btn-secondary\">Reset</button>\n";
+        $code .= "            <?php elseif (\$cancelUrl !== null): ?>\n";
+        $code .= "                <a href=\"<?= \$cancelUrl ?>\" class=\"btn btn-secondary\">Batal</a>\n";
+        $code .= "            <?php endif; ?>\n";
+        $code .= "            <button type=\"submit\" class=\"btn btn-primary\">\n";
+        $code .= "                <?= Html::encode(\$submitLabel) ?>\n";
+        $code .= "            </button>\n";
+        $code .= "        </div>\n";
+        $code .= "    </form>\n";
+        $code .= "</div>\n";
+
+        return $code;
+    }
+
+    private function buildCreateView(
+        string $modelName,
+        string $lowerModel,
+        array $columns,
+        string $primaryKey,
+        bool $isAutoIncrement
+    ): string {
+        $code = "<?php\n\n";
+        $code .= "declare(strict_types=1);\n\n";
         $code .= "use Yiisoft\View\WebView;\n";
         $code .= "use Yiisoft\Router\UrlGeneratorInterface;\n\n";
         $code .= "/**\n";
@@ -512,18 +551,13 @@ final class MvcGenerator
         $code .= "            Kembali\n";
         $code .= "        </a>\n";
         $code .= "    </div>\n\n";
-        $code .= "    <div class=\"card\">\n";
-        $code .= "        <form action=\"<?= \$urlGenerator->generate('{$lowerModel}/create') ?>\" method=\"POST\" class=\"form-grid\">\n";
-        $code .= "            <input type=\"hidden\" name=\"_csrf\" value=\"<?= Html::encode((string)\$this->getParameter('csrf')) ?>\">\n\n";
-        $code .= $fieldsHtml;
-        $code .= "            <div class=\"form-actions\">\n";
-        $code .= "                <button type=\"reset\" class=\"btn btn-secondary\">Reset</button>\n";
-        $code .= "                <button type=\"submit\" class=\"btn btn-primary\">\n";
-        $code .= "                    Simpan Data\n";
-        $code .= "                </button>\n";
-        $code .= "            </div>\n";
-        $code .= "        </form>\n";
-        $code .= "    </div>\n";
+        $code .= "    <?= \$this->render('./_form', [\n";
+        $code .= "        'model' => \$model,\n";
+        $code .= "        'formAction' => \$urlGenerator->generate('{$lowerModel}/create'),\n";
+        $code .= "        'submitLabel' => 'Simpan Data',\n";
+        $code .= "        'showReset' => true,\n";
+        $code .= "        'cancelUrl' => null,\n";
+        $code .= "    ]) ?>\n";
         $code .= "</div>\n";
 
         return $code;
@@ -536,23 +570,8 @@ final class MvcGenerator
         string $primaryKey,
         bool $isAutoIncrement
     ): string {
-        $fieldsHtml = '';
-        foreach ($columns as $col) {
-            $field = $col['Field'];
-            if ($field === $primaryKey && $isAutoIncrement) continue;
-
-            $fieldsHtml .= "            <div class=\"form-group\">\n";
-            $fieldsHtml .= "                <label for=\"{$field}\" class=\"form-label\">" . ucfirst($field) . "</label>\n";
-            $fieldsHtml .= "                <input type=\"text\" id=\"{$field}\" name=\"{$field}\" class=\"form-control <?= isset(\$model->errors['{$field}']) ? 'is-invalid' : '' ?>\" value=\"<?= Html::encode(\$model->{$field}) ?>\">\n";
-            $fieldsHtml .= "                <?php if (isset(\$model->errors['{$field}'])): " . '?' . ">\n";
-            $fieldsHtml .= "                    <div class=\"invalid-feedback\"><?= Html::encode(\$model->errors['{$field}']) ?></div>\n";
-            $fieldsHtml .= "                <?php endif; " . '?' . ">\n";
-            $fieldsHtml .= "            </div>\n\n";
-        }
-
         $code = "<?php\n\n";
         $code .= "declare(strict_types=1);\n\n";
-        $code .= "use Yiisoft\Html\Html;\n";
         $code .= "use Yiisoft\View\WebView;\n";
         $code .= "use Yiisoft\Router\UrlGeneratorInterface;\n\n";
         $code .= "/**\n";
@@ -572,18 +591,13 @@ final class MvcGenerator
         $code .= "            Kembali\n";
         $code .= "        </a>\n";
         $code .= "    </div>\n\n";
-        $code .= "    <div class=\"card\">\n";
-        $code .= "        <form action=\"<?= \$urlGenerator->generate('{$lowerModel}/update', ['id' => \$model->{$primaryKey}]) ?>\" method=\"POST\" class=\"form-grid\">\n";
-        $code .= "            <input type=\"hidden\" name=\"_csrf\" value=\"<?= Html::encode((string)\$this->getParameter('csrf')) ?>\">\n\n";
-        $code .= $fieldsHtml;
-        $code .= "            <div class=\"form-actions\">\n";
-        $code .= "                <a href=\"<?= \$urlGenerator->generate('{$lowerModel}/index') ?>\" class=\"btn btn-secondary\">Batal</a>\n";
-        $code .= "                <button type=\"submit\" class=\"btn btn-primary\">\n";
-        $code .= "                    Simpan Perubahan\n";
-        $code .= "                </button>\n";
-        $code .= "            </div>\n";
-        $code .= "        </form>\n";
-        $code .= "    </div>\n";
+        $code .= "    <?= \$this->render('./_form', [\n";
+        $code .= "        'model' => \$model,\n";
+        $code .= "        'formAction' => \$urlGenerator->generate('{$lowerModel}/update', ['id' => \$model->{$primaryKey}]),\n";
+        $code .= "        'submitLabel' => 'Simpan Perubahan',\n";
+        $code .= "        'showReset' => false,\n";
+        $code .= "        'cancelUrl' => \$urlGenerator->generate('{$lowerModel}/index'),\n";
+        $code .= "    ]) ?>\n";
         $code .= "</div>\n";
 
         return $code;

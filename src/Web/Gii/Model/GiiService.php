@@ -75,7 +75,7 @@ final class GiiService
             }
         }
 
-        $dir = "/var/www/html/teqic-yii3/src/Web/{$modelName}";
+        $dir = __DIR__ . "/../../{$modelName}";
         $subdirs = ['Controller', 'Model', 'View'];
         if ($architecture === 'ddd') {
             $subdirs[] = 'Service';
@@ -105,6 +105,9 @@ final class GiiService
 
             // 6. Inject Layout Navbar
             $this->injectLayoutNavbar($modelName, $lowerModel, $logs);
+
+            // 7. Inject Cycle Entity Path
+            $this->injectEntityPath($modelName, $logs);
         }
 
         return $success;
@@ -112,7 +115,7 @@ final class GiiService
 
     private function injectRoutes(string $modelName, string $lowerModel, array &$logs): void
     {
-        $routesPath = '/var/www/html/teqic-yii3/config/common/routes.php';
+        $routesPath = __DIR__ . '/../../../../config/common/routes.php';
         $content = file_get_contents($routesPath);
 
         // Check if route group already exists
@@ -145,7 +148,7 @@ final class GiiService
         $inject .= "                ->name('{$lowerModel}/delete'),\n";
         $inject .= "        ),\n";
 
-        $target = "    // RBAC Group protected by RBAC middleware";
+        $target = "    // Routes Protection Group protected by RBAC middleware";
         if (str_contains($content, $target)) {
             $content = str_replace($target, $inject . $target, $content);
             file_put_contents($routesPath, $content);
@@ -157,7 +160,7 @@ final class GiiService
 
     private function injectRbacSeeding(string $modelName, string $lowerModel, array &$logs): void
     {
-        $rbacPath = '/var/www/html/teqic-yii3/src/Web/Rbac/RbacRepository.php';
+        $rbacPath = __DIR__ . '/../../Rbac/Model/RbacRepository.php';
         $content = file_get_contents($rbacPath);
 
         if (str_contains($content, "view_{$lowerModel}")) {
@@ -165,50 +168,47 @@ final class GiiService
             return;
         }
 
-        $inject = "\n        // Seed {$modelName} Permissions jika belum ada\n";
-        $inject .= "        \${$lowerModel}Permissions = [\n";
-        $inject .= "            ['name' => 'view_{$lowerModel}', 'description' => 'Melihat daftar dan detail data {$modelName}.'],\n";
-        $inject .= "            ['name' => 'create_{$lowerModel}', 'description' => 'Menambahkan data {$modelName} baru.'],\n";
-        $inject .= "            ['name' => 'update_{$lowerModel}', 'description' => 'Mengubah detail data {$modelName}.'],\n";
-        $inject .= "            ['name' => 'delete_{$lowerModel}', 'description' => 'Menghapus data {$modelName}.'],\n";
-        $inject .= "        ];\n";
-        $inject .= "        foreach (\${$lowerModel}Permissions as \$perm) {\n";
-        $inject .= "            \$checkStmt->execute(['name' => \$perm['name']]);\n";
-        $inject .= "            if (\$checkStmt->fetchColumn() == 0) {\n";
-        $inject .= "                \$insertPermStmt->execute(\$perm);\n";
-        $inject .= "                \$this->pdo->prepare(\"INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Admin', :perm)\")\n";
-        $inject .= "                    ->execute(['perm' => \$perm['name']]);\n";
-        $inject .= "                if (\$perm['name'] !== 'delete_{$lowerModel}') {\n";
-        $inject .= "                    \$this->pdo->prepare(\"INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`) VALUES ('Operator', :perm)\")\n";
-        $inject .= "                        ->execute(['perm' => \$perm['name']]);\n";
-        $inject .= "                }\n";
-        $inject .= "            }\n";
-        $inject .= "        }\n";
-        $inject .= "        \${$lowerModel}RouteMappings = [\n";
-        $inject .= "            ['route_name' => '{$lowerModel}/index', 'permission_name' => 'view_{$lowerModel}'],\n";
-        $inject .= "            ['route_name' => '{$lowerModel}/create', 'permission_name' => 'create_{$lowerModel}'],\n";
-        $inject .= "            ['route_name' => '{$lowerModel}/create/post', 'permission_name' => 'create_{$lowerModel}'],\n";
-        $inject .= "            ['route_name' => '{$lowerModel}/update', 'permission_name' => 'update_{$lowerModel}'],\n";
-        $inject .= "            ['route_name' => '{$lowerModel}/update/post', 'permission_name' => 'update_{$lowerModel}'],\n";
-        $inject .= "            ['route_name' => '{$lowerModel}/delete', 'permission_name' => 'delete_{$lowerModel}'],\n";
-        $inject .= "        ];\n";
-        $inject .= "        foreach (\${$lowerModel}RouteMappings as \$mapping) {\n";
-        $inject .= "            \$routeCheckStmt->execute(['route_name' => \$mapping['route_name']]);\n";
-        $inject .= "            if (\$routeCheckStmt->fetchColumn() == 0) {\n";
-        $inject .= "                \$routeInsertStmt->execute(\$mapping);\n";
-        $inject .= "            }\n";
-        $inject .= "        }\n";
+        // 1. Inject permission entry into $allPermissions array (before closing ];)
+        $permEntry = "            ['name' => 'view_{$lowerModel}',           'description' => 'Melihat daftar dan detail data {$modelName}.'],\n";
+        $permEntry .= "            ['name' => 'create_{$lowerModel}',         'description' => 'Menambahkan data {$modelName} baru.'],\n";
+        $permEntry .= "            ['name' => 'update_{$lowerModel}',         'description' => 'Mengubah detail data {$modelName}.'],\n";
+        $permEntry .= "            ['name' => 'delete_{$lowerModel}',         'description' => 'Menghapus data {$modelName}.'],\n";
 
-        // Find the end of initializeTable() method
-        // We'll search for the last mapping of konsulat:
-        $target = "if (\$routeCheckStmt->fetchColumn() == 0) {\n                \$routeInsertStmt->execute(\$mapping);\n            }\n        }\n    }";
+        $permTarget = "        ];\n        foreach (\$allPermissions as \$perm) {";
+        if (str_contains($content, $permTarget)) {
+            $content = str_replace($permTarget, $permEntry . $permTarget, $content);
+        }
 
-        if (str_contains($content, $target)) {
-            $content = str_replace($target, "if (\$routeCheckStmt->fetchColumn() == 0) {\n                \$routeInsertStmt->execute(\$mapping);\n            }\n        }\n" . $inject . "    }", $content);
+        // 2. Inject permission names into Admin and Operator role matrix rows
+        $operatorNewPerms = "'view_{$lowerModel}','create_{$lowerModel}','update_{$lowerModel}'";
+        $adminNewPerms = "'view_{$lowerModel}','create_{$lowerModel}','update_{$lowerModel}','delete_{$lowerModel}'";
+
+        $content = preg_replace(
+            "/('Admin'\s*=>\s*\[)([^\]]+)(\])/",
+            "\${1}\${2},{$adminNewPerms}\${3}",
+            $content
+        );
+
+        $content = preg_replace(
+            "/('Operator'\s*=>\s*\[)([^\]]+)(\])/",
+            "\${1}\${2},{$operatorNewPerms}\${3}",
+            $content
+        );
+
+        // 3. Inject route mapping into $allRoutes array (before closing ];)
+        $routeEntry = "            ['route_name' => '{$lowerModel}/index',                 'permission_name' => 'view_{$lowerModel}'],\n";
+        $routeEntry .= "            ['route_name' => '{$lowerModel}/create',                'permission_name' => 'create_{$lowerModel}'],\n";
+        $routeEntry .= "            ['route_name' => '{$lowerModel}/create/post',           'permission_name' => 'create_{$lowerModel}'],\n";
+        $routeEntry .= "            ['route_name' => '{$lowerModel}/update',                'permission_name' => 'update_{$lowerModel}'],\n";
+        $routeEntry .= "            ['route_name' => '{$lowerModel}/update/post',           'permission_name' => 'update_{$lowerModel}'],\n";
+        $routeEntry .= "            ['route_name' => '{$lowerModel}/delete',                'permission_name' => 'delete_{$lowerModel}'],\n";
+
+        $routeTarget = "        ];\n        foreach (\$allRoutes as \$mapping) {";
+        if (str_contains($content, $routeTarget)) {
+            $content = str_replace($routeTarget, $routeEntry . $routeTarget, $content);
             file_put_contents($rbacPath, $content);
             $logs[] = "Izin RBAC & Route Mapping otomatis di-seed di RbacRepository.php.";
-            
-            // Execute RbacRepository constructor via reflection or directly inside the app to apply the seed right away
+
             try {
                 $this->pdo->query("DELETE FROM `rbac_permissions` WHERE `name` LIKE '%{$lowerModel}%'");
                 $this->pdo->query("DELETE FROM `rbac_route_permissions` WHERE `route_name` LIKE '%{$lowerModel}%'");
@@ -220,7 +220,7 @@ final class GiiService
 
     private function injectLayoutNavbar(string $modelName, string $lowerModel, array &$logs): void
     {
-        $layoutPath = '/var/www/html/teqic-yii3/src/Web/Shared/Layout/Main/layout.php';
+        $layoutPath = __DIR__ . '/../../Shared/Layout/Main/layout.php';
         $content = file_get_contents($layoutPath);
 
         if (str_contains($content, "generate('{$lowerModel}/index')")) {
@@ -251,6 +251,32 @@ final class GiiService
             }
         } else {
             $logs[] = "PERINGATAN: Menu navigasi layout.php tidak dapat diperbarui secara otomatis.";
+        }
+    }
+
+    private function injectEntityPath(string $modelName, array &$logs): void
+    {
+        $paramsPath = __DIR__ . '/../../../../config/common/params.php';
+        if (!file_exists($paramsPath)) {
+            $logs[] = "PERINGATAN: File params.php tidak ditemukan.";
+            return;
+        }
+
+        $content = file_get_contents($paramsPath);
+        $pathLine = "'@src/Web/{$modelName}/Model',";
+
+        if (str_contains($content, $pathLine)) {
+            $logs[] = "Path entitas untuk '{$modelName}' sudah terdaftar di params.php.";
+            return;
+        }
+
+        $target = "'entity-paths' => [";
+        if (str_contains($content, $target)) {
+            $content = str_replace($target, $target . "\n            '@src/Web/" . $modelName . "/Model',", $content);
+            file_put_contents($paramsPath, $content);
+            $logs[] = "Path entitas otomatis didaftarkan di config/common/params.php.";
+        } else {
+            $logs[] = "PERINGATAN: Target entity-paths di params.php tidak ditemukan. Daftarkan secara manual.";
         }
     }
 }

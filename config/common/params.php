@@ -68,8 +68,10 @@ return [
             ],
         ],
         'entity-paths' => [
-            '@src/Web/Auth/Model',
+            '@src/Web/Perizinan/Model',
             '@src/Web/Guru/Model',
+            '@src/Web/Rayon/Model',
+            '@src/Web/Auth/Model',
             '@src/Web/Kamar/Model',
             '@src/Web/Konsulat/Model',
             '@src/Web/Pelanggaran/Model',
