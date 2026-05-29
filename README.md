@@ -55,6 +55,8 @@ yii3-pmdg/
 │       ├── Santri/             # CRUD data santri
 │       ├── Kamar/              # CRUD data kamar
 │       ├── Konsulat/           # CRUD data konsulat
+│       ├── Perizinan/          # CRUD data perizinan
+│       ├── Rayon/              # CRUD data rayon
 │       ├── Pelanggaran/        # CRUD data pelanggaran
 │       ├── Rbac/               # Manajemen user, role, permission, route
 │       ├── Gii/                # Code generator (dev only)
@@ -154,6 +156,8 @@ Semua route (kecuali `/login`) diproteksi oleh `RbacAccessControlMiddleware`.
 | POST | `/santri/delete/{id}` | Hapus santri |
 | GET | `/kamar` | Daftar kamar |
 | GET | `/konsulat` | Daftar konsulat |
+| GET | `/perizinan` | Daftar perizinan |
+| GET | `/rayon` | Daftar rayon |
 | GET | `/pelanggaran` | Daftar pelanggaran |
 | GET | `/users` | Manajemen user |
 | GET | `/roles` | Manajemen role |
@@ -179,7 +183,7 @@ Semua route (kecuali `/login`) diproteksi oleh `RbacAccessControlMiddleware`.
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/username/yii3-pmdg.git
+git clone https://github.com/hamidalfarizi/yii3-pmdg.git
 cd yii3-pmdg
 ```
 
@@ -282,8 +286,10 @@ Aplikasi menggunakan Cycle ORM dengan `SyncTables` generator, artinya:
 
 ```php
 'entity-paths' => [
-    '@src/Web/Auth/Model',
+    '@src/Web/Perizinan/Model',
     '@src/Web/Guru/Model',
+    '@src/Web/Rayon/Model',
+    '@src/Web/Auth/Model',
     '@src/Web/Kamar/Model',
     '@src/Web/Konsulat/Model',
     '@src/Web/Pelanggaran/Model',
