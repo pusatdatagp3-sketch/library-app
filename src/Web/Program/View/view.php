@@ -21,7 +21,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  */
 
 $this->setTitle("Program Kerja - {$model->namaProgram}");
-$baseUrl = $this->getParameter('baseUrl') ?? '/teqic-yii3/public';
+$baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/teqic-yii3/public';
 ?>
 
 <div class="crud-container">
