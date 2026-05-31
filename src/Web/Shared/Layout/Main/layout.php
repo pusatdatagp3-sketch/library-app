@@ -113,7 +113,7 @@
                             style="fill:#7fb93c" transform="translate(245.403 498.558)" />
                     </g>
                 </svg>
-                <span class="brand-text" style="font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em;">TEQIC
+                <span class="brand-text fw-bold">TEQIC
                     Admin</span>
             </div>
 
@@ -309,13 +309,13 @@
             </main>
 
             <!-- Footer -->
-            <footer class="admin-footer" style="padding: 12px 32px;">
+            <footer class="admin-footer">
                 <div class="footer_copyright">
                     <a href="https://www.yiiframework.com/" target="_blank" rel="noopener">
                         © <?php echo date('Y') ?> <?php echo Html::encode($applicationParams->name) ?>
                     </a>
                 </div>
-                <div class="footer_crafted" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                <div class="footer_crafted text-sm text-muted fw-medium">
                     Crafted with ❤️ by ICT Gontor
                 </div>
             </footer>

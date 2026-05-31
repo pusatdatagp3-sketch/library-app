@@ -16,7 +16,7 @@ use Yiisoft\View\WebView;
 $this->setTitle("Edit Entitas - {$model->nama}");
 ?>
 
-<div class="crud-container max-w-2xl" style="max-width: 600px; margin: 0 auto;">
+<div class="crud-container max-w-2xl">
     <div class="crud-header">
         <div>
             <h1 class="crud-title"><i class="ri-edit-line text-primary"></i> Edit Entitas</h1>
@@ -30,11 +30,11 @@ $this->setTitle("Edit Entitas - {$model->nama}");
 
             <div class="form-group mb-4">
                 <label class="form-label" for="nama">Nama Entitas</label>
-                <input type="text" 
-                       id="nama" 
-                       name="nama" 
-                       value="<?= Html::encode($model->nama) ?>" 
-                       class="form-control <?= isset($model->errors['nama']) ? 'is-invalid' : '' ?>" 
+                <input type="text"
+                       id="nama"
+                       name="nama"
+                       value="<?= Html::encode($model->nama) ?>"
+                       class="form-control <?= isset($model->errors['nama']) ? 'is-invalid' : '' ?>"
                        required>
                 <?php if (isset($model->errors['nama'])): ?>
                     <div class="invalid-feedback"><?= Html::encode($model->errors['nama']) ?></div>
@@ -43,13 +43,13 @@ $this->setTitle("Edit Entitas - {$model->nama}");
 
             <div class="form-group mb-4">
                 <label class="form-label" for="deskripsi">Deskripsi</label>
-                <textarea id="deskripsi" 
-                          name="deskripsi" 
-                          rows="4" 
+                <textarea id="deskripsi"
+                          name="deskripsi"
+                          rows="4"
                           class="form-control"><?= Html::encode($model->deskripsi ?? '') ?></textarea>
             </div>
 
-            <div class="form-actions d-flex justify-content-end gap-3 mt-4" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <div class="form-actions mt-4">
                 <a href="<?= $this->getParameter('urlGenerator')->generate($indexRoute) ?>" class="btn btn-secondary">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>
