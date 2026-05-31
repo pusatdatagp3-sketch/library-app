@@ -1,5 +1,5 @@
 /* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
 
 :root {
     --primary: #4f46e5;
@@ -65,18 +65,29 @@ body[data-theme="dark"] {
     --badge-guru-text: #fbbf24;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     height: 100%;
 }
 
 body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family:
+        "Plus Jakarta Sans",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
     background: var(--bg-main);
     color: var(--text-main);
     -webkit-font-smoothing: antialiased;
-    transition: background 0.3s ease, color 0.3s ease;
+    transition:
+        background 0.3s ease,
+        color 0.3s ease;
 }
 
 /* Layout Wrapper */
@@ -203,7 +214,9 @@ body {
     position: sticky;
     top: 0;
     z-index: 90;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease;
 }
 
 .header-left-actions {
@@ -325,7 +338,9 @@ body {
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.05),
+        0 2px 4px -2px rgb(0 0 0 / 0.05);
 }
 
 /* Buttons */
@@ -375,7 +390,9 @@ body {
     border-radius: 12px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.05),
+        0 2px 4px -2px rgb(0 0 0 / 0.05);
 }
 
 .table {
@@ -582,7 +599,9 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease;
 }
 
 .admin-footer a {
@@ -810,7 +829,9 @@ body {
     width: 100%;
     max-width: 420px;
     padding: 36px;
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow:
+        0 20px 25px -5px rgb(0 0 0 / 0.1),
+        0 8px 10px -6px rgb(0 0 0 / 0.1);
     border-radius: 16px;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -1024,7 +1045,7 @@ body {
     right: 0;
     bottom: 0;
     background-color: #cbd5e1;
-    transition: .3s;
+    transition: 0.3s;
     border-radius: 34px;
 }
 
@@ -1036,7 +1057,7 @@ body {
     left: 3px;
     bottom: 3px;
     background-color: white;
-    transition: .3s;
+    transition: 0.3s;
     border-radius: 50%;
 }
 
@@ -1103,7 +1124,9 @@ body {
     padding: 48px 36px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    box-shadow:
+        0 10px 15px -3px rgb(0 0 0 / 0.05),
+        0 4px 6px -4px rgb(0 0 0 / 0.05);
 }
 
 .error-icon-container {
@@ -1185,7 +1208,7 @@ body {
     body.sidebar-collapsed .sidebar-menu a {
         justify-content: center;
         padding: 10px 0;
-        margin: 0 10px;
+        /* margin: 0 10px; */
         gap: 0;
         overflow: hidden;
     }
@@ -1215,6 +1238,155 @@ body {
 .filter-row .gap-1 {
     gap: 4px;
 }
+/* ==========================
+   DROPDOWN SIDEBAR
+   ========================== */
 
+.sidebar-dropdown {
+    display: flex;
+    flex-direction: column;
+}
 
+.sidebar-dropdown-toggle {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
 
+.sidebar-dropdown-toggle:hover {
+    background: #1e293b;
+    color: #fff;
+}
+
+.sidebar-dropdown-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-dropdown-left i {
+    width: 18px;
+    min-width: 18px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.sidebar-dropdown-toggle.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.sidebar-dropdown-toggle.active .dropdown-arrow {
+    color: #fff;
+}
+
+/* ==========================
+   SUBMENU
+   ========================== */
+
+.sidebar-submenu {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+    margin-left: 20px;
+}
+
+.sidebar-dropdown.open .sidebar-submenu {
+    display: flex;
+}
+
+.sidebar-submenu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #94a3b8;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-submenu a:hover {
+    background: #1e293b;
+    color: #fff;
+}
+
+.sidebar-submenu a i {
+    width: 18px;
+    min-width: 18px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.sidebar-submenu a.active {
+    background: rgba(79, 70, 229, 0.15);
+    color: #818cf8;
+}
+
+/* ==========================
+   ARROW
+   ========================== */
+
+.dropdown-arrow {
+    transition: transform 0.3s ease;
+}
+
+.sidebar-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* ==========================
+   COLLAPSED SIDEBAR
+   ========================== */
+
+body.sidebar-collapsed .sidebar-dropdown-toggle {
+    justify-content: center;
+    padding: 10px 0;
+}
+
+body.sidebar-collapsed .sidebar-dropdown-left {
+    justify-content: center;
+}
+
+body.sidebar-collapsed .sidebar-dropdown-left span,
+body.sidebar-collapsed .dropdown-arrow {
+    display: none;
+}
+/* Collapse: default sembunyikan submenu */
+body.sidebar-collapsed .sidebar-submenu {
+    display: none;
+    margin-left: 0;
+}
+
+/* Collapse: tampilkan submenu jika dropdown open */
+body.sidebar-collapsed .sidebar-dropdown.open .sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Hanya tampilkan icon submenu */
+body.sidebar-collapsed .sidebar-submenu a {
+    justify-content: center;
+    padding: 8px 0;
+}
+
+body.sidebar-collapsed .sidebar-submenu a span {
+    display: none;
+}
+
+body.sidebar-collapsed .sidebar-submenu a i {
+    margin: 0;
+}
