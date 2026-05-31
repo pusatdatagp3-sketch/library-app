@@ -27,7 +27,7 @@ $deleteMemberRoute = "{$prefix}/delete-member";
 ?>
 
 <div class="crud-container">
-    <div class="mb-4">
+    <div class="sticky-page-header">
         <a href="<?= $urlGenerator->generate($indexRoute) ?>" class="btn btn-sm btn-secondary">
             <i class="ri-arrow-left-line"></i> Kembali ke Daftar <?= Html::encode($modulTitle) ?>
         </a>
@@ -35,7 +35,7 @@ $deleteMemberRoute = "{$prefix}/delete-member";
 
     <!-- Header Info Card -->
     <div class="card mb-4 overflow-hidden card-accent">
-        <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
                 <span class="badge badge-primary-light mb-2">
                     <?= Html::encode($modulTitle) ?>
@@ -76,7 +76,7 @@ $deleteMemberRoute = "{$prefix}/delete-member";
         <!-- SECTION 1: PROGRAM KERJA -->
         <div class="d-flex flex-col gap-4">
             <div class="card p-5">
-                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 border-bottom pb-3">
                     <h2 class="text-lg fw-bold d-flex align-items-center gap-2 m-0">
                         <i class="ri-calendar-todo-line text-primary text-xl"></i> Program Kerja
                     </h2>
@@ -96,7 +96,7 @@ $deleteMemberRoute = "{$prefix}/delete-member";
                             <div class="program-row hover-glow">
                                 <div>
                                     <h4 class="fw-bold mb-1 m-0"><?= Html::encode($prog->namaProgram) ?></h4>
-                                    <div class="d-flex gap-3 align-items-center text-sm text-muted">
+                                    <div class="d-flex gap-3 align-items-center text-sm text-muted flex-wrap">
                                         <span class="inline-flex align-items-center gap-1">
                                             <i class="ri-time-line"></i> <?= Html::encode(ucfirst($prog->periode ?? 'tidak ditentukan')) ?>
                                         </span>

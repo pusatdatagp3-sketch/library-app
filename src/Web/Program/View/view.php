@@ -25,7 +25,7 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
 ?>
 
 <div class="crud-container">
-    <div class="mb-4">
+    <div class="sticky-page-header">
         <a href="<?= $backUrl ?>" class="btn btn-sm btn-secondary">
             <i class="ri-arrow-left-line"></i> Kembali ke Entitas (<?= Html::encode($entitas->nama) ?>)
         </a>
@@ -33,7 +33,7 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
 
     <!-- Main Title Card -->
     <div class="card mb-4 overflow-hidden card-accent">
-        <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
                 <div class="d-flex gap-2 mb-2">
                     <span class="badge badge-primary-light">
