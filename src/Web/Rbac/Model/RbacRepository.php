@@ -61,6 +61,8 @@ final class RbacRepository
         }
         // Seed Permissions
         $allPermissions = [
+            ['name' => 'manage_rbac',          'description' => 'Mengelola RBAC (Role, Permission, User).'],
+            ['name' => 'manage_gii',           'description' => 'Mengakses Gii Code Generator.'],
             ['name' => 'view_fungsionaris',    'description' => 'Melihat entitas Fungsionaris KMI.'],
             ['name' => 'create_fungsionaris',  'description' => 'Menambahkan entitas Fungsionaris KMI.'],
             ['name' => 'update_fungsionaris',  'description' => 'Mengubah entitas Fungsionaris KMI.'],
@@ -88,9 +90,9 @@ final class RbacRepository
         // Seed Role Permissions matrix
         if ((int)$this->db->query("SELECT COUNT(*) FROM `rbac_role_permissions`")->fetchColumn() === 0) {
             $matrix = [
-                'Admin'    => ['view_guru','create_guru','update_guru','delete_guru','manage_rbac','view_kamar','create_kamar','update_kamar','delete_kamar','view_konsulat','create_konsulat','update_konsulat','delete_konsulat','manage_gii','view_pelanggaran','create_pelanggaran','update_pelanggaran','delete_pelanggaran','view_santri','create_santri','update_santri','delete_santri','view_rayon','create_rayon','update_rayon','delete_rayon','view_perizinan','create_perizinan','update_perizinan','delete_perizinan'],
-                'Operator' => ['view_guru','create_guru','update_guru','delete_guru','view_kamar','create_kamar','update_kamar','view_konsulat','create_konsulat','update_konsulat','view_pelanggaran','create_pelanggaran','update_pelanggaran','view_santri','create_santri','update_santri','view_rayon','create_rayon','update_rayon','view_perizinan','create_perizinan','update_perizinan'],
-                'Guru'     => ['view_guru'],
+                'Admin'    => ['manage_rbac', 'manage_gii', 'view_fungsionaris', 'create_fungsionaris', 'update_fungsionaris', 'delete_fungsionaris', 'view_kepanitiaan', 'create_kepanitiaan', 'update_kepanitiaan', 'delete_kepanitiaan', 'view_empowering', 'create_empowering', 'update_empowering', 'delete_empowering', 'view_program', 'create_program', 'update_program', 'delete_program'],
+                'Operator' => ['view_fungsionaris', 'view_kepanitiaan', 'view_empowering', 'view_program'],
+                'Guru'     => ['view_program'],
             ];
             foreach ($matrix as $roleName => $perms) {
                 foreach ($perms as $permName) {
@@ -107,40 +109,8 @@ final class RbacRepository
 
         // Seed Route Permissions
         $allRoutes = [
-            ['route_name' => 'guru/index',                   'permission_name' => 'view_guru'],
-            ['route_name' => 'guru/create',                  'permission_name' => 'create_guru'],
-            ['route_name' => 'guru/create/post',             'permission_name' => 'create_guru'],
-            ['route_name' => 'guru/update',                  'permission_name' => 'update_guru'],
-            ['route_name' => 'guru/update/post',             'permission_name' => 'update_guru'],
-            ['route_name' => 'guru/delete',                  'permission_name' => 'delete_guru'],
-            ['route_name' => 'guru/download-template',       'permission_name' => 'view_guru'],
-            ['route_name' => 'guru/upload',                  'permission_name' => 'create_guru'],
-            ['route_name' => 'kamar/index',                  'permission_name' => 'view_kamar'],
-            ['route_name' => 'kamar/create',                 'permission_name' => 'create_kamar'],
-            ['route_name' => 'kamar/create/post',            'permission_name' => 'create_kamar'],
-            ['route_name' => 'kamar/update',                 'permission_name' => 'update_kamar'],
-            ['route_name' => 'kamar/update/post',            'permission_name' => 'update_kamar'],
-            ['route_name' => 'kamar/delete',                 'permission_name' => 'delete_kamar'],
-            ['route_name' => 'konsulat/index',               'permission_name' => 'view_konsulat'],
-            ['route_name' => 'konsulat/create',              'permission_name' => 'create_konsulat'],
-            ['route_name' => 'konsulat/create/post',         'permission_name' => 'create_konsulat'],
-            ['route_name' => 'konsulat/update',              'permission_name' => 'update_konsulat'],
-            ['route_name' => 'konsulat/update/post',         'permission_name' => 'update_konsulat'],
-            ['route_name' => 'konsulat/delete',              'permission_name' => 'delete_konsulat'],
             ['route_name' => 'gii/index',                    'permission_name' => 'manage_gii'],
             ['route_name' => 'gii/generate',                 'permission_name' => 'manage_gii'],
-            ['route_name' => 'pelanggaran/index',            'permission_name' => 'view_pelanggaran'],
-            ['route_name' => 'pelanggaran/create',           'permission_name' => 'create_pelanggaran'],
-            ['route_name' => 'pelanggaran/create/post',      'permission_name' => 'create_pelanggaran'],
-            ['route_name' => 'pelanggaran/update',           'permission_name' => 'update_pelanggaran'],
-            ['route_name' => 'pelanggaran/update/post',      'permission_name' => 'update_pelanggaran'],
-            ['route_name' => 'pelanggaran/delete',           'permission_name' => 'delete_pelanggaran'],
-            ['route_name' => 'santri/index',                 'permission_name' => 'view_santri'],
-            ['route_name' => 'santri/create',                'permission_name' => 'create_santri'],
-            ['route_name' => 'santri/create/post',           'permission_name' => 'create_santri'],
-            ['route_name' => 'santri/update',                'permission_name' => 'update_santri'],
-            ['route_name' => 'santri/update/post',           'permission_name' => 'update_santri'],
-            ['route_name' => 'santri/delete',                'permission_name' => 'delete_santri'],
             ['route_name' => 'users/index',                  'permission_name' => 'manage_rbac'],
             ['route_name' => 'users/create',                 'permission_name' => 'manage_rbac'],
             ['route_name' => 'users/create/post',            'permission_name' => 'manage_rbac'],
@@ -162,18 +132,6 @@ final class RbacRepository
             ['route_name' => 'permissions/delete',           'permission_name' => 'manage_rbac'],
             ['route_name' => 'routes/index',                 'permission_name' => 'manage_rbac'],
             ['route_name' => 'routes/save-route-permissions','permission_name' => 'manage_rbac'],
-            ['route_name' => 'rayon/index',                 'permission_name' => 'view_rayon'],
-            ['route_name' => 'rayon/create',                'permission_name' => 'create_rayon'],
-            ['route_name' => 'rayon/create/post',           'permission_name' => 'create_rayon'],
-            ['route_name' => 'rayon/update',                'permission_name' => 'update_rayon'],
-            ['route_name' => 'rayon/update/post',           'permission_name' => 'update_rayon'],
-            ['route_name' => 'rayon/delete',                'permission_name' => 'delete_rayon'],
-            ['route_name' => 'perizinan/index',                 'permission_name' => 'view_perizinan'],
-            ['route_name' => 'perizinan/create',                'permission_name' => 'create_perizinan'],
-            ['route_name' => 'perizinan/create/post',           'permission_name' => 'create_perizinan'],
-            ['route_name' => 'perizinan/update',                'permission_name' => 'update_perizinan'],
-            ['route_name' => 'perizinan/update/post',           'permission_name' => 'update_perizinan'],
-            ['route_name' => 'perizinan/delete',                'permission_name' => 'delete_perizinan'],
             ['route_name' => 'fungsionaris/index',           'permission_name' => 'view_fungsionaris'],
             ['route_name' => 'fungsionaris/create',          'permission_name' => 'create_fungsionaris'],
             ['route_name' => 'fungsionaris/create/post',     'permission_name' => 'create_fungsionaris'],

@@ -13,50 +13,7 @@ return [
         ],
     ],
 
-    [
-        'group' => 'Data Master',
-        'items' => [
 
-            [
-                'label' => 'Data Guru',
-                'icon'  => 'ri-user-star',
-                'route' => 'guru/index',
-            ],
-
-            [
-                'label'      => 'Asrama',
-                'icon'       => 'ri-building-4',
-                'permission' => 'view_kamar',
-
-                'children'   => [
-                    [
-                        'label' => 'Data Kamar',
-                        'icon'  => 'ri-door-open',
-                        'route' => 'kamar/index',
-                    ],
-                    [
-                        'label' => 'Data Rayon',
-                        'icon'  => 'ri-community',
-                        'route' => 'rayon/index',
-                    ],
-                ],
-            ],
-
-            [
-                'label'      => 'Data Konsulat',
-                'icon'       => 'ri-global',
-                'route'      => 'konsulat/index',
-                'permission' => 'view_konsulat',
-            ],
-
-            [
-                'label'      => 'Data Santri',
-                'icon'       => 'ri-user',
-                'route'      => 'santri/index',
-                'permission' => 'view_santri',
-            ],
-        ],
-    ],
 
     [
         'group' => 'TQC KMI',

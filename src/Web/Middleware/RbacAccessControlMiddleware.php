@@ -53,7 +53,7 @@ final class RbacAccessControlMiddleware implements MiddlewareInterface
                         // Jika POST (aksi), redirect kembali dengan pesan kesalahan flash
                         $this->flash->set('errors', ['Anda tidak memiliki hak akses untuk melakukan aksi ini.']);
                         $referrer = $request->getHeaderLine('Referer');
-                        $redirectUrl = $referrer !== '' ? $referrer : $this->urlGenerator->generate('guru/index');
+                        $redirectUrl = $referrer !== '' ? $referrer : $this->urlGenerator->generate('home');
                         return $this->responseFactory->createResponse(302)
                             ->withHeader('Location', $redirectUrl);
                     }

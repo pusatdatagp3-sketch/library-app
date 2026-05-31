@@ -30,7 +30,7 @@ final class AuthController
     {
         if ($this->userSession->isLoggedIn()) {
             return $this->responseFactory->createResponse(302)
-                ->withHeader('Location', $this->urlGenerator->generate('guru/index'));
+                ->withHeader('Location', $this->urlGenerator->generate('home'));
         }
 
         $error = null;
@@ -56,7 +56,7 @@ final class AuthController
                     $this->flash->remove('errors'); // Pastikan flash errors benar-benar bersih
                     $this->flash->set('success', 'Selamat datang kembali, ' . HtmlHelper::encode($user['username']) . '!');
                     return $this->responseFactory->createResponse(302)
-                        ->withHeader('Location', $this->urlGenerator->generate('guru/index'));
+                        ->withHeader('Location', $this->urlGenerator->generate('home'));
                 } else {
                     $error = 'Username atau password salah.';
                 }
