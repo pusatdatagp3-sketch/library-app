@@ -30,8 +30,15 @@ $this->beginPage()
     <link rel="icon" href="<?= $aliases->get('@baseUrl/favicon.svg') ?>" type="image/svg+xml">
     <title><?= Html::encode($this->getTitle()) ?></title>
     <?php $this->head() ?>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body data-theme="light">
+    <script>
+    (function() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+    })();
+    </script>
 <?php $this->beginBody() ?>
 
 <main class="login-layout-wrapper">
