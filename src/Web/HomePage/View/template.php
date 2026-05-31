@@ -26,7 +26,7 @@ $urlGenerator = $this->getParameter('urlGenerator');
             Selamat Datang di TEQIC
         </h1>
         <p style="font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto 2rem auto;">
-            Sistem Manajemen KMI Modern terintegrasi Cycle ORM dan Yii3.
+            Sistem Total Quality Control Kinerja Akademis KMI Pondok Modern Darussalam Gontor.
         </p>
         <div style="display: inline-flex; gap: 1rem; justify-content: center;">
             <span class="badge" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 0.4rem 1rem; border-radius: 50px; font-weight: 600; font-size: 0.85rem;">
@@ -55,7 +55,7 @@ $urlGenerator = $this->getParameter('urlGenerator');
                     Kelola struktur kepengurusan fungsionaris utama, alokasi penanggung jawab bagian, dan tupoksi resmi.
                 </p>
             </div>
-            <a href="<?= $urlGenerator->generate('fungsionaris/index') ?>" class="btn btn-primary w-100" style="width: 100%; justify-content: center;">
+            <a href="<?= $urlGenerator->generate('fungsionaris/index') ?>" class="btn btn-primary w-100" style="width: 100%; justify-content: center; box-sizing: border-box;">
                 Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
             </a>
         </div>
@@ -71,7 +71,7 @@ $urlGenerator = $this->getParameter('urlGenerator');
                     Organisasi kepanitiaan ad-hoc untuk program formal, event tahunan, dan kepanitiaan berkala KMI.
                 </p>
             </div>
-            <a href="<?= $urlGenerator->generate('kepanitiaan/index') ?>" class="btn btn-success w-100" style="width: 100%; justify-content: center; background: #10b981; border-color: #10b981;">
+            <a href="<?= $urlGenerator->generate('kepanitiaan/index') ?>" class="btn btn-success w-100" style="width: 100%; justify-content: center; background: #10b981; border-color: #10b981; color: #fff; box-sizing: border-box;">
                 Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
             </a>
         </div>
@@ -87,7 +87,7 @@ $urlGenerator = $this->getParameter('urlGenerator');
                     Program penguatan, pembinaan karakter pembina, dan peningkatan mutu tata kelola pengasuhan.
                 </p>
             </div>
-            <a href="<?= $urlGenerator->generate('empowering/index') ?>" class="btn btn-warning w-100" style="width: 100%; justify-content: center; background: #f59e0b; border-color: #f59e0b; color: #fff;">
+            <a href="<?= $urlGenerator->generate('empowering/index') ?>" class="btn btn-warning w-100" style="width: 100%; justify-content: center; background: #f59e0b; border-color: #f59e0b; color: #fff; box-sizing: border-box;">
                 Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
             </a>
         </div>
