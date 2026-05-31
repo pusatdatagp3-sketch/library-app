@@ -287,6 +287,12 @@ return [
                 ->name('program/delete-dokumentasi'),
         ),
 
+    // Monitor Route
+    Route::get('/monitor')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->action([Web\Kanban\Controller\KanbanController::class, 'monitor'])
+        ->name('kanban/monitor'),
+
     // Kanban Group
     Group::create('/kanban')
         ->middleware(RbacAccessControlMiddleware::class)

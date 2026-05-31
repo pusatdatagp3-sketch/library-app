@@ -10,6 +10,11 @@ return [
                 'icon'  => 'ri-home-5',
                 'route' => 'home',
             ],
+            [
+                'label' => 'Monitor Kanban',
+                'icon'  => 'ri-dashboard',
+                'route' => 'kanban/monitor',
+            ],
         ],
     ],
 
