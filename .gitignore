@@ -36,3 +36,12 @@ error/
 config/web/di/subfolder.php
 config/web/params.php
 config/common/aliases.php
+
+############
+/public/assets/*
+!/public/assets/.gitkeep
+
+vendor/
+runtime/
+public/assets/
+yii
