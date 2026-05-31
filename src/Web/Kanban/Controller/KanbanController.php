@@ -210,7 +210,14 @@ final class KanbanController
         $body = (array)$request->getParsedBody();
         $taskId = isset($body['taskId']) ? (int)$body['taskId'] : null;
         $columnId = isset($body['columnId']) ? (int)$body['columnId'] : null;
-        $taskIds = isset($body['taskIds']) ? (array)$body['taskIds'] : [];
+        
+        $taskIdsRaw = $body['taskIds'] ?? [];
+        $taskIds = [];
+        if (is_array($taskIdsRaw)) {
+            $taskIds = $taskIdsRaw;
+        } elseif (is_string($taskIdsRaw) && $taskIdsRaw !== '') {
+            $taskIds = explode(',', $taskIdsRaw);
+        }
 
         if ($taskId === null || $columnId === null) {
             $response = $this->responseFactory->createResponse(400);
@@ -243,16 +250,20 @@ final class KanbanController
             if ($oldProgress === 0 || $oldProgress === 100) {
                 $newProgress = 50;
             }
-        } elseif (str_contains($colNameLower, 'todo') || str_contains($colNameLower, 'rencana')) {
+        } elseif (str_contains($colNameLower, 'todo') || str_contains($colNameLower, 'to do') || str_contains($colNameLower, 'rencana')) {
             $newProgress = 0;
         }
 
         $task->kanbanColumnId = $columnId;
+        $task->kanbanColumn = $column; // Crucial: sync the relation object so Cycle ORM doesn't overwrite kanbanColumnId with the old relation's ID
         $task->progress = $newProgress;
         $this->entityManager->persist($task)->run();
 
         // Update all tasks order in the column
         foreach ($taskIds as $idx => $tId) {
+            if (empty($tId) || strtolower((string)$tId) === 'null') {
+                continue;
+            }
             $t = $this->taskRepository->findByPK((int)$tId);
             if ($t !== null) {
                 $t->urutan = $idx + 1;

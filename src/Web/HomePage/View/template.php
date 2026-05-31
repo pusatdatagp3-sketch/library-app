@@ -17,6 +17,25 @@ $urlGenerator = $this->getParameter('urlGenerator');
 ?>
 
 <div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem 0;">
+    
+    <?php if ($successMsg): ?>
+        <div class="alert alert-success">
+            <i class="ri-checkbox-circle-fill alert-icon"></i>
+            <div><?= Html::encode($successMsg) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($errorMsgs)): ?>
+        <div class="alert alert-danger">
+            <i class="ri-error-warning-fill alert-icon"></i>
+            <div>
+                <?php foreach ($errorMsgs as $errorMsg): ?>
+                    <p><?= Html::encode($errorMsg) ?></p>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Welcome Card -->
     <div class="card mb-5 text-center overflow-hidden" style="position: relative; border: none; background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%); color: #fff; padding: 3rem 2rem;">
         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>

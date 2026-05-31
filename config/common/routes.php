@@ -165,6 +165,9 @@ return [
             Route::post('/view/{id:\d+}/delete-member/{memberId:\d+}')
                 ->action([Web\Entitas\Controller\EntitasController::class, 'deleteMember'])
                 ->name('fungsionaris/delete-member'),
+            Route::post('/view/{id:\d+}/update-member/{memberId:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'updateMember'])
+                ->name('fungsionaris/update-member'),
         ),
 
     // Kepanitiaan Group
@@ -198,6 +201,9 @@ return [
             Route::post('/view/{id:\d+}/delete-member/{memberId:\d+}')
                 ->action([Web\Entitas\Controller\EntitasController::class, 'deleteMember'])
                 ->name('kepanitiaan/delete-member'),
+            Route::post('/view/{id:\d+}/update-member/{memberId:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'updateMember'])
+                ->name('kepanitiaan/update-member'),
         ),
 
     // Empowering Group
@@ -231,6 +237,9 @@ return [
             Route::post('/view/{id:\d+}/delete-member/{memberId:\d+}')
                 ->action([Web\Entitas\Controller\EntitasController::class, 'deleteMember'])
                 ->name('empowering/delete-member'),
+            Route::post('/view/{id:\d+}/update-member/{memberId:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'updateMember'])
+                ->name('empowering/update-member'),
         ),
 
     // Program Group

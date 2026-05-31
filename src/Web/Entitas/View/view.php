@@ -155,12 +155,25 @@ $deleteMemberRoute = "{$prefix}/delete-member";
                                 </div>
                                 
                                 <?php if ($userSession->hasPermission("update_{$prefix}")): ?>
-                                    <form action="<?= $urlGenerator->generate($deleteMemberRoute, ['id' => $model->id, 'memberId' => $mb->id]) ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin melepas anggota ini?');" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
-                                        <button type="submit" class="btn btn-sm btn-icon text-danger" style="background:none; border:none; padding:0.25rem; cursor:pointer;" title="Hapus Anggota">
-                                            <i class="ri-close-circle-line" style="font-size: 1.25rem;"></i>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <!-- Edit Button -->
+                                        <button type="button" class="btn btn-sm btn-icon text-primary" style="background:none; border:none; padding:0.25rem; cursor:pointer;" title="Edit Anggota" 
+                                                data-nama="<?= Html::encode($mb->namaAnggota) ?>"
+                                                data-jabatan="<?= Html::encode($mb->jabatan ?? '') ?>"
+                                                data-user-id="<?= $mb->userId ?? '' ?>"
+                                                data-action="<?= $urlGenerator->generate($prefix . '/update-member', ['id' => $model->id, 'memberId' => $mb->id]) ?>"
+                                                onclick="openEditMemberModal(this)">
+                                            <i class="ri-edit-line" style="font-size: 1.25rem;"></i>
                                         </button>
-                                    </form>
+
+                                        <!-- Delete Form -->
+                                        <form action="<?= $urlGenerator->generate($deleteMemberRoute, ['id' => $model->id, 'memberId' => $mb->id]) ?>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin melepas anggota ini?');" style="margin:0; display: inline;">
+                                            <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
+                                            <button type="submit" class="btn btn-sm btn-icon text-danger" style="background:none; border:none; padding:0.25rem; cursor:pointer;" title="Hapus Anggota">
+                                                <i class="ri-close-circle-line" style="font-size: 1.25rem;"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
@@ -176,16 +189,6 @@ $deleteMemberRoute = "{$prefix}/delete-member";
                             <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
                             
                             <div class="form-group mb-3">
-                                <label class="form-label" style="font-size: 0.8rem;" for="user_id">Link Akun Pengguna (Opsional)</label>
-                                <select id="user_id" name="user_id" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" onchange="document.getElementById('nama_anggota').value = this.options[this.selectedIndex].text;">
-                                    <option value="">-- Pilih Akun Pengguna --</option>
-                                    <?php foreach ($users as $usr): ?>
-                                        <option value="<?= $usr->id ?>"><?= Html::encode($usr->username) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="form-group mb-3">
                                 <label class="form-label" style="font-size: 0.8rem;" for="nama_anggota">Nama Anggota</label>
                                 <input type="text" id="nama_anggota" name="nama_anggota" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" placeholder="Nama Lengkap Anggota" required>
                             </div>
@@ -193,6 +196,16 @@ $deleteMemberRoute = "{$prefix}/delete-member";
                             <div class="form-group mb-3">
                                 <label class="form-label" style="font-size: 0.8rem;" for="jabatan">Jabatan</label>
                                 <input type="text" id="jabatan" name="jabatan" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" placeholder="Contoh: Ketua, Anggota, Sekretaris" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label" style="font-size: 0.8rem;" for="user_id">Link Akun Pengguna (Opsional)</label>
+                                <select id="user_id" name="user_id" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" onchange="document.getElementById('nama_anggota').value = this.options[this.selectedIndex].text;">
+                                    <option value="">-- Pilih Akun Pengguna --</option>
+                                    <?php foreach ($users as $usr): ?>
+                                        <option value="<?= $usr->id ?>"><?= Html::encode($usr->username) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
 
                             <button type="submit" class="btn btn-sm btn-primary w-100" style="width: 100%; justify-content: center; padding: 0.5rem; margin-top: 0.5rem;">
@@ -206,3 +219,64 @@ $deleteMemberRoute = "{$prefix}/delete-member";
 
     </div>
 </div>
+
+<!-- Edit Member Modal -->
+<div id="edit-member-modal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="ri-edit-line text-primary"></i> Edit Anggota</h3>
+            <button type="button" class="modal-close" onclick="closeEditMemberModal()">&times;</button>
+        </div>
+        <form id="edit-member-form" method="POST" class="form-grid">
+            <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
+
+            <div class="form-group mb-3">
+                <label class="form-label" style="font-size: 0.8rem;" for="edit_nama_anggota">Nama Anggota</label>
+                <input type="text" id="edit_nama_anggota" name="nama_anggota" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label" style="font-size: 0.8rem;" for="edit_jabatan">Jabatan</label>
+                <input type="text" id="edit_jabatan" name="jabatan" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label" style="font-size: 0.8rem;" for="edit_user_id">Link Akun Pengguna (Opsional)</label>
+                <select id="edit_user_id" name="user_id" class="form-control" style="font-size: 0.85rem; padding: 0.375rem 0.75rem;" onchange="if(this.value) { document.getElementById('edit_nama_anggota').value = this.options[this.selectedIndex].text; }">
+                    <option value="">-- Pilih Akun Pengguna --</option>
+                    <?php foreach ($users as $usr): ?>
+                        <option value="<?= $usr->id ?>"><?= Html::encode($usr->username) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4" style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditMemberModal()">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditMemberModal(btn) {
+    const modal = document.getElementById('edit-member-modal');
+    const form = document.getElementById('edit-member-form');
+    
+    // Set form action
+    form.action = btn.getAttribute('data-action');
+    
+    // Set field values
+    document.getElementById('edit_nama_anggota').value = btn.getAttribute('data-nama');
+    document.getElementById('edit_jabatan').value = btn.getAttribute('data-jabatan');
+    document.getElementById('edit_user_id').value = btn.getAttribute('data-user-id') || '';
+    
+    // Open modal
+    modal.classList.add('open');
+}
+
+function closeEditMemberModal() {
+    const modal = document.getElementById('edit-member-modal');
+    modal.classList.remove('open');
+}
+</script>

@@ -380,24 +380,30 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
             new Sortable(col, {
                 group: 'kanban',
                 animation: 150,
+                draggable: '.kanban-card',
                 ghostClass: 'kanban-ghost',
                 onEnd: function(evt) {
                     const taskId = evt.item.getAttribute('data-task-id');
                     const columnId = evt.to.getAttribute('data-column-id');
-                    const taskIds = Array.from(evt.to.children).map(child => child.getAttribute('data-task-id'));
+                    const taskIds = Array.from(evt.to.querySelectorAll('.kanban-card'))
+                        .map(child => child.getAttribute('data-task-id'))
+                        .filter(id => id !== null && id !== undefined && id !== '');
                     const moveUrl = "<?= $urlGenerator->generate('kanban/move-task') ?>";
+
+                    const params = new URLSearchParams();
+                    params.append('taskId', taskId);
+                    params.append('columnId', columnId);
+                    params.append('_csrf', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                    taskIds.forEach(id => {
+                        params.append('taskIds[]', id);
+                    });
 
                     fetch(moveUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: new URLSearchParams({
-                            taskId: taskId,
-                            columnId: columnId,
-                            taskIds: taskIds,
-                            _csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        })
+                        body: params
                     })
                     .then(res => {
                         if (!res.ok) {

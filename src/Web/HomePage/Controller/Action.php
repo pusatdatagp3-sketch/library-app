@@ -7,6 +7,7 @@ namespace App\Web\HomePage\Controller;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use App\Web\Auth\Model\UserSession;
+use Yiisoft\Session\Flash\FlashInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
@@ -15,6 +16,7 @@ final readonly class Action
     public function __construct(
         private WebViewRenderer $viewRenderer,
         private UserSession $userSession,
+        private FlashInterface $flash,
         private UrlGeneratorInterface $urlGenerator,
         private ResponseFactoryInterface $responseFactory,
     ) {}
@@ -27,6 +29,9 @@ final readonly class Action
                 ->withHeader('Location', $this->urlGenerator->generate('login'));
         }
         
-        return $this->viewRenderer->render(__DIR__ . '/../View/template');
+        return $this->viewRenderer->render(__DIR__ . '/../View/template', [
+            'successMsg' => $this->flash->get('success'),
+            'errorMsgs' => $this->flash->get('errors') ?? [],
+        ]);
     }
 }

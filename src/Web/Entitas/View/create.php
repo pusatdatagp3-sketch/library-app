@@ -25,7 +25,7 @@ $this->setTitle("Tambah Entitas - {$modulTitle}");
     </div>
 
     <div class="card">
-        <form method="POST">
+        <form method="POST" class="form-grid">
             <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
 
             <div class="form-group mb-4">

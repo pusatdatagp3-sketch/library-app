@@ -218,6 +218,36 @@ final class EntitasController
             ->withHeader('Location', $this->urlGenerator->generate($viewRoute, ['id' => $id]));
     }
 
+    public function updateMember(ServerRequestInterface $request): ResponseInterface
+    {
+        [$modulId, $prefix, $modulTitle, $indexRoute] = $this->getModulContext();
+        $entitasId = (int) $this->currentRoute->getArgument('id');
+        $memberId = (int) $this->currentRoute->getArgument('memberId');
+
+        if ($request->getMethod() !== 'POST') {
+            return $this->responseFactory->createResponse(405);
+        }
+
+        $member = $this->anggotaRepository->findByPK($memberId);
+        if ($member === null) {
+            return $this->responseFactory->createResponse(404);
+        }
+
+        $data = (array) $request->getParsedBody();
+        $member->load($data);
+
+        if ($member->validate()) {
+            $this->entityManager->persist($member)->run();
+            $this->flash->set('success', "Anggota \"{$member->namaAnggota}\" berhasil diperbarui.");
+        } else {
+            $this->flash->set('errors', array_values($member->errors));
+        }
+
+        $viewRoute = str_replace('/index', '/view', $indexRoute);
+        return $this->responseFactory->createResponse(302)
+            ->withHeader('Location', $this->urlGenerator->generate($viewRoute, ['id' => $entitasId]));
+    }
+
     public function deleteMember(): ResponseInterface
     {
         [$modulId, $prefix, $modulTitle, $indexRoute] = $this->getModulContext();
