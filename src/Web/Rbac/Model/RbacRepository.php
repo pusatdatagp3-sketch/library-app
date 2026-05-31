@@ -59,39 +59,24 @@ final class RbacRepository
                 $this->db->execute("INSERT INTO `rbac_roles` (`name`, `description`) VALUES (?, ?)", [$role['name'], $role['description']]);
             }
         }
-
         // Seed Permissions
         $allPermissions = [
-            ['name' => 'view_guru',           'description' => 'Melihat daftar dan detail data Guru.'],
-            ['name' => 'create_guru',          'description' => 'Menambahkan data Guru baru dan mengunggah Excel.'],
-            ['name' => 'update_guru',          'description' => 'Mengubah detail data Guru.'],
-            ['name' => 'delete_guru',          'description' => 'Menghapus data Guru.'],
-            ['name' => 'manage_rbac',          'description' => 'Mengelola RBAC (Peran, Hak Akses, Matrix, & Pengguna).'],
-            ['name' => 'view_kamar',           'description' => 'Melihat daftar dan detail data Kamar.'],
-            ['name' => 'create_kamar',         'description' => 'Menambahkan data Kamar baru.'],
-            ['name' => 'update_kamar',         'description' => 'Mengubah detail data Kamar.'],
-            ['name' => 'delete_kamar',         'description' => 'Menghapus data Kamar.'],
-            ['name' => 'view_konsulat',        'description' => 'Melihat daftar dan detail data Konsulat.'],
-            ['name' => 'create_konsulat',      'description' => 'Menambahkan data Konsulat baru.'],
-            ['name' => 'update_konsulat',      'description' => 'Mengubah detail data Konsulat.'],
-            ['name' => 'delete_konsulat',      'description' => 'Menghapus data Konsulat.'],
-            ['name' => 'manage_gii',           'description' => 'Akses dan penggunaan Gii Generator.'],
-            ['name' => 'view_pelanggaran',     'description' => 'Melihat daftar dan detail data Pelanggaran.'],
-            ['name' => 'create_pelanggaran',   'description' => 'Menambahkan data Pelanggaran baru.'],
-            ['name' => 'update_pelanggaran',   'description' => 'Mengubah detail data Pelanggaran.'],
-            ['name' => 'delete_pelanggaran',   'description' => 'Menghapus data Pelanggaran.'],
-            ['name' => 'view_santri',          'description' => 'Melihat daftar dan detail data Santri.'],
-            ['name' => 'create_santri',        'description' => 'Menambahkan data Santri baru.'],
-            ['name' => 'update_santri',        'description' => 'Mengubah detail data Santri.'],
-            ['name' => 'delete_santri',        'description' => 'Menghapus data Santri.'],
-            ['name' => 'view_rayon',           'description' => 'Melihat daftar dan detail data Rayon.'],
-            ['name' => 'create_rayon',         'description' => 'Menambahkan data Rayon baru.'],
-            ['name' => 'update_rayon',         'description' => 'Mengubah detail data Rayon.'],
-            ['name' => 'delete_rayon',         'description' => 'Menghapus data Rayon.'],
-            ['name' => 'view_perizinan',           'description' => 'Melihat daftar dan detail data Perizinan.'],
-            ['name' => 'create_perizinan',         'description' => 'Menambahkan data Perizinan baru.'],
-            ['name' => 'update_perizinan',         'description' => 'Mengubah detail data Perizinan.'],
-            ['name' => 'delete_perizinan',         'description' => 'Menghapus data Perizinan.'],
+            ['name' => 'view_fungsionaris',    'description' => 'Melihat entitas Fungsionaris KMI.'],
+            ['name' => 'create_fungsionaris',  'description' => 'Menambahkan entitas Fungsionaris KMI.'],
+            ['name' => 'update_fungsionaris',  'description' => 'Mengubah entitas Fungsionaris KMI.'],
+            ['name' => 'delete_fungsionaris',  'description' => 'Menghapus entitas Fungsionaris KMI.'],
+            ['name' => 'view_kepanitiaan',     'description' => 'Melihat entitas Kepanitiaan KMI.'],
+            ['name' => 'create_kepanitiaan',   'description' => 'Menambahkan entitas Kepanitiaan KMI.'],
+            ['name' => 'update_kepanitiaan',   'description' => 'Mengubah entitas Kepanitiaan KMI.'],
+            ['name' => 'delete_kepanitiaan',   'description' => 'Menghapus entitas Kepanitiaan KMI.'],
+            ['name' => 'view_empowering',      'description' => 'Melihat entitas Empowering KMI.'],
+            ['name' => 'create_empowering',    'description' => 'Menambahkan entitas Empowering KMI.'],
+            ['name' => 'update_empowering',    'description' => 'Mengubah entitas Empowering KMI.'],
+            ['name' => 'delete_empowering',    'description' => 'Menghapus entitas Empowering KMI.'],
+            ['name' => 'view_program',         'description' => 'Melihat Program Kerja.'],
+            ['name' => 'create_program',       'description' => 'Menambahkan Program Kerja.'],
+            ['name' => 'update_program',       'description' => 'Mengubah/mengelola Program Kerja.'],
+            ['name' => 'delete_program',       'description' => 'Menghapus Program Kerja.'],
         ];
         foreach ($allPermissions as $perm) {
             $exists = (int)$this->db->query("SELECT COUNT(*) FROM `rbac_permissions` WHERE `name` = ?", [$perm['name']])->fetchColumn();
@@ -113,6 +98,12 @@ final class RbacRepository
                 }
             }
         }
+
+        // Auto-assign all new permissions to Admin role
+        $this->db->execute("
+            INSERT IGNORE INTO `rbac_role_permissions` (`role_name`, `permission_name`)
+            SELECT 'Admin', `name` FROM `rbac_permissions`
+        ");
 
         // Seed Route Permissions
         $allRoutes = [
@@ -183,6 +174,51 @@ final class RbacRepository
             ['route_name' => 'perizinan/update',                'permission_name' => 'update_perizinan'],
             ['route_name' => 'perizinan/update/post',           'permission_name' => 'update_perizinan'],
             ['route_name' => 'perizinan/delete',                'permission_name' => 'delete_perizinan'],
+            ['route_name' => 'fungsionaris/index',           'permission_name' => 'view_fungsionaris'],
+            ['route_name' => 'fungsionaris/create',          'permission_name' => 'create_fungsionaris'],
+            ['route_name' => 'fungsionaris/create/post',     'permission_name' => 'create_fungsionaris'],
+            ['route_name' => 'fungsionaris/update',          'permission_name' => 'update_fungsionaris'],
+            ['route_name' => 'fungsionaris/update/post',     'permission_name' => 'update_fungsionaris'],
+            ['route_name' => 'fungsionaris/delete',          'permission_name' => 'delete_fungsionaris'],
+            ['route_name' => 'fungsionaris/view',            'permission_name' => 'view_fungsionaris'],
+            ['route_name' => 'fungsionaris/add-member',      'permission_name' => 'update_fungsionaris'],
+            ['route_name' => 'fungsionaris/delete-member',   'permission_name' => 'update_fungsionaris'],
+            ['route_name' => 'kepanitiaan/index',            'permission_name' => 'view_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/create',           'permission_name' => 'create_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/create/post',      'permission_name' => 'create_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/update',           'permission_name' => 'update_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/update/post',      'permission_name' => 'update_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/delete',           'permission_name' => 'delete_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/view',             'permission_name' => 'view_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/add-member',       'permission_name' => 'update_kepanitiaan'],
+            ['route_name' => 'kepanitiaan/delete-member',    'permission_name' => 'update_kepanitiaan'],
+            ['route_name' => 'empowering/index',            'permission_name' => 'view_empowering'],
+            ['route_name' => 'empowering/create',           'permission_name' => 'create_empowering'],
+            ['route_name' => 'empowering/create/post',      'permission_name' => 'create_empowering'],
+            ['route_name' => 'empowering/update',           'permission_name' => 'update_empowering'],
+            ['route_name' => 'empowering/update/post',      'permission_name' => 'update_empowering'],
+            ['route_name' => 'empowering/delete',           'permission_name' => 'delete_empowering'],
+            ['route_name' => 'empowering/view',             'permission_name' => 'view_empowering'],
+            ['route_name' => 'empowering/add-member',       'permission_name' => 'update_empowering'],
+            ['route_name' => 'empowering/delete-member',    'permission_name' => 'update_empowering'],
+            ['route_name' => 'program/create',               'permission_name' => 'create_program'],
+            ['route_name' => 'program/create/post',          'permission_name' => 'create_program'],
+            ['route_name' => 'program/update',               'permission_name' => 'update_program'],
+            ['route_name' => 'program/update/post',          'permission_name' => 'update_program'],
+            ['route_name' => 'program/delete',               'permission_name' => 'delete_program'],
+            ['route_name' => 'program/view',                 'permission_name' => 'view_program'],
+            ['route_name' => 'program/add-kendala',          'permission_name' => 'update_program'],
+            ['route_name' => 'program/resolve-kendala',      'permission_name' => 'update_program'],
+            ['route_name' => 'program/delete-kendala',       'permission_name' => 'update_program'],
+            ['route_name' => 'program/add-notulensi',        'permission_name' => 'update_program'],
+            ['route_name' => 'program/delete-notulensi',     'permission_name' => 'update_program'],
+            ['route_name' => 'program/add-dokumentasi',      'permission_name' => 'update_program'],
+            ['route_name' => 'program/delete-dokumentasi',   'permission_name' => 'update_program'],
+            ['route_name' => 'kanban/board',                 'permission_name' => 'view_program'],
+            ['route_name' => 'kanban/add-task',              'permission_name' => 'update_program'],
+            ['route_name' => 'kanban/edit-task',             'permission_name' => 'update_program'],
+            ['route_name' => 'kanban/delete-task',            'permission_name' => 'update_program'],
+            ['route_name' => 'kanban/move-task',             'permission_name' => 'update_program'],
         ];
         foreach ($allRoutes as $mapping) {
             $exists = (int)$this->db->query("SELECT COUNT(*) FROM `rbac_route_permissions` WHERE `route_name` = ?", [$mapping['route_name']])->fetchColumn();

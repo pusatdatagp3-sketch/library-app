@@ -59,6 +59,30 @@ return [
     ],
 
     [
+        'group' => 'TQC KMI',
+        'items' => [
+            [
+                'label'      => 'Fungsionaris KMI',
+                'icon'       => 'ri-group-3',
+                'route'      => 'fungsionaris/index',
+                'permission' => 'view_fungsionaris',
+            ],
+            [
+                'label'      => 'Kepanitiaan KMI',
+                'icon'       => 'ri-calendar-event',
+                'route'      => 'kepanitiaan/index',
+                'permission' => 'view_kepanitiaan',
+            ],
+            [
+                'label'      => 'Empowering KMI',
+                'icon'       => 'ri-sparkling',
+                'route'      => 'empowering/index',
+                'permission' => 'view_empowering',
+            ],
+        ],
+    ],
+
+    [
         'group' => 'Sistem',
         'items' => [
 

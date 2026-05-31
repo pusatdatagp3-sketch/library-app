@@ -16,7 +16,6 @@ final class HomePageCest
         $I->fillField('password', 'admin123');
         $I->click('Masuk Aplikasi');
         $I->amOnPage('/');
-        $I->expectTo('see page home.');
-        $I->see('Hello!');
+        $I->see('Selamat Datang di TEQIC');
     }
 }
