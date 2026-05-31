@@ -103,7 +103,7 @@ $urlGenerator = $this->getParameter('urlGenerator');
                 </div>
                 <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Empowering KMI</h3>
                 <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                    Program penguatan, pembinaan karakter pembina, dan peningkatan mutu tata kelola pengasuhan.
+                    Program penguatan, pembinaan karakter pembina, dan peningkatan mutu tata kelola kehidupan holistik santri.
                 </p>
             </div>
             <a href="<?= $urlGenerator->generate('empowering/index') ?>" class="btn btn-warning w-100" style="width: 100%; justify-content: center; background: #f59e0b; border-color: #f59e0b; color: #fff; box-sizing: border-box;">
