@@ -27,3 +27,12 @@ c3.php
 
 # Local environment configuration
 .env
+
+# local / server files
+.htaccess
+public/.htaccess
+
+error/
+config/web/di/subfolder.php
+config/web/params.php
+config/common/aliases.php
