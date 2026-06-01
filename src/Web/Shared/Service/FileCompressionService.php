@@ -26,7 +26,7 @@ final class FileCompressionService
     public function compressAndSave(UploadedFileInterface $file, string $uploadDir, string $relativeDir, string $prefix): string
     {
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            mkdir($uploadDir, 0755, true);
         }
 
         $clientFilename = $file->getClientFilename();
