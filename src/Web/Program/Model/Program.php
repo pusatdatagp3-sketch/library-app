@@ -10,7 +10,7 @@ use Cycle\Annotated\Annotation\Relation\BelongsTo;
 use App\Web\Entitas\Model\Entitas;
 use App\Web\Entitas\Model\AnggotaEntitas;
 
-#[Entity(role: 'program', table: 'program', repository: ProgramRepository::class)]
+#[Entity(role: 'entitas_program', table: 'entitas_program', repository: ProgramRepository::class)]
 class Program
 {
     #[Column(type: 'primary')]

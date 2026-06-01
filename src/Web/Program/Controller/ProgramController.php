@@ -263,14 +263,14 @@ final class ProgramController
             $extension = pathinfo($clientFilename, PATHINFO_EXTENSION);
             $filename = uniqid('notulen_') . '.' . $extension;
 
-            $uploadDir = dirname(__DIR__, 4) . '/public/uploads/notulensi';
+            $uploadDir = dirname(__DIR__, 4) . '/public/uploads/entitas_program_notulensi';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
 
             try {
                 $file->moveTo($uploadDir . '/' . $filename);
-                $notulensi->filePath = 'uploads/notulensi/' . $filename;
+                $notulensi->filePath = 'uploads/entitas_program_notulensi/' . $filename;
             } catch (\Throwable $e) {
                 $this->flash->set('errors', ['Gagal memproses file upload: ' . $e->getMessage()]);
                 return $this->responseFactory->createResponse(302)
@@ -333,14 +333,14 @@ final class ProgramController
             $extension = pathinfo($clientFilename, PATHINFO_EXTENSION);
             $filename = uniqid('dokumentasi_') . '.' . $extension;
 
-            $uploadDir = dirname(__DIR__, 4) . '/public/uploads/dokumentasi';
+            $uploadDir = dirname(__DIR__, 4) . '/public/uploads/entitas_program_dokumentasi';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
 
             try {
                 $file->moveTo($uploadDir . '/' . $filename);
-                $dokumentasi->filePath = 'uploads/dokumentasi/' . $filename;
+                $dokumentasi->filePath = 'uploads/entitas_program_dokumentasi/' . $filename;
             } catch (\Throwable $e) {
                 $this->flash->set('errors', ['Gagal memproses file upload: ' . $e->getMessage()]);
                 return $this->responseFactory->createResponse(302)
@@ -394,6 +394,8 @@ final class ProgramController
             $viewRoute = 'kepanitiaan/view';
         } elseif ($entitas->modulId === 3) {
             $viewRoute = 'empowering/view';
+        } elseif ($entitas->modulId === 4) {
+            $viewRoute = 'koordinator/view';
         }
 
         return $this->urlGenerator->generate($viewRoute, ['id' => $entitas->id]);

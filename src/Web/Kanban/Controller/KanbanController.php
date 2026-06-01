@@ -65,11 +65,18 @@ final class KanbanController
             ->fetchAll();
 
         if (empty($columns)) {
-            $colNames = ['To Do', 'Pending', 'On Progress', 'Rejected', 'Done'];
-            foreach ($colNames as $i => $name) {
+            $defaultCols = [
+                ['nama' => 'To Do', 'progress' => 0],
+                ['nama' => 'Pending', 'progress' => 20],
+                ['nama' => 'On Progress', 'progress' => 50],
+                ['nama' => 'Rejected', 'progress' => 0],
+                ['nama' => 'Done', 'progress' => 100],
+            ];
+            foreach ($defaultCols as $i => $item) {
                 $col = new KanbanColumn();
                 $col->entitasId = $program->entitasId;
-                $col->nama = $name;
+                $col->nama = $item['nama'];
+                $col->progress = $item['progress'];
                 $col->urutan = $i + 1;
                 $this->entityManager->persist($col)->run();
             }
@@ -243,24 +250,9 @@ final class KanbanController
             return $response->withHeader('Content-Type', 'application/json');
         }
 
-        // Apply rules based on column name
+        // Apply progress based on dynamic column-configured progress value
         $oldProgress = $task->progress;
-        $newProgress = $oldProgress;
-
-        $colNameLower = strtolower($column->nama);
-        if (str_contains($colNameLower, 'done') || str_contains($colNameLower, 'selesai')) {
-            $newProgress = 100;
-        } elseif (str_contains($colNameLower, 'progress') || str_contains($colNameLower, 'jalan')) {
-            if ($oldProgress === 0 || $oldProgress === 100 || $oldProgress === 20) {
-                $newProgress = 50;
-            }
-        } elseif (str_contains($colNameLower, 'todo') || str_contains($colNameLower, 'to do') || str_contains($colNameLower, 'rencana')) {
-            $newProgress = 0;
-        } elseif (str_contains($colNameLower, 'pending') || str_contains($colNameLower, 'ditunda')) {
-            $newProgress = 20;
-        } elseif (str_contains($colNameLower, 'rejected') || str_contains($colNameLower, 'ditolak')) {
-            $newProgress = 0;
-        }
+        $newProgress = $column->progress;
 
         $task->kanbanColumnId = $columnId;
         $task->kanbanColumn = $column; // Crucial: sync the relation object so Cycle ORM doesn't overwrite kanbanColumnId with the old relation's ID

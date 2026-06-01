@@ -75,6 +75,10 @@ final class RbacRepository
             ['name' => 'create_empowering',    'description' => 'Menambahkan entitas Empowering KMI.'],
             ['name' => 'update_empowering',    'description' => 'Mengubah entitas Empowering KMI.'],
             ['name' => 'delete_empowering',    'description' => 'Menghapus entitas Empowering KMI.'],
+            ['name' => 'view_koordinator',     'description' => 'Melihat entitas Koordinator KMI.'],
+            ['name' => 'create_koordinator',   'description' => 'Menambahkan entitas Koordinator KMI.'],
+            ['name' => 'update_koordinator',   'description' => 'Mengubah entitas Koordinator KMI.'],
+            ['name' => 'delete_koordinator',   'description' => 'Menghapus entitas Koordinator KMI.'],
             ['name' => 'view_program',         'description' => 'Melihat Program Kerja.'],
             ['name' => 'create_program',       'description' => 'Menambahkan Program Kerja.'],
             ['name' => 'update_program',       'description' => 'Mengubah/mengelola Program Kerja.'],
@@ -90,8 +94,8 @@ final class RbacRepository
         // Seed Role Permissions matrix
         if ((int)$this->db->query("SELECT COUNT(*) FROM `rbac_role_permissions`")->fetchColumn() === 0) {
             $matrix = [
-                'Admin'    => ['manage_rbac', 'manage_gii', 'view_fungsionaris', 'create_fungsionaris', 'update_fungsionaris', 'delete_fungsionaris', 'view_kepanitiaan', 'create_kepanitiaan', 'update_kepanitiaan', 'delete_kepanitiaan', 'view_empowering', 'create_empowering', 'update_empowering', 'delete_empowering', 'view_program', 'create_program', 'update_program', 'delete_program'],
-                'Operator' => ['view_fungsionaris', 'view_kepanitiaan', 'view_empowering', 'view_program'],
+                'Admin'    => ['manage_rbac', 'manage_gii', 'view_fungsionaris', 'create_fungsionaris', 'update_fungsionaris', 'delete_fungsionaris', 'view_kepanitiaan', 'create_kepanitiaan', 'update_kepanitiaan', 'delete_kepanitiaan', 'view_empowering', 'create_empowering', 'update_empowering', 'delete_empowering', 'view_koordinator', 'create_koordinator', 'update_koordinator', 'delete_koordinator', 'view_program', 'create_program', 'update_program', 'delete_program'],
+                'Operator' => ['view_fungsionaris', 'view_kepanitiaan', 'view_empowering', 'view_koordinator', 'view_program'],
                 'Guru'     => ['view_program'],
             ];
             foreach ($matrix as $roleName => $perms) {
@@ -159,6 +163,16 @@ final class RbacRepository
             ['route_name' => 'empowering/view',             'permission_name' => 'view_empowering'],
             ['route_name' => 'empowering/add-member',       'permission_name' => 'update_empowering'],
             ['route_name' => 'empowering/delete-member',    'permission_name' => 'update_empowering'],
+            ['route_name' => 'koordinator/index',            'permission_name' => 'view_koordinator'],
+            ['route_name' => 'koordinator/create',           'permission_name' => 'create_koordinator'],
+            ['route_name' => 'koordinator/create/post',      'permission_name' => 'create_koordinator'],
+            ['route_name' => 'koordinator/update',           'permission_name' => 'update_koordinator'],
+            ['route_name' => 'koordinator/update/post',      'permission_name' => 'update_koordinator'],
+            ['route_name' => 'koordinator/delete',           'permission_name' => 'delete_koordinator'],
+            ['route_name' => 'koordinator/view',             'permission_name' => 'view_koordinator'],
+            ['route_name' => 'koordinator/add-member',       'permission_name' => 'update_koordinator'],
+            ['route_name' => 'koordinator/delete-member',    'permission_name' => 'update_koordinator'],
+            ['route_name' => 'koordinator/update-member',    'permission_name' => 'update_koordinator'],
             ['route_name' => 'program/create',               'permission_name' => 'create_program'],
             ['route_name' => 'program/create/post',          'permission_name' => 'create_program'],
             ['route_name' => 'program/update',               'permission_name' => 'update_program'],

@@ -38,6 +38,8 @@ $this->setTitle('Monitor Kanban Tugas');
                     $colorClass = 'module-kepanitiaan';
                 } elseif (str_contains($modulNameLower, 'empower') || str_contains($modulNameLower, 'empowering')) {
                     $colorClass = 'module-empowering';
+                } elseif (str_contains($modulNameLower, 'koordinator')) {
+                    $colorClass = 'module-koordinator';
                 }
 
                 $todoTasks       = $data['todoTasks'];

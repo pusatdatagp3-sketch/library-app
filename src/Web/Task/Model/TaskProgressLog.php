@@ -8,7 +8,7 @@ use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
 use Cycle\Annotated\Annotation\Relation\BelongsTo;
 
-#[Entity(role: 'task_progress_log', table: 'task_progress_logs')]
+#[Entity(role: 'entitas_program_kanban_log', table: 'entitas_program_kanban_log')]
 class TaskProgressLog
 {
     #[Column(type: 'primary')]

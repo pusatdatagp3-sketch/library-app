@@ -2056,6 +2056,7 @@ body[data-theme="dark"] .module-card {
 .module-fungsionaris { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
 .module-kepanitiaan  { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); }
 .module-empowering   { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+.module-koordinator  { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
 .module-default      { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
 
 .module-card-body {

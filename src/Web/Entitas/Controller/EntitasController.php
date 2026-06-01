@@ -50,8 +50,10 @@ final class EntitasController
             return [1, 'fungsionaris', 'Fungsionaris KMI', 'fungsionaris/index'];
         } elseif (str_contains($routeName, 'kepanitiaan')) {
             return [2, 'kepanitiaan', 'Kepanitiaan KMI', 'kepanitiaan/index'];
-        } else {
+        } elseif (str_contains($routeName, 'empowering')) {
             return [3, 'empowering', 'Empowering KMI', 'empowering/index'];
+        } else {
+            return [4, 'koordinator', 'Koordinator KMI', 'koordinator/index'];
         }
     }
 
@@ -68,6 +70,11 @@ final class EntitasController
     public function empoweringIndex(): ResponseInterface
     {
         return $this->index(3, 'Empowering KMI', 'empowering');
+    }
+
+    public function koordinatorIndex(): ResponseInterface
+    {
+        return $this->index(4, 'Koordinator KMI', 'koordinator');
     }
 
     private function index(int $modulId, string $title, string $prefix): ResponseInterface

@@ -8,7 +8,7 @@ use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
 use Cycle\Annotated\Annotation\Relation\BelongsTo;
 
-#[Entity(role: 'anggota_entitas', table: 'anggota_entitas', repository: AnggotaEntitasRepository::class)]
+#[Entity(role: 'entitas_anggota', table: 'entitas_anggota', repository: AnggotaEntitasRepository::class)]
 class AnggotaEntitas
 {
     #[Column(type: 'primary')]

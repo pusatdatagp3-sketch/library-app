@@ -24,10 +24,10 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `anggota_entitas`
+-- Table structure for table `entitas_anggota`
 --
 
-CREATE TABLE `anggota_entitas` (
+CREATE TABLE `entitas_anggota` (
   `id` int NOT NULL,
   `entitas_id` int NOT NULL,
   `user_id` int DEFAULT NULL,
@@ -38,10 +38,10 @@ CREATE TABLE `anggota_entitas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `anggota_entitas`
+-- Dumping data for table `entitas_anggota`
 --
 
-INSERT INTO `anggota_entitas` (`id`, `entitas_id`, `user_id`, `nama_anggota`, `jabatan`, `created_at`, `updated_at`) VALUES
+INSERT INTO `entitas_anggota` (`id`, `entitas_id`, `user_id`, `nama_anggota`, `jabatan`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 'hamid', 'ketua', NULL, NULL);
 
 -- --------------------------------------------------------
@@ -299,10 +299,10 @@ CREATE TABLE `auth_rule` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `dokumentasi`
+-- Table structure for table `entitas_program_dokumentasi`
 --
 
-CREATE TABLE `dokumentasi` (
+CREATE TABLE `entitas_program_dokumentasi` (
   `id` int NOT NULL,
   `program_id` int NOT NULL,
   `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -337,35 +337,36 @@ INSERT INTO `entitas` (`id`, `nama`, `modul_id`, `deskripsi`, `created_at`, `upd
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kanban_columns`
+-- Table structure for table `entitas_program_kanban_column`
 --
 
-CREATE TABLE `kanban_columns` (
+CREATE TABLE `entitas_program_kanban_column` (
   `id` int NOT NULL,
   `entitas_id` int NOT NULL,
   `nama` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `urutan` int NOT NULL DEFAULT '1',
+  `progress` int NOT NULL DEFAULT '0',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `kanban_columns`
+-- Dumping data for table `entitas_program_kanban_column`
 --
 
-INSERT INTO `kanban_columns` (`id`, `entitas_id`, `nama`, `urutan`, `created_at`, `updated_at`) VALUES
-(1, 1, 'To Do', 1, NULL, NULL),
-(2, 1, 'On Progress', 2, NULL, NULL),
-(3, 1, 'Done', 3, NULL, NULL),
-(4, 1, 'Diulangi', 4, NULL, NULL);
+INSERT INTO `entitas_program_kanban_column` (`id`, `entitas_id`, `nama`, `urutan`, `progress`, `created_at`, `updated_at`) VALUES
+(1, 1, 'To Do', 1, 0, NULL, NULL),
+(2, 1, 'On Progress', 2, 50, NULL, NULL),
+(3, 1, 'Done', 3, 100, NULL, NULL),
+(4, 1, 'Diulangi', 4, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kendala_program`
+-- Table structure for table `entitas_program_kendala`
 --
 
-CREATE TABLE `kendala_program` (
+CREATE TABLE `entitas_program_kendala` (
   `id` int NOT NULL,
   `program_id` int NOT NULL,
   `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -422,7 +423,8 @@ CREATE TABLE `modul` (
 INSERT INTO `modul` (`id`, `nama`, `tipe`, `created_at`, `updated_at`) VALUES
 (1, 'fungsionaris', 'internal', '2026-04-27 01:16:42', '2026-04-27 01:16:42'),
 (2, 'kepanitiaan', 'internal', '2026-04-27 01:16:42', '2026-04-27 01:16:42'),
-(3, 'empowering', 'internal', '2026-04-27 01:16:42', '2026-04-27 01:16:42');
+(3, 'empowering', 'internal', '2026-04-27 01:16:42', '2026-04-27 01:16:42'),
+(4, 'koordinator', 'internal', '2026-06-01 12:53:50', '2026-06-01 12:53:50');
 
 -- --------------------------------------------------------
 
@@ -443,10 +445,10 @@ CREATE TABLE `nilai_akademik` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notulensi`
+-- Table structure for table `entitas_program_notulensi`
 --
 
-CREATE TABLE `notulensi` (
+CREATE TABLE `entitas_program_notulensi` (
   `id` int NOT NULL,
   `program_id` int NOT NULL,
   `judul` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -459,10 +461,10 @@ CREATE TABLE `notulensi` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `program`
+-- Table structure for table `entitas_program`
 --
 
-CREATE TABLE `program` (
+CREATE TABLE `entitas_program` (
   `id` int NOT NULL,
   `entitas_id` int NOT NULL,
   `nama_program` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -475,19 +477,19 @@ CREATE TABLE `program` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `program`
+-- Dumping data for table `entitas_program`
 --
 
-INSERT INTO `program` (`id`, `entitas_id`, `nama_program`, `periode`, `penanggung_jawab_id`, `tupoksi`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `entitas_program` (`id`, `entitas_id`, `nama_program`, `periode`, `penanggung_jawab_id`, `tupoksi`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 'jaja', 'mingguan', 1, 'ajdfj\r\n', 'active', NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tasks`
+-- Table structure for table `entitas_program_kanban_task`
 --
 
-CREATE TABLE `tasks` (
+CREATE TABLE `entitas_program_kanban_task` (
   `id` int NOT NULL,
   `program_id` int NOT NULL,
   `kanban_column_id` int DEFAULT NULL,
@@ -502,19 +504,19 @@ CREATE TABLE `tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `tasks`
+-- Dumping data for table `entitas_program_kanban_task`
 --
 
-INSERT INTO `tasks` (`id`, `program_id`, `kanban_column_id`, `judul`, `deskripsi`, `assigned_to`, `progress`, `deadline`, `urutan`, `created_at`, `updated_at`) VALUES
+INSERT INTO `entitas_program_kanban_task` (`id`, `program_id`, `kanban_column_id`, `judul`, `deskripsi`, `assigned_to`, `progress`, `deadline`, `urutan`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 'haha', NULL, NULL, 0, NULL, 1, NULL, '2026-04-27 10:16:25');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `task_progress_logs`
+-- Table structure for table `entitas_program_kanban_log`
 --
 
-CREATE TABLE `task_progress_logs` (
+CREATE TABLE `entitas_program_kanban_log` (
   `id` int NOT NULL,
   `task_id` int NOT NULL,
   `keterangan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -524,10 +526,10 @@ CREATE TABLE `task_progress_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `task_progress_logs`
+-- Dumping data for table `entitas_program_kanban_log`
 --
 
-INSERT INTO `task_progress_logs` (`id`, `task_id`, `keterangan`, `progress_sebelumnya`, `progress_baru`, `created_at`) VALUES
+INSERT INTO `entitas_program_kanban_log` (`id`, `task_id`, `keterangan`, `progress_sebelumnya`, `progress_baru`, `created_at`) VALUES
 (1, 1, 'Dipindahkan ke Kolom Baru', 0, 50, NULL),
 (2, 1, 'Dipindahkan ke Kolom Baru', 50, 100, NULL),
 (3, 1, 'Dipindahkan ke Kolom Baru', 100, 50, NULL),
@@ -605,11 +607,11 @@ INSERT INTO `user` (`id`, `username`, `auth_key`, `password_hash`, `password_res
 --
 
 --
--- Indexes for table `anggota_entitas`
+-- Indexes for table `entitas_anggota`
 --
-ALTER TABLE `anggota_entitas`
+ALTER TABLE `entitas_anggota`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-anggota_entitas-entitas_id` (`entitas_id`);
+  ADD KEY `fk-entitas_anggota-entitas_id` (`entitas_id`);
 
 --
 -- Indexes for table `auth_assignment`
@@ -640,11 +642,11 @@ ALTER TABLE `auth_rule`
   ADD PRIMARY KEY (`name`);
 
 --
--- Indexes for table `dokumentasi`
+-- Indexes for table `entitas_program_dokumentasi`
 --
-ALTER TABLE `dokumentasi`
+ALTER TABLE `entitas_program_dokumentasi`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-dokumentasi-program_id` (`program_id`);
+  ADD KEY `fk-entitas_program_dokumentasi-program_id` (`program_id`);
 
 --
 -- Indexes for table `entitas`
@@ -654,18 +656,18 @@ ALTER TABLE `entitas`
   ADD KEY `fk-entitas-modul_id` (`modul_id`);
 
 --
--- Indexes for table `kanban_columns`
+-- Indexes for table `entitas_program_kanban_column`
 --
-ALTER TABLE `kanban_columns`
+ALTER TABLE `entitas_program_kanban_column`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-kanban_columns-entitas_id` (`entitas_id`);
+  ADD KEY `fk-entitas_program_kanban_column-entitas_id` (`entitas_id`);
 
 --
--- Indexes for table `kendala_program`
+-- Indexes for table `entitas_program_kendala`
 --
-ALTER TABLE `kendala_program`
+ALTER TABLE `entitas_program_kendala`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-kendala_program-program_id` (`program_id`);
+  ADD KEY `fk-entitas_program_kendala-program_id` (`program_id`);
 
 --
 -- Indexes for table `migration`
@@ -686,35 +688,35 @@ ALTER TABLE `nilai_akademik`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `notulensi`
+-- Indexes for table `entitas_program_notulensi`
 --
-ALTER TABLE `notulensi`
+ALTER TABLE `entitas_program_notulensi`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-notulensi-program_id` (`program_id`);
+  ADD KEY `fk-entitas_program_notulensi-program_id` (`program_id`);
 
 --
--- Indexes for table `program`
+-- Indexes for table `entitas_program`
 --
-ALTER TABLE `program`
+ALTER TABLE `entitas_program`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-program-entitas_id` (`entitas_id`),
-  ADD KEY `fk-program-penanggung_jawab_id` (`penanggung_jawab_id`);
+  ADD KEY `fk-entitas_program-entitas_id` (`entitas_id`),
+  ADD KEY `fk-entitas_program-penanggung_jawab_id` (`penanggung_jawab_id`);
 
 --
--- Indexes for table `tasks`
+-- Indexes for table `entitas_program_kanban_task`
 --
-ALTER TABLE `tasks`
+ALTER TABLE `entitas_program_kanban_task`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-tasks-program_id` (`program_id`),
-  ADD KEY `fk-tasks-kanban_column_id` (`kanban_column_id`),
-  ADD KEY `fk-tasks-assigned_to` (`assigned_to`);
+  ADD KEY `fk-entitas_program_kanban_task-program_id` (`program_id`),
+  ADD KEY `fk-entitas_program_kanban_task-kanban_column_id` (`kanban_column_id`),
+  ADD KEY `fk-entitas_program_kanban_task-assigned_to` (`assigned_to`);
 
 --
--- Indexes for table `task_progress_logs`
+-- Indexes for table `entitas_program_kanban_log`
 --
-ALTER TABLE `task_progress_logs`
+ALTER TABLE `entitas_program_kanban_log`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk-task_progress_logs-task_id` (`task_id`);
+  ADD KEY `fk-entitas_program_kanban_log-task_id` (`task_id`);
 
 --
 -- Indexes for table `user`
@@ -730,15 +732,15 @@ ALTER TABLE `user`
 --
 
 --
--- AUTO_INCREMENT for table `anggota_entitas`
+-- AUTO_INCREMENT for table `entitas_anggota`
 --
-ALTER TABLE `anggota_entitas`
+ALTER TABLE `entitas_anggota`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `dokumentasi`
+-- AUTO_INCREMENT for table `entitas_program_dokumentasi`
 --
-ALTER TABLE `dokumentasi`
+ALTER TABLE `entitas_program_dokumentasi`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -748,15 +750,15 @@ ALTER TABLE `entitas`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `kanban_columns`
+-- AUTO_INCREMENT for table `entitas_program_kanban_column`
 --
-ALTER TABLE `kanban_columns`
+ALTER TABLE `entitas_program_kanban_column`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `kendala_program`
+-- AUTO_INCREMENT for table `entitas_program_kendala`
 --
-ALTER TABLE `kendala_program`
+ALTER TABLE `entitas_program_kendala`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -772,27 +774,27 @@ ALTER TABLE `nilai_akademik`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `notulensi`
+-- AUTO_INCREMENT for table `entitas_program_notulensi`
 --
-ALTER TABLE `notulensi`
+ALTER TABLE `entitas_program_notulensi`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `program`
+-- AUTO_INCREMENT for table `entitas_program`
 --
-ALTER TABLE `program`
+ALTER TABLE `entitas_program`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `tasks`
+-- AUTO_INCREMENT for table `entitas_program_kanban_task`
 --
-ALTER TABLE `tasks`
+ALTER TABLE `entitas_program_kanban_task`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `task_progress_logs`
+-- AUTO_INCREMENT for table `entitas_program_kanban_log`
 --
-ALTER TABLE `task_progress_logs`
+ALTER TABLE `entitas_program_kanban_log`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
@@ -806,10 +808,10 @@ ALTER TABLE `user`
 --
 
 --
--- Constraints for table `anggota_entitas`
+-- Constraints for table `entitas_anggota`
 --
-ALTER TABLE `anggota_entitas`
-  ADD CONSTRAINT `fk-anggota_entitas-entitas_id` FOREIGN KEY (`entitas_id`) REFERENCES `entitas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_anggota`
+  ADD CONSTRAINT `fk-entitas_anggota-entitas_id` FOREIGN KEY (`entitas_id`) REFERENCES `entitas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `auth_assignment`
@@ -831,10 +833,10 @@ ALTER TABLE `auth_item_child`
   ADD CONSTRAINT `auth_item_child_ibfk_2` FOREIGN KEY (`child`) REFERENCES `auth_item` (`name`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `dokumentasi`
+-- Constraints for table `entitas_program_dokumentasi`
 --
-ALTER TABLE `dokumentasi`
-  ADD CONSTRAINT `fk-dokumentasi-program_id` FOREIGN KEY (`program_id`) REFERENCES `program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_program_dokumentasi`
+  ADD CONSTRAINT `fk-entitas_program_dokumentasi-program_id` FOREIGN KEY (`program_id`) REFERENCES `entitas_program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `entitas`
@@ -843,43 +845,43 @@ ALTER TABLE `entitas`
   ADD CONSTRAINT `fk-entitas-modul_id` FOREIGN KEY (`modul_id`) REFERENCES `modul` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `kanban_columns`
+-- Constraints for table `entitas_program_kanban_column`
 --
-ALTER TABLE `kanban_columns`
-  ADD CONSTRAINT `fk-kanban_columns-entitas_id` FOREIGN KEY (`entitas_id`) REFERENCES `entitas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_program_kanban_column`
+  ADD CONSTRAINT `fk-entitas_program_kanban_column-entitas_id` FOREIGN KEY (`entitas_id`) REFERENCES `entitas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `kendala_program`
+-- Constraints for table `entitas_program_kendala`
 --
-ALTER TABLE `kendala_program`
-  ADD CONSTRAINT `fk-kendala_program-program_id` FOREIGN KEY (`program_id`) REFERENCES `program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_program_kendala`
+  ADD CONSTRAINT `fk-entitas_program_kendala-program_id` FOREIGN KEY (`program_id`) REFERENCES `entitas_program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `notulensi`
+-- Constraints for table `entitas_program_notulensi`
 --
-ALTER TABLE `notulensi`
-  ADD CONSTRAINT `fk-notulensi-program_id` FOREIGN KEY (`program_id`) REFERENCES `program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_program_notulensi`
+  ADD CONSTRAINT `fk-entitas_program_notulensi-program_id` FOREIGN KEY (`program_id`) REFERENCES `entitas_program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `program`
+-- Constraints for table `entitas_program`
 --
-ALTER TABLE `program`
-  ADD CONSTRAINT `fk-program-entitas_id` FOREIGN KEY (`entitas_id`) REFERENCES `entitas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk-program-penanggung_jawab_id` FOREIGN KEY (`penanggung_jawab_id`) REFERENCES `anggota_entitas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `entitas_program`
+  ADD CONSTRAINT `fk-entitas_program-entitas_id` FOREIGN KEY (`entitas_id`) REFERENCES `entitas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk-entitas_program-penanggung_jawab_id` FOREIGN KEY (`penanggung_jawab_id`) REFERENCES `entitas_anggota` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `tasks`
+-- Constraints for table `entitas_program_kanban_task`
 --
-ALTER TABLE `tasks`
-  ADD CONSTRAINT `fk-tasks-assigned_to` FOREIGN KEY (`assigned_to`) REFERENCES `anggota_entitas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk-tasks-kanban_column_id` FOREIGN KEY (`kanban_column_id`) REFERENCES `kanban_columns` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk-tasks-program_id` FOREIGN KEY (`program_id`) REFERENCES `program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_program_kanban_task`
+  ADD CONSTRAINT `fk-entitas_program_kanban_task-assigned_to` FOREIGN KEY (`assigned_to`) REFERENCES `entitas_anggota` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk-entitas_program_kanban_task-kanban_column_id` FOREIGN KEY (`kanban_column_id`) REFERENCES `entitas_program_kanban_column` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk-entitas_program_kanban_task-program_id` FOREIGN KEY (`program_id`) REFERENCES `entitas_program` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `task_progress_logs`
+-- Constraints for table `entitas_program_kanban_log`
 --
-ALTER TABLE `task_progress_logs`
-  ADD CONSTRAINT `fk-task_progress_logs-task_id` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `entitas_program_kanban_log`
+  ADD CONSTRAINT `fk-entitas_program_kanban_log-task_id` FOREIGN KEY (`task_id`) REFERENCES `entitas_program_kanban_task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

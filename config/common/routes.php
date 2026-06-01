@@ -242,6 +242,42 @@ return [
                 ->name('empowering/update-member'),
         ),
 
+    // Koordinator Group
+    Group::create('/koordinator')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'koordinatorIndex'])
+                ->name('koordinator/index'),
+            Route::get('/create')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'create'])
+                ->name('koordinator/create'),
+            Route::post('/create')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'create'])
+                ->name('koordinator/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'update'])
+                ->name('koordinator/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'update'])
+                ->name('koordinator/update/post'),
+            Route::post('/delete/{id:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'delete'])
+                ->name('koordinator/delete'),
+            Route::get('/view/{id:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'view'])
+                ->name('koordinator/view'),
+            Route::post('/view/{id:\d+}/add-member')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'addMember'])
+                ->name('koordinator/add-member'),
+            Route::post('/view/{id:\d+}/delete-member/{memberId:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'deleteMember'])
+                ->name('koordinator/delete-member'),
+            Route::post('/view/{id:\d+}/update-member/{memberId:\d+}')
+                ->action([Web\Entitas\Controller\EntitasController::class, 'updateMember'])
+                ->name('koordinator/update-member'),
+        ),
+
     // Program Group
     Group::create('/program')
         ->middleware(RbacAccessControlMiddleware::class)

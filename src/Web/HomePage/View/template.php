@@ -110,5 +110,21 @@ $urlGenerator = $this->getParameter('urlGenerator');
                 Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
             </a>
         </div>
+
+        <!-- Card 4: Koordinator -->
+        <div class="card hover-glow" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease;">
+            <div>
+                <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(236, 72, 153, 0.1); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.25rem;">
+                    <i class="ri-user-star-line"></i>
+                </div>
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Koordinator KMI</h3>
+                <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
+                    Kelola pembagian penugasan koordinator kegiatan, koordinasi lintas divisi, dan monitoring agenda kerja koordinator.
+                </p>
+            </div>
+            <a href="<?= $urlGenerator->generate('koordinator/index') ?>" class="btn w-100" style="width: 100%; justify-content: center; background: #ec4899; border-color: #ec4899; color: #fff; box-sizing: border-box;">
+                Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
+            </a>
+        </div>
     </div>
 </div>

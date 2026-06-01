@@ -11,7 +11,7 @@ use App\Web\Program\Model\Program;
 use App\Web\Kanban\Model\KanbanColumn;
 use App\Web\Entitas\Model\AnggotaEntitas;
 
-#[Entity(role: 'task', table: 'tasks', repository: TaskRepository::class)]
+#[Entity(role: 'entitas_program_kanban_task', table: 'entitas_program_kanban_task', repository: TaskRepository::class)]
 class Task
 {
     #[Column(type: 'primary')]

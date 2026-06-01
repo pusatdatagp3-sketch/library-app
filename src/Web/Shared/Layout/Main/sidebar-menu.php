@@ -41,6 +41,12 @@ return [
                 'route'      => 'empowering/index',
                 'permission' => 'view_empowering',
             ],
+            [
+                'label'      => 'Koordinator KMI',
+                'icon'       => 'ri-user-star',
+                'route'      => 'koordinator/index',
+                'permission' => 'view_koordinator',
+            ],
         ],
     ],
 
