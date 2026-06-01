@@ -60,8 +60,9 @@ final class ProgramController
             $data = (array) $request->getParsedBody();
             $model->load($data);
             if ($model->validate()) {
+                $successMsg = "Program \"{$model->namaProgram}\" berhasil dibuat.";
                 $this->entityManager->persist($model)->run();
-                $this->flash->set('success', "Program \"{$model->namaProgram}\" berhasil dibuat.");
+                $this->flash->set('success', $successMsg);
                 
                 // Get modul prefix for redirection
                 $entitas = $this->entitasRepository->findByPK($model->entitasId);
@@ -105,8 +106,9 @@ final class ProgramController
             $data = (array) $request->getParsedBody();
             $model->load($data);
             if ($model->validate()) {
+                $successMsg = "Program \"{$model->namaProgram}\" berhasil diperbarui.";
                 $this->entityManager->persist($model)->run();
-                $this->flash->set('success', "Program \"{$model->namaProgram}\" berhasil diperbarui.");
+                $this->flash->set('success', $successMsg);
                 return $this->responseFactory->createResponse(302)
                     ->withHeader('Location', $this->urlGenerator->generate('program/view', ['id' => $model->id]));
             }
@@ -135,8 +137,9 @@ final class ProgramController
             $entitas = $this->entitasRepository->findByPK($model->entitasId);
             $redirectUrl = $this->getRedirectUrlForEntitas($entitas);
             
+            $successMsg = "Program berhasil dihapus.";
             $this->entityManager->delete($model)->run();
-            $this->flash->set('success', "Program berhasil dihapus.");
+            $this->flash->set('success', $successMsg);
             return $this->responseFactory->createResponse(302)->withHeader('Location', $redirectUrl);
         }
 
@@ -196,8 +199,9 @@ final class ProgramController
         $kendala->load($data);
 
         if ($kendala->validate()) {
+            $successMsg = "Kendala berhasil dicatat.";
             $this->entityManager->persist($kendala)->run();
-            $this->flash->set('success', "Kendala berhasil dicatat.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($kendala->errors));
         }
@@ -214,8 +218,9 @@ final class ProgramController
         $kendala = $this->kendalaRepository->findByPK($kendalaId);
         if ($kendala !== null) {
             $kendala->jenis = 'tertutup';
+            $successMsg = "Kendala telah ditandai selesai/tertutup.";
             $this->entityManager->persist($kendala)->run();
-            $this->flash->set('success', "Kendala telah ditandai selesai/tertutup.");
+            $this->flash->set('success', $successMsg);
         }
 
         return $this->responseFactory->createResponse(302)
@@ -229,8 +234,9 @@ final class ProgramController
 
         $kendala = $this->kendalaRepository->findByPK($kendalaId);
         if ($kendala !== null) {
+            $successMsg = "Kendala berhasil dihapus.";
             $this->entityManager->delete($kendala)->run();
-            $this->flash->set('success', "Kendala berhasil dihapus.");
+            $this->flash->set('success', $successMsg);
         }
 
         return $this->responseFactory->createResponse(302)
@@ -273,8 +279,9 @@ final class ProgramController
         }
 
         if ($notulensi->validate()) {
+            $successMsg = "Notulensi berhasil ditambahkan.";
             $this->entityManager->persist($notulensi)->run();
-            $this->flash->set('success', "Notulensi berhasil ditambahkan.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($notulensi->errors));
         }
@@ -297,8 +304,9 @@ final class ProgramController
                     unlink($fullPath);
                 }
             }
+            $successMsg = "Notulensi berhasil dihapus.";
             $this->entityManager->delete($notulensi)->run();
-            $this->flash->set('success', "Notulensi berhasil dihapus.");
+            $this->flash->set('success', $successMsg);
         }
 
         return $this->responseFactory->createResponse(302)
@@ -341,8 +349,9 @@ final class ProgramController
         }
 
         if ($dokumentasi->validate()) {
+            $successMsg = "Dokumentasi berhasil diunggah.";
             $this->entityManager->persist($dokumentasi)->run();
-            $this->flash->set('success', "Dokumentasi berhasil diunggah.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($dokumentasi->errors));
         }
@@ -365,8 +374,9 @@ final class ProgramController
                     unlink($fullPath);
                 }
             }
+            $successMsg = "Dokumentasi berhasil dihapus.";
             $this->entityManager->delete($dokumentasi)->run();
-            $this->flash->set('success', "Dokumentasi berhasil dihapus.");
+            $this->flash->set('success', $successMsg);
         }
 
         return $this->responseFactory->createResponse(302)

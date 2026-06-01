@@ -96,8 +96,9 @@ final class EntitasController
             $data = (array) $request->getParsedBody();
             $model->load($data);
             if ($model->validate()) {
+                $successMsg = "Entitas \"{$model->nama}\" berhasil ditambahkan."; // build dulu sebelum persist
                 $this->entityManager->persist($model)->run();
-                $this->flash->set('success', "Entitas \"{$model->nama}\" berhasil ditambahkan.");
+                $this->flash->set('success', $successMsg);
                 return $this->responseFactory->createResponse(302)
                     ->withHeader('Location', $this->urlGenerator->generate($indexRoute));
             }
@@ -125,8 +126,9 @@ final class EntitasController
             $data = (array) $request->getParsedBody();
             $model->load($data);
             if ($model->validate()) {
+                $successMsg = "Entitas \"{$model->nama}\" berhasil diperbarui.";
                 $this->entityManager->persist($model)->run();
-                $this->flash->set('success', "Entitas \"{$model->nama}\" berhasil diperbarui.");
+                $this->flash->set('success', $successMsg);
                 return $this->responseFactory->createResponse(302)
                     ->withHeader('Location', $this->urlGenerator->generate($indexRoute));
             }
@@ -147,8 +149,9 @@ final class EntitasController
         $model = $this->entitasRepository->findByPK($id);
 
         if ($model !== null) {
+            $successMsg = "Entitas \"{$model->nama}\" berhasil dihapus.";
             $this->entityManager->delete($model)->run();
-            $this->flash->set('success', "Entitas \"{$model->nama}\" berhasil dihapus.");
+            $this->flash->set('success', $successMsg);
         }
 
         return $this->responseFactory->createResponse(302)
@@ -207,8 +210,9 @@ final class EntitasController
         $member->load($data);
 
         if ($member->validate()) {
+            $successMsg = "Anggota \"{$member->namaAnggota}\" berhasil ditambahkan.";
             $this->entityManager->persist($member)->run();
-            $this->flash->set('success', "Anggota \"{$member->namaAnggota}\" berhasil ditambahkan.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($member->errors));
         }
@@ -237,8 +241,9 @@ final class EntitasController
         $member->load($data);
 
         if ($member->validate()) {
+            $successMsg = "Anggota \"{$member->namaAnggota}\" berhasil diperbarui.";
             $this->entityManager->persist($member)->run();
-            $this->flash->set('success', "Anggota \"{$member->namaAnggota}\" berhasil diperbarui.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($member->errors));
         }

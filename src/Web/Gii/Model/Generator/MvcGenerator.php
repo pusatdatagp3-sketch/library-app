@@ -246,8 +246,9 @@ final class MvcGenerator
         $code .= "            \$data = (array) \$request->getParsedBody();\n";
         $code .= "            \$model->load(\$data);\n";
         $code .= "            if (\$model->validate()) {\n";
+        $code .= "                \$successMsg = 'Data {$modelName} berhasil ditambahkan.';\n";
         $code .= "                \$this->entityManager->persist(\$model)->run();\n";
-        $code .= "                \$this->flash->set('success', 'Data {$modelName} berhasil ditambahkan.');\n";
+        $code .= "                \$this->flash->set('success', \$successMsg);\n";
         $code .= "                return \$this->responseFactory->createResponse(302)\n";
         $code .= "                    ->withHeader('Location', \$this->urlGenerator->generate('{$lowerModel}/index'));\n";
         $code .= "            }\n";
@@ -267,8 +268,9 @@ final class MvcGenerator
         $code .= "            \$data = (array) \$request->getParsedBody();\n";
         $code .= "            \$model->load(\$data);\n";
         $code .= "            if (\$model->validate()) {\n";
+        $code .= "                \$successMsg = 'Data {$modelName} berhasil diperbarui.';\n";
         $code .= "                \$this->entityManager->persist(\$model)->run();\n";
-        $code .= "                \$this->flash->set('success', 'Data {$modelName} berhasil diperbarui.');\n";
+        $code .= "                \$this->flash->set('success', \$successMsg);\n";
         $code .= "                return \$this->responseFactory->createResponse(302)\n";
         $code .= "                    ->withHeader('Location', \$this->urlGenerator->generate('{$lowerModel}/index'));\n";
         $code .= "            }\n";
@@ -282,8 +284,9 @@ final class MvcGenerator
         $code .= "        \$id = {$pkCast} \$this->currentRoute->getArgument('id');\n";
         $code .= "        \$model = \$this->repository->findByPK(\$id);\n\n";
         $code .= "        if (\$model !== null) {\n";
+        $code .= "            \$successMsg = 'Data {$modelName} berhasil dihapus.';\n";
         $code .= "            \$this->entityManager->delete(\$model)->run();\n";
-        $code .= "            \$this->flash->set('success', 'Data {$modelName} berhasil dihapus.');\n";
+        $code .= "            \$this->flash->set('success', \$successMsg);\n";
         $code .= "        }\n\n";
         $code .= "        return \$this->responseFactory->createResponse(302)\n";
         $code .= "            ->withHeader('Location', \$this->urlGenerator->generate('{$lowerModel}/index'));\n";

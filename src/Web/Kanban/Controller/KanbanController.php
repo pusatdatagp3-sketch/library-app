@@ -125,6 +125,7 @@ final class KanbanController
         }
 
         if ($task->validate()) {
+            $successMsg = "Tugas \"{$task->judul}\" berhasil ditambahkan.";
             $this->entityManager->persist($task)->run();
 
             // Create initial progress log
@@ -136,7 +137,7 @@ final class KanbanController
             $log->createdAt = new \DateTimeImmutable();
             $this->entityManager->persist($log)->run();
 
-            $this->flash->set('success', "Tugas \"{$task->judul}\" berhasil ditambahkan.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($task->errors));
         }
@@ -165,6 +166,7 @@ final class KanbanController
         $task->load($data);
 
         if ($task->validate()) {
+            $successMsg = "Tugas berhasil diperbarui.";
             $this->entityManager->persist($task)->run();
 
             // Create progress log if progress changed
@@ -178,7 +180,7 @@ final class KanbanController
                 $this->entityManager->persist($log)->run();
             }
 
-            $this->flash->set('success', "Tugas berhasil diperbarui.");
+            $this->flash->set('success', $successMsg);
         } else {
             $this->flash->set('errors', array_values($task->errors));
         }
@@ -194,8 +196,9 @@ final class KanbanController
 
         $task = $this->taskRepository->findByPK($taskId);
         if ($task !== null) {
+            $successMsg = "Tugas berhasil dihapus.";
             $this->entityManager->delete($task)->run();
-            $this->flash->set('success', "Tugas berhasil dihapus.");
+            $this->flash->set('success', $successMsg);
         }
 
         return $this->responseFactory->createResponse(302)
