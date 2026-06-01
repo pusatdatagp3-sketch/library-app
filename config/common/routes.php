@@ -301,25 +301,25 @@ return [
                 ->action([Web\Program\Controller\ProgramController::class, 'view'])
                 ->name('program/view'),
             Route::post('/view/{id:\d+}/add-kendala')
-                ->action([Web\Program\Controller\ProgramController::class, 'addKendala'])
+                ->action([Web\Program\Controller\ProgramKendalaController::class, 'addKendala'])
                 ->name('program/add-kendala'),
             Route::post('/view/{id:\d+}/resolve-kendala/{kendalaId:\d+}')
-                ->action([Web\Program\Controller\ProgramController::class, 'resolveKendala'])
+                ->action([Web\Program\Controller\ProgramKendalaController::class, 'resolveKendala'])
                 ->name('program/resolve-kendala'),
             Route::post('/view/{id:\d+}/delete-kendala/{kendalaId:\d+}')
-                ->action([Web\Program\Controller\ProgramController::class, 'deleteKendala'])
+                ->action([Web\Program\Controller\ProgramKendalaController::class, 'deleteKendala'])
                 ->name('program/delete-kendala'),
             Route::post('/view/{id:\d+}/add-notulensi')
-                ->action([Web\Program\Controller\ProgramController::class, 'addNotulensi'])
+                ->action([Web\Program\Controller\ProgramNotulensiController::class, 'addNotulensi'])
                 ->name('program/add-notulensi'),
             Route::post('/view/{id:\d+}/delete-notulensi/{notulensiId:\d+}')
-                ->action([Web\Program\Controller\ProgramController::class, 'deleteNotulensi'])
+                ->action([Web\Program\Controller\ProgramNotulensiController::class, 'deleteNotulensi'])
                 ->name('program/delete-notulensi'),
             Route::post('/view/{id:\d+}/add-dokumentasi')
-                ->action([Web\Program\Controller\ProgramController::class, 'addDokumentasi'])
+                ->action([Web\Program\Controller\ProgramDokumentasiController::class, 'addDokumentasi'])
                 ->name('program/add-dokumentasi'),
             Route::post('/view/{id:\d+}/delete-dokumentasi/{dokumentasiId:\d+}')
-                ->action([Web\Program\Controller\ProgramController::class, 'deleteDokumentasi'])
+                ->action([Web\Program\Controller\ProgramDokumentasiController::class, 'deleteDokumentasi'])
                 ->name('program/delete-dokumentasi'),
         ),
 

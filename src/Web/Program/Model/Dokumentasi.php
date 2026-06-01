@@ -7,6 +7,7 @@ namespace App\Web\Program\Model;
 use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
 use Cycle\Annotated\Annotation\Relation\BelongsTo;
+use Cycle\Annotated\Annotation\Relation\HasMany;
 
 #[Entity(role: 'entitas_program_dokumentasi', table: 'entitas_program_dokumentasi')]
 class Dokumentasi
@@ -20,11 +21,11 @@ class Dokumentasi
     #[BelongsTo(target: Program::class, innerKey: 'programId', fkAction: 'CASCADE', load: 'eager')]
     public ?Program $program = null;
 
+    #[HasMany(target: DokumentasiFoto::class, outerKey: 'dokumentasiId', load: 'eager')]
+    public array $fotos = [];
+
     #[Column(type: 'string(255)')]
     public string $judul = '';
-
-    #[Column(type: 'string(255)', name: 'file_path', nullable: true)]
-    public ?string $filePath = null;
 
     #[Column(type: 'datetime', name: 'created_at', nullable: true)]
     public ?\DateTimeImmutable $createdAt = null;
@@ -37,7 +38,6 @@ class Dokumentasi
     public function load(array $data): bool
     {
         $this->judul = trim((string)($data['judul'] ?? $this->judul));
-        $this->filePath = isset($data['file_path']) ? trim((string)$data['file_path']) : $this->filePath;
         if (isset($data['program_id'])) {
             $this->programId = (int)$data['program_id'];
         }

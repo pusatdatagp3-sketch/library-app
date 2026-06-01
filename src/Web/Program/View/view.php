@@ -108,13 +108,29 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                             <div class="kendala-item <?= $kd->jenis === 'terbuka' ? 'kendala-item-open' : 'kendala-item-closed' ?>">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <h4 class="text-sm fw-bold m-0 mb-1 <?= $kd->jenis === 'tertutup' ? 'line-through text-muted' : 'text-color' ?>">
-                                        <?= Html::encode($kd->judul) ?>
+                                        <?= Html::encode($kd->kendala) ?>
                                     </h4>
                                     <span class="badge <?= $kd->jenis === 'terbuka' ? 'badge-open' : 'badge-closed' ?>">
                                         <?= Html::encode($kd->jenis) ?>
                                     </span>
                                 </div>
-                                <p class="text-xs text-muted mb-2"><?= Html::encode($kd->deskripsi ?? '') ?></p>
+                                <?php if ($kd->solusiSingkat !== null): ?>
+                                    <p class="text-xs text-muted mb-2"><?= Html::encode($kd->solusiSingkat) ?></p>
+                                <?php endif; ?>
+
+                                <?php if (!empty($kd->fotos)): ?>
+                                     <?php 
+                                         $kdUrls = array_map(fn($f) => $baseUrl . '/' . $f->filePath, $kd->fotos);
+                                         $kdUrlsJson = htmlspecialchars(json_encode($kdUrls), ENT_QUOTES, 'UTF-8');
+                                     ?>
+                                     <div class="d-flex flex-wrap gap-1 mb-2">
+                                         <?php foreach ($kd->fotos as $fIndex => $foto): ?>
+                                             <a href="javascript:void(0)" onclick="openImageGalleryModal('<?= Html::encode(addslashes($kd->kendala)) ?>', <?= $kdUrlsJson ?>, <?= $fIndex ?>)">
+                                                 <img src="<?= Html::encode($baseUrl . '/' . $foto->filePath) ?>" alt="Foto Kendala" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);">
+                                             </a>
+                                         <?php endforeach; ?>
+                                     </div>
+                                 <?php endif; ?>
 
                                 <div class="d-flex justify-content-end gap-2 align-items-center">
                                     <?php if ($kd->jenis === 'terbuka'): ?>
@@ -141,13 +157,17 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
 
             <div class="mini-form-section">
                 <h4 class="text-sm fw-bold mb-3"><i class="ri-add-line"></i> Laporkan Kendala</h4>
-                <form action="<?= $urlGenerator->generate('program/add-kendala', ['id' => $model->id]) ?>" method="POST">
+                <form action="<?= $urlGenerator->generate('program/add-kendala', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
                     <div class="form-group mb-2">
-                        <input type="text" name="judul" class="form-control form-control-sm" placeholder="Judul Kendala" required>
+                        <input type="text" name="kendala" class="form-control form-control-sm" placeholder="Kendala" required>
                     </div>
                     <div class="form-group mb-2">
-                        <textarea name="deskripsi" class="form-control form-control-sm" placeholder="Deskripsi kendala..." rows="2"></textarea>
+                        <textarea name="solusi_singkat" class="form-control form-control-sm" placeholder="Solusi Singkat (Opsional)" rows="2"></textarea>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input type="file" name="files[]" class="form-control form-control-xs" accept="image/*" multiple>
+                        <div class="text-muted" style="font-size: 10px; margin-top: 2px;">Opsional: Foto pendukung (JPG, PNG, WEBP, Maks. 2MB per file)</div>
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary btn-w-full">Laporkan</button>
                 </form>
@@ -199,7 +219,8 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                         <textarea name="isi" class="form-control form-control-sm" placeholder="Catatan/Isi rapat..." rows="2"></textarea>
                     </div>
                     <div class="form-group mb-2">
-                        <input type="file" name="file" class="form-control form-control-xs">
+                        <input type="file" name="file" class="form-control form-control-xs" accept=".pdf,image/*">
+                        <div class="text-muted" style="font-size: 10px; margin-top: 2px;">Format: PDF, JPG, JPEG, PNG, GIF (Maks. 2MB)</div>
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary btn-w-full">Unggah Notulensi</button>
                 </form>
@@ -216,19 +237,11 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                 <?php if (empty($dokumentasiList)): ?>
                     <p class="text-muted text-center py-4">Belum ada dokumentasi terunggah.</p>
                 <?php else: ?>
-                    <div class="grid grid-img-2col gap-2 max-h-350 overflow-y-auto">
+                    <div class="d-flex flex-col gap-3 max-h-350 overflow-y-auto">
                         <?php foreach ($dokumentasiList as $doc): ?>
-                            <div class="dokumentasi-item d-flex flex-col" style="justify-content:space-between;">
-                                <div>
-                                    <?php if ($doc->filePath): ?>
-                                        <img src="<?= Html::encode($baseUrl . '/' . $doc->filePath) ?>" class="dokumentasi-img" alt="<?= Html::encode($doc->judul) ?>">
-                                    <?php endif; ?>
-                                    <div class="text-sm fw-bold word-break"><?= Html::encode($doc->judul) ?></div>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-2 border-top pt-1">
-                                    <a href="<?= Html::encode($baseUrl . '/' . $doc->filePath) ?>" target="_blank" class="text-sm text-primary">
-                                        <i class="ri-external-link-line"></i> Buka
-                                    </a>
+                            <div class="dokumentasi-item p-3 border rounded" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.08) !important;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h4 class="text-sm fw-bold m-0"><?= Html::encode($doc->judul) ?></h4>
                                     <form action="<?= $urlGenerator->generate('program/delete-dokumentasi', ['id' => $model->id, 'dokumentasiId' => $doc->id]) ?>" method="POST" onsubmit="return confirm('Hapus dokumentasi ini?');" class="m-0">
                                         <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
                                         <button type="submit" class="btn-inline-delete" title="Hapus">
@@ -236,6 +249,22 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                                         </button>
                                     </form>
                                 </div>
+                                
+                                <?php if (!empty($doc->fotos)): ?>
+                                     <?php 
+                                         $docUrls = array_map(fn($f) => $baseUrl . '/' . $f->filePath, $doc->fotos);
+                                         $docUrlsJson = htmlspecialchars(json_encode($docUrls), ENT_QUOTES, 'UTF-8');
+                                     ?>
+                                     <div class="grid grid-img-2col gap-1">
+                                         <?php foreach ($doc->fotos as $fIndex => $foto): ?>
+                                             <a href="javascript:void(0)" onclick="openImageGalleryModal('<?= Html::encode(addslashes($doc->judul)) ?>', <?= $docUrlsJson ?>, <?= $fIndex ?>)">
+                                                 <img src="<?= Html::encode($baseUrl . '/' . $foto->filePath) ?>" class="dokumentasi-img" alt="Foto Dokumentasi" style="height: 80px; object-fit: cover;">
+                                             </a>
+                                         <?php endforeach; ?>
+                                     </div>
+                                 <?php else: ?>
+                                     <p class="text-xs text-muted">Tidak ada foto.</p>
+                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -250,7 +279,8 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                         <input type="text" name="judul" class="form-control form-control-sm" placeholder="Nama Dokumentasi / Kegiatan" required>
                     </div>
                     <div class="form-group mb-2">
-                        <input type="file" name="file" class="form-control form-control-xs" accept="image/*" required>
+                        <input type="file" name="files[]" class="form-control form-control-xs" accept="image/*" multiple required>
+                        <div class="text-muted" style="font-size: 10px; margin-top: 2px;">Hanya Gambar (JPG, PNG, WEBP). Bisa pilih beberapa foto sekaligus (Maks. 2MB per file)</div>
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary btn-w-full">Unggah Gambar</button>
                 </form>
@@ -259,3 +289,74 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
 
     </div>
 </div>
+
+<!-- Image Gallery Modal -->
+<div id="image-gallery-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px; padding: 20px;">
+        <div class="modal-header" style="margin-bottom: 12px;">
+            <h3 class="modal-title" id="gallery-modal-title" style="font-size: 1.05rem;">Galeri Foto</h3>
+            <button type="button" class="modal-close" onclick="closeImageGalleryModal()">&times;</button>
+        </div>
+        <div class="modal-body d-flex flex-col gap-2">
+            <!-- Large Active Image -->
+            <div class="gallery-active-container text-center border rounded p-2" style="background: rgba(0,0,0,0.3); min-height: 250px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-color: rgba(255,255,255,0.08) !important;">
+                <img id="gallery-active-image" src="" alt="Active Photo" style="max-height: 350px; max-width: 100%; object-fit: contain; border-radius: 6px; transition: opacity 0.2s ease;">
+            </div>
+            <!-- Thumbnails Row -->
+            <div id="gallery-thumbnails" class="d-flex gap-2 overflow-x-auto py-1" style="scrollbar-width: thin; max-width: 100%;">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openImageGalleryModal(title, images, startIndex = 0) {
+    if (!images || images.length === 0) return;
+
+    document.getElementById('gallery-modal-title').textContent = title;
+    const activeImg = document.getElementById('gallery-active-image');
+    activeImg.src = images[startIndex];
+
+    const thumbnailsContainer = document.getElementById('gallery-thumbnails');
+    thumbnailsContainer.innerHTML = '';
+
+    images.forEach((imgUrl, index) => {
+        const thumb = document.createElement('img');
+        thumb.src = imgUrl;
+        thumb.style.width = '50px';
+        thumb.style.height = '50px';
+        thumb.style.objectFit = 'cover';
+        thumb.style.borderRadius = '4px';
+        thumb.style.cursor = 'pointer';
+        thumb.style.border = index === startIndex ? '2px solid var(--primary)' : '2px solid transparent';
+        thumb.style.transition = 'all 0.15s ease';
+
+        thumb.onclick = function() {
+            Array.from(thumbnailsContainer.children).forEach(child => {
+                child.style.border = '2px solid transparent';
+            });
+            thumb.style.border = '2px solid var(--primary)';
+            activeImg.style.opacity = '0.3';
+            setTimeout(() => {
+                activeImg.src = imgUrl;
+                activeImg.style.opacity = '1';
+            }, 100);
+        };
+
+        thumbnailsContainer.appendChild(thumb);
+    });
+
+    document.getElementById('image-gallery-modal').classList.add('open');
+}
+
+function closeImageGalleryModal() {
+    document.getElementById('image-gallery-modal').classList.remove('open');
+}
+
+document.getElementById('image-gallery-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageGalleryModal();
+    }
+});
+</script>
