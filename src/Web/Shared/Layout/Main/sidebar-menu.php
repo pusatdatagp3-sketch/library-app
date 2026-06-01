@@ -15,6 +15,11 @@ return [
                 'icon'  => 'ri-dashboard',
                 'route' => 'monitor/index',
             ],
+            [
+                'label' => 'Laporan',
+                'icon'  => 'ri-file',
+                'route' => 'laporan/index',
+            ],
         ],
     ],
 

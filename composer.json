@@ -35,6 +35,7 @@
     "require": {
         "php": "8.2 - 8.5",
         "ext-filter": "*",
+        "dompdf/dompdf": "^3.1",
         "httpsoft/http-message": "^1.1.6",
         "phpoffice/phpspreadsheet": "^5.7",
         "psr/container": "^2.0.2",

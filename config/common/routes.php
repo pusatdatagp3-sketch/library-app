@@ -8,6 +8,7 @@ use App\Web\Rbac\Controller\UserController;
 use App\Web\Rbac\Controller\RoleController;
 use App\Web\Rbac\Controller\PermissionController;
 use App\Web\Rbac\Controller\RoutePermissionController;
+use App\Web\Laporan\Controller\LaporanController;
 use App\Web\Middleware\RbacAccessControlMiddleware;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
@@ -328,6 +329,17 @@ return [
         ->middleware(RbacAccessControlMiddleware::class)
         ->action([Web\Monitor\Controller\MonitorController::class, 'index'])
         ->name('monitor/index'),
+
+    // Laporan Route
+    Route::get('/laporan')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->action([LaporanController::class, 'index'])
+        ->name('laporan/index'),
+
+    Route::post('/laporan/export-pdf')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->action([LaporanController::class, 'exportPdf'])
+        ->name('laporan/export-pdf'),
 
     // Kanban Group
     Group::create('/kanban')
