@@ -176,8 +176,9 @@ final class LaporanController
     public function exportPdf(ServerRequestInterface $request): ResponseInterface
     {
         $queryParams = $request->getQueryParams();
+        $parsedBody = $request->getParsedBody();
         
-        // Get date range from query params
+        // Get date range from query params or parsed body
         $today = new \DateTime();
         $currentDay = (int)$today->format('w');
         
@@ -193,11 +194,14 @@ final class LaporanController
         $friday = clone $wednesday;
         $friday->modify('+2 days');
         
-        $dateFrom = isset($queryParams['date_from']) 
-            ? new \DateTime($queryParams['date_from'])
+        $dateFromVal = $parsedBody['date_from'] ?? $queryParams['date_from'] ?? null;
+        $dateToVal = $parsedBody['date_to'] ?? $queryParams['date_to'] ?? null;
+
+        $dateFrom = !empty($dateFromVal) && is_string($dateFromVal)
+            ? new \DateTime($dateFromVal)
             : $wednesday;
-        $dateTo = isset($queryParams['date_to']) 
-            ? new \DateTime($queryParams['date_to'])
+        $dateTo = !empty($dateToVal) && is_string($dateToVal)
+            ? new \DateTime($dateToVal)
             : $friday;
 
         // Get all moduls, entitas, and tasks (same as index method)
@@ -297,7 +301,7 @@ final class LaporanController
         $response = $this->responseFactory->createResponse();
         $response = $response
             ->withHeader('Content-Type', 'application/pdf')
-            ->withHeader('Content-Disposition', 'attachment; filename="laporan-program-kerja-' . date('Y-m-d') . '.pdf"')
+            ->withHeader('Content-Disposition', 'inline; filename="laporan-program-kerja-' . date('Y-m-d') . '.pdf"')
             ->withHeader('Content-Length', (string)strlen($pdf));
         
         $response->getBody()->write($pdf);
@@ -308,6 +312,25 @@ final class LaporanController
     private function generateHtmlReport(array $reportData, \DateTime $dateFrom, \DateTime $dateTo): string
     {
         $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Laporan Program Kerja</title></head><body>';
+        
+        $kopPath = '';
+        foreach (['png', 'jpg', 'jpeg'] as $ext) {
+            $path = dirname(__DIR__, 4) . '/public/assets/kop-surat.' . $ext;
+            if (is_file($path)) {
+                $kopPath = $path;
+                break;
+            }
+        }
+        
+        if ($kopPath !== '') {
+            $ext = pathinfo($kopPath, PATHINFO_EXTENSION);
+            $mimeType = strtolower($ext) === 'png' ? 'image/png' : 'image/jpeg';
+            $imageData = base64_encode(file_get_contents($kopPath));
+            
+            $html .= '<div style="margin: -1cm -1cm 0cm -1cm; width: 21cm; height: 4cm; overflow: hidden;">';
+            $html .= '    <img src="data:' . $mimeType . ';base64,' . $imageData . '" style="width: 21cm; height: 4.5cm; object-fit: fill;" />';
+            $html .= '</div>';
+        }
         
         // No margins
         $html .= '<div style="margin: 0; padding: 0; font-family: \'Book Antiqua\', Georgia, serif; line-height: 1.5;">';
@@ -329,7 +352,7 @@ final class LaporanController
                 $modulCounter++;
                 $modulLetter = chr(64 + $modulCounter); // A, B, C, D, etc.
                 
-                $html .= '<div style="margin: 0 0 18pt 0; page-break-inside: avoid;">';
+                $html .= '<div style="margin: 0 0 18pt 0;">';
                 
                 // H1: Modul dengan format A. B. C.
                 $html .= '<h2 style="font-size: 14pt; font-weight: bold; border-bottom: 1pt solid #000; padding: 0 0 6pt 0; margin: 0 0 12pt 0;">';
@@ -340,7 +363,7 @@ final class LaporanController
                 foreach ($modulData['entitas'] as $entitasId => $entitasData) {
                     $entitasCounter++;
                     
-                    $html .= '<div style="margin: 0 0 12pt 0; page-break-inside: avoid;">';
+                    $html .= '<div style="margin: 0 0 12pt 0;">';
                     
                     // H2: Entitas dengan format 1. 2. 3.
                     $html .= '<h3 style="font-size: 12pt; font-weight: bold; border-left: 2pt solid #333; padding: 0 0 0 12pt; margin: 0 0 10pt 0; line-height: 1.5;">';
@@ -355,13 +378,18 @@ final class LaporanController
                         $html .= '<h4 style="font-size: 11pt; font-weight: bold; margin: 0 0 6pt 0;">Hasil Usaha</h4>';
                         $html .= '<div style="margin-left: 12pt;">';
                         foreach ($entitasData['done'] as $index => $task) {
-                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
-                            $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
+                            $line2Parts = [];
                             if ($task->deskripsi) {
-                                $html .= '<br>' . nl2br(htmlspecialchars($task->deskripsi));
+                                $line2Parts[] = htmlspecialchars($task->deskripsi);
                             }
                             if ($task->assignedUser) {
-                                $html .= '<br><small>PIC: ' . htmlspecialchars($task->assignedUser->namaAnggota ?? 'N/A') . '</small>';
+                                $line2Parts[] = 'PIC: ' . htmlspecialchars($task->assignedUser->namaAnggota ?? 'N/A');
+                            }
+                            
+                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
+                            $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
+                            if (!empty($line2Parts)) {
+                                $html .= '<br>' . implode(' | ', $line2Parts);
                             }
                             $html .= '</p>';
                         }
@@ -401,11 +429,11 @@ final class LaporanController
                         $html .= '<h4 style="font-size: 11pt; font-weight: bold; margin: 0 0 6pt 0;">Program Kerja Minggu Depan</h4>';
                         $html .= '<div style="margin-left: 12pt;">';
                         foreach ($entitasData['todo'] as $index => $task) {
-                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
-                            $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
+                            $line2Parts = [];
                             if ($task->deskripsi) {
-                                $html .= '<br>' . nl2br(htmlspecialchars($task->deskripsi));
+                                $line2Parts[] = htmlspecialchars($task->deskripsi);
                             }
+                            
                             $details = [];
                             if ($task->deadline) {
                                 $details[] = 'Target: ' . $task->deadline->format('d-m-Y');
@@ -414,7 +442,13 @@ final class LaporanController
                                 $details[] = 'Progress: ' . $task->progress . '%';
                             }
                             if (!empty($details)) {
-                                $html .= '<br><small>' . implode(' | ', $details) . '</small>';
+                                $line2Parts[] = implode(', ', $details);
+                            }
+                            
+                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
+                            $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
+                            if (!empty($line2Parts)) {
+                                $html .= '<br>' . implode(' | ', $line2Parts);
                             }
                             $html .= '</p>';
                         }

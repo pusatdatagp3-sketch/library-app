@@ -7,6 +7,7 @@ namespace App\Web\Monitor\Controller;
 use App\Web\Entitas\Model\Entitas;
 use App\Web\Modul\Model\Modul;
 use App\Web\Task\Model\Task;
+use App\Web\Task\Model\TaskProgressLog;
 use Cycle\ORM\ORMInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -101,8 +102,31 @@ final class MonitorController
             }
         }
 
+        $taskIds = [];
+        foreach ($tasks as $t) {
+            if ($t->id !== null) {
+                $taskIds[] = $t->id;
+            }
+        }
+
+        $taskReasons = [];
+        if (!empty($taskIds)) {
+            $logs = $this->orm->getRepository(TaskProgressLog::class)->select()
+                ->where('task_id', 'IN', $taskIds)
+                ->orderBy('created_at', 'DESC')
+                ->fetchAll();
+            foreach ($logs as $log) {
+                if ($log->alasan !== null && trim($log->alasan) !== '') {
+                    if (!isset($taskReasons[$log->taskId])) {
+                        $taskReasons[$log->taskId] = $log->alasan;
+                    }
+                }
+            }
+        }
+
         return $this->viewRenderer->render(__DIR__ . '/../View/index', [
             'modulData' => $modulData,
+            'taskReasons' => $taskReasons,
         ]);
     }
 }

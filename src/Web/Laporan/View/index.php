@@ -62,7 +62,7 @@ $csrf = $this->getParameter('csrf');
             </div>
         </form>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <form method="POST" action="<?= $urlGenerator->generate('laporan/export-pdf') ?>" style="display: inline;">
+            <form method="POST" action="<?= $urlGenerator->generate('laporan/export-pdf') ?>" target="_blank" style="display: inline;">
                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
                 <input type="hidden" name="date_from" value="<?= $dateFrom->format('Y-m-d') ?>">
                 <input type="hidden" name="date_to" value="<?= $dateTo->format('Y-m-d') ?>">

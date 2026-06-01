@@ -9,6 +9,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
 /**
  * @var WebView $this
  * @var array $modulData
+ * @var array $taskReasons
  * @var UrlGeneratorInterface $urlGenerator
  */
 
@@ -330,6 +331,15 @@ $this->setTitle('Monitor');
                                             </div>
                                         </div>
 
+                                        <?php if (isset($taskReasons[$task->id])): ?>
+                                            <div class="task-log-reason" style="margin-top: 0.6rem; margin-bottom: 0.2rem; font-size: 0.75rem; border-left: 3px solid #fbbf24; background: rgba(251, 191, 36, 0.08); padding: 6px 10px; border-radius: 6px; display: flex; align-items: flex-start; gap: 6px;">
+                                                <i class="ri-chat-history-line text-warning" style="font-size: 0.85rem; margin-top: 1px;"></i>
+                                                <span class="text-xs text-muted" style="word-break: break-word; line-height: 1.3;">
+                                                    <strong style="color: #d97706;">Alasan Ditunda:</strong> <?= Html::encode($taskReasons[$task->id]) ?>
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
+
                                         <div class="task-footer">
                                             <span class="task-pic">
                                                 <i class="ri-user-star-line"></i> <?= Html::encode($task->assignedUser?->namaAnggota ?? 'Unassigned') ?>
@@ -381,6 +391,15 @@ $this->setTitle('Monitor');
                                                 <div class="task-progress-bar bar-rejected" style="width:<?= $task->progress ?>%"></div>
                                             </div>
                                         </div>
+
+                                        <?php if (isset($taskReasons[$task->id])): ?>
+                                            <div class="task-log-reason" style="margin-top: 0.6rem; margin-bottom: 0.2rem; font-size: 0.75rem; border-left: 3px solid var(--danger); background: rgba(239, 68, 68, 0.08); padding: 6px 10px; border-radius: 6px; display: flex; align-items: flex-start; gap: 6px;">
+                                                <i class="ri-chat-delete-line text-danger" style="font-size: 0.85rem; margin-top: 1px;"></i>
+                                                <span class="text-xs text-muted" style="word-break: break-word; line-height: 1.3;">
+                                                    <strong class="text-danger">Alasan Ditolak:</strong> <?= Html::encode($taskReasons[$task->id]) ?>
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
 
                                         <div class="task-footer">
                                             <span class="task-pic">

@@ -29,12 +29,10 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
     <!-- Top Action Row -->
     <div class="sticky-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <div class="d-flex align-items-center gap-2 text-sm text-muted mb-1">
-                <a href="<?= $urlGenerator->generate('program/view', ['id' => $program->id]) ?>" class="text-muted">
-                    <?= Html::encode($program->namaProgram) ?>
+            <div class="mb-2">
+                <a href="<?= $urlGenerator->generate('program/view', ['id' => $program->id]) ?>" class="btn btn-sm btn-secondary">
+                    <i class="ri-arrow-left-line"></i> Kembali ke Program (<?= Html::encode($program->namaProgram) ?>)
                 </a>
-                <span>/</span>
-                <span>Papan Kanban</span>
             </div>
             <h1 class="text-xl fw-extrabold m-0 d-flex align-items-center gap-2">
                 <i class="ri-kanban-view text-primary"></i> Papan Kanban: <?= Html::encode($program->namaProgram) ?>
@@ -45,9 +43,6 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
             <button onclick="openModal('add-task-modal')" class="btn btn-primary">
                 <i class="ri-add-line"></i> Tambah Tugas
             </button>
-            <a href="<?= $urlGenerator->generate('program/view', ['id' => $program->id]) ?>" class="btn btn-secondary">
-                <i class="ri-arrow-go-back-line"></i> Detail Program
-            </a>
         </div>
     </div>
 
@@ -142,14 +137,6 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
                                 <?php endif; ?>
                             </div>
                         </div>
-
-                        <!-- MODAL EDIT TUGAS -->
-                        <?= $this->render('./_edit_task_modal', [
-                            'task' => $task,
-                            'members' => $members,
-                            'urlGenerator' => $urlGenerator,
-                            'program' => $program,
-                        ]) ?>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -157,11 +144,17 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
     </div>
 </div>
 
-<!-- TASK LOG MODALS (dikumpulkan di luar board agar tidak terjebak overflow/stacking context) -->
+<!-- TASK LOG & EDIT MODALS (dikumpulkan di luar board agar tidak terjebak overflow/stacking context) -->
 <?php foreach ($tasks as $task): ?>
     <?= $this->render('./_task_log', [
         'task' => $task,
         'logs' => $taskLogs[$task->id] ?? [],
+    ]) ?>
+    <?= $this->render('./_edit_task_modal', [
+        'task' => $task,
+        'members' => $members,
+        'urlGenerator' => $urlGenerator,
+        'program' => $program,
     ]) ?>
 <?php endforeach; ?>
 
