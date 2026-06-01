@@ -10,6 +10,7 @@ use App\Web\Program\Model\Notulensi;
 use App\Web\Program\Model\Dokumentasi;
 use App\Web\Entitas\Model\Entitas;
 use App\Web\Entitas\Model\AnggotaEntitas;
+use App\Web\Task\Model\Task;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -28,6 +29,7 @@ final class ProgramController
     private $dokumentasiRepository;
     private $entitasRepository;
     private $anggotaRepository;
+    private $taskRepository;
 
     public function __construct(
         private WebViewRenderer $viewRenderer,
@@ -44,6 +46,7 @@ final class ProgramController
         $this->dokumentasiRepository = $orm->getRepository(Dokumentasi::class);
         $this->entitasRepository = $orm->getRepository(Entitas::class);
         $this->anggotaRepository = $orm->getRepository(AnggotaEntitas::class);
+        $this->taskRepository = $orm->getRepository(Task::class);
     }
 
     public function create(ServerRequestInterface $request): ResponseInterface
@@ -171,6 +174,37 @@ final class ProgramController
             ->orderBy('id', 'DESC')
             ->fetchAll();
 
+        $tasks = $this->taskRepository->select()
+            ->where(['program_id' => $id])
+            ->load('kanbanColumn')
+            ->fetchAll();
+
+        $taskStats = [
+            'todo' => 0,
+            'pending' => 0,
+            'progress' => 0,
+            'rejected' => 0,
+            'done' => 0,
+        ];
+
+        foreach ($tasks as $task) {
+            if ($task->kanbanColumn === null) {
+                continue;
+            }
+            $colNameLower = strtolower($task->kanbanColumn->nama);
+            if (str_contains($colNameLower, 'todo') || str_contains($colNameLower, 'to do') || str_contains($colNameLower, 'rencana')) {
+                $taskStats['todo']++;
+            } elseif (str_contains($colNameLower, 'pending') || str_contains($colNameLower, 'tunda')) {
+                $taskStats['pending']++;
+            } elseif (str_contains($colNameLower, 'progress') || str_contains($colNameLower, 'jalan')) {
+                $taskStats['progress']++;
+            } elseif (str_contains($colNameLower, 'rejected') || str_contains($colNameLower, 'tolak')) {
+                $taskStats['rejected']++;
+            } elseif (str_contains($colNameLower, 'done') || str_contains($colNameLower, 'selesai')) {
+                $taskStats['done']++;
+            }
+        }
+
         $entitas = $this->entitasRepository->findByPK($model->entitasId);
         $backUrl = $this->getRedirectUrlForEntitas($entitas);
 
@@ -181,6 +215,7 @@ final class ProgramController
             'dokumentasiList' => $dokumentasiList,
             'backUrl' => $backUrl,
             'entitas' => $entitas,
+            'taskStats' => $taskStats,
             'successMsg' => $this->flash->get('success'),
             'errorMsgs' => $this->flash->get('errors') ?? [],
         ]);

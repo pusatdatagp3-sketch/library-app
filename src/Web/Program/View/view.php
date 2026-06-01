@@ -18,6 +18,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var string $backUrl
  * @var string|null $successMsg
  * @var array $errorMsgs
+ * @var array $taskStats
  */
 
 $this->setTitle("Program Kerja - {$model->namaProgram}");
@@ -47,6 +48,24 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                 <p class="text-muted mb-2">
                     <i class="ri-user-star-line"></i> Penanggung Jawab: <strong><?= Html::encode($model->penanggungJawab?->namaAnggota ?? 'Belum Ditentukan') ?></strong>
                 </p>
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-2" style="font-size: 0.8rem; margin-top: 0.5rem;">
+                    <span style="color: var(--text-muted); font-size: 0.75rem;"><i class="ri-kanban-view"></i> Ringkasan Tugas:</span>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                        To Do: <?= $taskStats['todo'] ?>
+                    </span>
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                        Pending: <?= $taskStats['pending'] ?>
+                    </span>
+                    <span class="badge" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.2); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                        On Progress: <?= $taskStats['progress'] ?>
+                    </span>
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                        Rejected: <?= $taskStats['rejected'] ?>
+                    </span>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                        Done: <?= $taskStats['done'] ?>
+                    </span>
+                </div>
                 <div class="text-sm text-color border-top pt-3 mt-3">
                     <strong>Tupoksi:</strong>
                     <p class="m-0 mt-1 white-space-pre text-muted"><?= Html::encode($model->tupoksi ?? 'Tidak ada tupoksi khusus.') ?></p>

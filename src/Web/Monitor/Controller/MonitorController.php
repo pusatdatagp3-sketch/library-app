@@ -34,6 +34,7 @@ final class MonitorController
         $tasks = $this->taskRepository->select()
             ->load('kanbanColumn')
             ->load('program')
+            ->load('program.entitas')
             ->load('assignedUser')
             ->orderBy('urutan', 'ASC')
             ->fetchAll();
@@ -43,7 +44,10 @@ final class MonitorController
             $modulData[$modul->id] = [
                 'modul' => $modul,
                 'todoTasks' => [],
-                'progressTasks' => []
+                'progressTasks' => [],
+                'doneTasks' => [],
+                'pendingTasks' => [],
+                'rejectedTasks' => []
             ];
         }
 
@@ -55,8 +59,11 @@ final class MonitorController
             $colNameLower = strtolower($task->kanbanColumn->nama);
             $isTodo = str_contains($colNameLower, 'todo') || str_contains($colNameLower, 'to do') || str_contains($colNameLower, 'rencana');
             $isProgress = str_contains($colNameLower, 'progress') || str_contains($colNameLower, 'jalan');
+            $isDone = str_contains($colNameLower, 'done') || str_contains($colNameLower, 'selesai');
+            $isPending = str_contains($colNameLower, 'pending') || str_contains($colNameLower, 'tunda');
+            $isRejected = str_contains($colNameLower, 'rejected') || str_contains($colNameLower, 'tolak');
 
-            if (!$isTodo && !$isProgress) {
+            if (!$isTodo && !$isProgress && !$isDone && !$isPending && !$isRejected) {
                 continue;
             }
 
@@ -82,8 +89,14 @@ final class MonitorController
             if (isset($modulData[$entitas->modulId])) {
                 if ($isTodo) {
                     $modulData[$entitas->modulId]['todoTasks'][] = $task;
-                } else {
+                } elseif ($isProgress) {
                     $modulData[$entitas->modulId]['progressTasks'][] = $task;
+                } elseif ($isDone) {
+                    $modulData[$entitas->modulId]['doneTasks'][] = $task;
+                } elseif ($isPending) {
+                    $modulData[$entitas->modulId]['pendingTasks'][] = $task;
+                } elseif ($isRejected) {
+                    $modulData[$entitas->modulId]['rejectedTasks'][] = $task;
                 }
             }
         }

@@ -16,7 +16,7 @@ $this->setTitle($applicationParams->name);
 $urlGenerator = $this->getParameter('urlGenerator');
 ?>
 
-<div class="dashboard-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem 0;">
+<div class="dashboard-container" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
     
     <?php if ($successMsg): ?>
         <div class="alert alert-success">

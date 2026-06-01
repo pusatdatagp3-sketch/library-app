@@ -282,5 +282,6 @@ final class KanbanController
 
         $response = $this->responseFactory->createResponse(200);
         $response->getBody()->write(json_encode(['success' => true]));
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

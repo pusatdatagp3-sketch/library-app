@@ -2008,7 +2008,7 @@ body[data-theme="dark"] .monitor-header {
 
 .modules-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
 }
 
@@ -2205,6 +2205,9 @@ body[data-theme="dark"] .section-title {
 
 .task-progress-bar.bar-todo     { background: #3b82f6; }
 .task-progress-bar.bar-progress { background: #a855f7; }
+.task-progress-bar.bar-done     { background: #10b981; }
+.task-progress-bar.bar-pending  { background: #f59e0b; }
+.task-progress-bar.bar-rejected { background: #ef4444; }
 
 /* ==========================================================================
    KANBAN BOARD SPECIFIC STYLES
