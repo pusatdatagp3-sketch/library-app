@@ -326,8 +326,8 @@ return [
     // Monitor Route
     Route::get('/monitor')
         ->middleware(RbacAccessControlMiddleware::class)
-        ->action([Web\Kanban\Controller\KanbanController::class, 'monitor'])
-        ->name('kanban/monitor'),
+        ->action([Web\Monitor\Controller\MonitorController::class, 'index'])
+        ->name('monitor/index'),
 
     // Kanban Group
     Group::create('/kanban')

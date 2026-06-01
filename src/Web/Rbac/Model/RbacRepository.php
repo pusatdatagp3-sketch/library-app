@@ -186,6 +186,7 @@ final class RbacRepository
             ['route_name' => 'program/delete-notulensi',     'permission_name' => 'update_program'],
             ['route_name' => 'program/add-dokumentasi',      'permission_name' => 'update_program'],
             ['route_name' => 'program/delete-dokumentasi',   'permission_name' => 'update_program'],
+            ['route_name' => 'monitor/index',                'permission_name' => null],
             ['route_name' => 'kanban/board',                 'permission_name' => 'view_program'],
             ['route_name' => 'kanban/add-task',              'permission_name' => 'update_program'],
             ['route_name' => 'kanban/edit-task',             'permission_name' => 'update_program'],

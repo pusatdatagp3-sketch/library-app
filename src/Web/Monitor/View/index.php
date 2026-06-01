@@ -12,14 +12,14 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var UrlGeneratorInterface $urlGenerator
  */
 
-$this->setTitle('Monitor Kanban Tugas');
+$this->setTitle('Monitor');
 ?>
 
 <div class="monitor-container">
     <!-- Header -->
     <div class="monitor-header">
         <div class="monitor-title">
-            <h1><i class="ri-dashboard-line text-primary"></i> Monitor Kanban Tugas</h1>
+            <h1><i class="ri-dashboard-line text-primary"></i> Monitor</h1>
             <p>Memantau tugas berstatus <b>To Do</b> dan <b>On Progress</b> di seluruh entitas berdasarkan masing-masing modul.</p>
         </div>
     </div>
