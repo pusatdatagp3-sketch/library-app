@@ -7,6 +7,7 @@ use Yiisoft\Html\Html;
 /**
  * @var App\Web\Task\Model\Task $task
  * @var App\Web\Task\Model\TaskProgressLog[] $logs
+ * @var Yiisoft\Aliases\Aliases $aliases
  */
 
 $logs = $logs ?? [];
@@ -65,7 +66,7 @@ $logs = $logs ?? [];
                             <?php if ($hasFoto): ?>
                                 <div class="task-log-photo-wrap">
                                     <img
-                                        src="/teqic-yii3/public/<?= Html::encode($log->buktiFoto) ?>"
+                                        src="<?= Html::encode($aliases->get('@baseUrl') . '/' . $log->buktiFoto) ?>"
                                         alt="Bukti foto"
                                         class="task-log-photo"
                                         onclick="openPhotoLightbox(this.src)"
