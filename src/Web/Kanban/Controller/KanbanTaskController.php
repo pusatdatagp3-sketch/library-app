@@ -21,9 +21,13 @@ use Yiisoft\Session\Flash\FlashInterface;
 
 final class KanbanTaskController
 {
+    /** @var \Cycle\ORM\RepositoryInterface */
     private $programRepository;
+    /** @var \App\Web\Kanban\Model\KanbanColumnRepository */
     private $columnRepository;
+    /** @var \App\Web\Task\Model\TaskRepository */
     private $taskRepository;
+    /** @var \Cycle\ORM\Select\Repository */
     private $logRepository;
 
     public function __construct(
@@ -135,6 +139,18 @@ final class KanbanTaskController
         $task = $this->taskRepository->findByPK($taskId);
         if ($task !== null) {
             $successMsg = 'Tugas berhasil dihapus.';
+
+            // Hapus file fisik foto bukti yang terkait dengan log progres tugas ini
+            $logs = $this->logRepository->select()->where(['task_id' => $taskId])->fetchAll();
+            foreach ($logs as $log) {
+                if (!empty($log->buktiFoto)) {
+                    $filePath = dirname(__DIR__, 4) . '/public/' . $log->buktiFoto;
+                    if (is_file($filePath)) {
+                        unlink($filePath);
+                    }
+                }
+            }
+
             $this->entityManager->delete($task)->run();
             $this->flash->set('success', $successMsg);
         }
@@ -223,6 +239,11 @@ final class KanbanTaskController
                 $response = $this->responseFactory->createResponse(422);
                 $response->getBody()->write(json_encode(['error' => 'Alasan wajib diisi untuk kolom ini.']));
                 return $response->withHeader('Content-Type', 'application/json');
+            }
+        } else {
+            $alasanInput = trim((string)($body['alasan'] ?? ''));
+            if ($alasanInput !== '') {
+                $alasan = $alasanInput;
             }
         }
 

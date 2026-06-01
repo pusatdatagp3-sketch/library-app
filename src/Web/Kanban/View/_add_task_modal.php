@@ -16,7 +16,7 @@ use Yiisoft\Html\Html;
     <div class="kanban-modal-content">
         <span onclick="closeModal('add-task-modal')" class="kanban-modal-close">&times;</span>
         <h3 class="m-0 mb-4 fw-extrabold"><i class="ri-add-circle-line text-primary"></i> Tambah Tugas Baru</h3>
-        <form action="<?= $urlGenerator->generate('kanban/add-task', ['program_id' => $program->id]) ?>" method="POST" class="form-grid">
+        <form action="<?= $urlGenerator->generate('kanban/add-task', ['program_id' => $program->id]) ?>" method="POST" class="form-grid" onsubmit="const btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<i class=\'ri-loader-4-line ri-spin\'></i> Menyimpan...';">
             <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
             
             <div class="form-group mb-3">

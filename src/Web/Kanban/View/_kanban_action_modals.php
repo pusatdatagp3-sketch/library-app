@@ -28,6 +28,11 @@ declare(strict_types=1);
                 <i class="ri-delete-bin-line"></i> Hapus Foto
             </button>
         </div>
+        <!-- Kolom Alasan / Catatan Tambahan (Opsional) -->
+        <div class="form-group mb-3 mt-3">
+            <label class="form-label text-sm" for="proof-reason-textarea">Alasan / Catatan Tambahan <span class="text-xs text-muted">(Opsional)</span></label>
+            <textarea id="proof-reason-textarea" class="form-control" rows="3" placeholder="Tulis catatan tambahan di sini..."></textarea>
+        </div>
         <div class="d-flex gap-2 mt-4">
             <button type="button" class="btn btn-secondary flex-1" onclick="cancelKanbanModal()">Batal</button>
             <button type="button" id="proof-submit-btn" class="btn btn-primary flex-1" onclick="submitProofModal()">
@@ -44,7 +49,7 @@ declare(strict_types=1);
         <h3 class="m-0 mb-1 fw-extrabold"><i class="ri-question-answer-line text-warning"></i> Berikan Alasan</h3>
         <p class="text-xs text-muted mb-4" id="reason-modal-subtitle">Jelaskan mengapa tugas ini dipindahkan.</p>
         <div class="form-group mb-3">
-            <label class="form-label text-sm" for="reason-textarea">Alasan <span class="text-danger">*</span></label>
+            <label class="form-label text-sm" id="reason-label-text" for="reason-textarea">Alasan <span class="text-danger" id="reason-required-star">*</span></label>
             <textarea id="reason-textarea" class="form-control" rows="4" placeholder="Tulis alasan di sini..."></textarea>
         </div>
         <div class="d-flex gap-2 mt-2">

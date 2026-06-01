@@ -178,7 +178,7 @@ $baseUrl = $aliases->get('@baseUrl');
 
             <div class="mini-form-section">
                 <h4 class="text-sm fw-bold mb-3"><i class="ri-add-line"></i> Laporkan Kendala</h4>
-                <form action="<?= $urlGenerator->generate('program/add-kendala', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data">
+                <form action="<?= $urlGenerator->generate('program/add-kendala', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data" onsubmit="const btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<i class=\'ri-loader-4-line ri-spin\'></i> Menyimpan...';">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
                     <div class="form-group mb-2">
                         <input type="text" name="kendala" class="form-control form-control-sm" placeholder="Kendala" required>
@@ -231,7 +231,7 @@ $baseUrl = $aliases->get('@baseUrl');
 
             <div class="mini-form-section">
                 <h4 class="text-sm fw-bold mb-3"><i class="ri-add-line"></i> Unggah Notulensi Baru</h4>
-                <form action="<?= $urlGenerator->generate('program/add-notulensi', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data">
+                <form action="<?= $urlGenerator->generate('program/add-notulensi', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data" onsubmit="const btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<i class=\'ri-loader-4-line ri-spin\'></i> Menyimpan...';">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
                     <div class="form-group mb-2">
                         <input type="text" name="judul" class="form-control form-control-sm" placeholder="Agenda Rapat" required>
@@ -294,7 +294,7 @@ $baseUrl = $aliases->get('@baseUrl');
 
             <div class="mini-form-section">
                 <h4 class="text-sm fw-bold mb-3"><i class="ri-add-line"></i> Unggah Dokumentasi</h4>
-                <form action="<?= $urlGenerator->generate('program/add-dokumentasi', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data">
+                <form action="<?= $urlGenerator->generate('program/add-dokumentasi', ['id' => $model->id]) ?>" method="POST" enctype="multipart/form-data" onsubmit="const btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<i class=\'ri-loader-4-line ri-spin\'></i> Menyimpan...';">
                     <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
                     <div class="form-group mb-2">
                         <input type="text" name="judul" class="form-control form-control-sm" placeholder="Nama Dokumentasi / Kegiatan" required>

@@ -34,6 +34,7 @@
 }
 
 body[data-theme="dark"] {
+    color-scheme: dark;
     --primary: #6366f1;
     --primary-hover: #818cf8;
     --secondary: #475569;
@@ -63,6 +64,49 @@ body[data-theme="dark"] {
     --badge-operator-text: #2dd4bf;
     --badge-guru-bg: rgba(245, 158, 11, 0.2);
     --badge-guru-text: #fbbf24;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.35);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Firefox support */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+body[data-theme="dark"] {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.dummy-scrollbar-wrapper {
 }
 
 html,

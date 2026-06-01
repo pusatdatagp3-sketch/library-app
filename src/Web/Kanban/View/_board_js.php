@@ -12,6 +12,7 @@ declare(strict_types=1);
 const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
     'id'             => $c->id,
     'nama'           => $c->nama,
+    'progress'       => (int)$c->progress,
     'requiresProof'  => (bool)$c->requiresProof,
     'requiresReason' => (bool)$c->requiresReason,
 ], $columns), JSON_UNESCAPED_UNICODE) ?>;
@@ -78,6 +79,7 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
         closeModal('kanban-reason-modal');
         clearProofFile();
         document.getElementById('reason-textarea').value = '';
+        document.getElementById('proof-reason-textarea').value = '';
     }
 
     // =============================================
@@ -221,6 +223,12 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
                 btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Mengunggah...';
                 const fd = buildFormData();
                 fd.append('bukti_foto', compressedFile);
+                
+                const optReason = document.getElementById('proof-reason-textarea').value.trim();
+                if (optReason) {
+                    fd.append('alasan', optReason);
+                }
+                
                 sendMoveRequest(fd, function() {
                     closeModal('kanban-proof-modal');
                     clearProofFile();
@@ -233,6 +241,12 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
                 btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Mengunggah...';
                 const fd = buildFormData();
                 fd.append('bukti_foto', originalFile);
+                
+                const optReason = document.getElementById('proof-reason-textarea').value.trim();
+                if (optReason) {
+                    fd.append('alasan', optReason);
+                }
+                
                 sendMoveRequest(fd, function() {
                     closeModal('kanban-proof-modal');
                     clearProofFile();
@@ -247,8 +261,11 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
     // =============================================
     function submitReasonModal() {
         if (!_pendingDrag) return;
-        const alasan = document.getElementById('reason-textarea').value.trim();
-        if (!alasan) {
+        const textarea = document.getElementById('reason-textarea');
+        const alasan = textarea.value.trim();
+        const isRequired = textarea.getAttribute('data-required') !== 'false';
+        
+        if (isRequired && !alasan) {
             alert('Alasan wajib diisi.');
             return;
         }
@@ -257,10 +274,12 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
         btn.innerHTML = '<i class="ri-loader-4-line"></i> Menyimpan...';
 
         const fd = buildFormData();
-        fd.append('alasan', alasan);
+        if (alasan) {
+            fd.append('alasan', alasan);
+        }
         sendMoveRequest(fd, function() {
             closeModal('kanban-reason-modal');
-            document.getElementById('reason-textarea').value = '';
+            textarea.value = '';
             btn.disabled = false;
         });
     }
@@ -295,12 +314,15 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
     function submitMoveTaskModal() {
         const taskId = document.getElementById('move-task-id').value;
         const columnId = document.getElementById('move-target-column').value;
+        const currentColumnId = document.getElementById('move-current-column-id').value;
         if (!columnId) {
             alert('Silakan pilih kolom tujuan terlebih dahulu.');
             return;
         }
 
         const colData = KANBAN_COLUMNS.find(c => c.id == columnId);
+        const fromColData = KANBAN_COLUMNS.find(c => c.id == currentColumnId);
+        const isMovingBackward = fromColData && colData && (colData.progress < fromColData.progress);
         
         // Find destination column task IDs in DOM
         const toEl = document.querySelector('.kanban-column-body[data-column-id="' + columnId + '"]');
@@ -331,6 +353,15 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
         } else if (colData && colData.requiresReason) {
             document.getElementById('reason-modal-subtitle').textContent =
                 'Kenapa tugas ini dipindahkan ke kolom "' + colData.nama + '"?';
+            document.getElementById('reason-textarea').setAttribute('data-required', 'true');
+            document.getElementById('reason-label-text').innerHTML = 'Alasan <span class="text-danger" id="reason-required-star">*</span>';
+            openModal('kanban-reason-modal');
+
+        } else if (isMovingBackward) {
+            document.getElementById('reason-modal-subtitle').textContent =
+                'Anda memindahkan tugas ini kembali ke kolom "' + colData.nama + '". Anda dapat memberikan penjelasan opsional.';
+            document.getElementById('reason-textarea').setAttribute('data-required', 'false');
+            document.getElementById('reason-label-text').innerHTML = 'Alasan / Catatan Tambahan <span class="text-xs text-muted">(Opsional)</span>';
             openModal('kanban-reason-modal');
 
         } else {
@@ -390,11 +421,14 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
 
                     const taskId   = evt.item.getAttribute('data-task-id');
                     const columnId = evt.to.getAttribute('data-column-id');
+                    const fromColumnId = evt.from.getAttribute('data-column-id');
                     const taskIds  = Array.from(evt.to.querySelectorAll('.kanban-card'))
                         .map(c => c.getAttribute('data-task-id'))
                         .filter(id => id !== null && id !== undefined && id !== '');
 
                     const colData = KANBAN_COLUMNS.find(c => c.id == columnId);
+                    const fromColData = KANBAN_COLUMNS.find(c => c.id == fromColumnId);
+                    const isMovingBackward = fromColData && colData && (colData.progress < fromColData.progress);
 
                     // Simpan state drag
                     _pendingDrag = {
@@ -412,6 +446,15 @@ const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
                     } else if (colData && colData.requiresReason) {
                         document.getElementById('reason-modal-subtitle').textContent =
                             'Kenapa tugas ini dipindahkan ke kolom "' + colData.nama + '"?';
+                        document.getElementById('reason-textarea').setAttribute('data-required', 'true');
+                        document.getElementById('reason-label-text').innerHTML = 'Alasan <span class="text-danger" id="reason-required-star">*</span>';
+                        openModal('kanban-reason-modal');
+
+                    } else if (isMovingBackward) {
+                        document.getElementById('reason-modal-subtitle').textContent =
+                            'Anda memindahkan tugas ini kembali ke kolom "' + colData.nama + '". Anda dapat memberikan penjelasan opsional.';
+                        document.getElementById('reason-textarea').setAttribute('data-required', 'false');
+                        document.getElementById('reason-label-text').innerHTML = 'Alasan / Catatan Tambahan <span class="text-xs text-muted">(Opsional)</span>';
                         openModal('kanban-reason-modal');
 
                     } else {
