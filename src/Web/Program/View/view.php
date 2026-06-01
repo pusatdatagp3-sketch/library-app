@@ -68,7 +68,7 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
                     </span>
                 </div>
                 <div class="text-sm text-color border-top pt-3 mt-3">
-                    <strong>Tupoksi:</strong>
+                    <strong class="text-color mb-2 mt-2" style="display:block;">Tupoksi:</strong>
                     <p class="m-0 mt-1 white-space-pre text-muted"><?= Html::encode($model->tupoksi ?? 'Tidak ada tupoksi khusus.') ?></p>
                 </div>
             </div>
@@ -111,7 +111,7 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
     <?php endif; ?>
 
     <!-- Three-column feature grid -->
-    <div class="grid grid-auto-fit gap-4">
+    <div class="grid grid-auto-fit gap-4 mb-4">
 
         <!-- COLUMN 1: KENDALA PROGRAM -->
         <div class="card p-5 d-flex flex-col" style="min-height:450px; justify-content:space-between;">
