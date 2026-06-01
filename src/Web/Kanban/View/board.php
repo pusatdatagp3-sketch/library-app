@@ -13,6 +13,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var App\Web\Kanban\Model\KanbanColumn[] $columns
  * @var App\Web\Task\Model\Task[] $tasks
  * @var App\Web\Entitas\Model\AnggotaEntitas[] $members
+ * @var App\Web\Task\Model\TaskProgressLog[][] $taskLogs
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $successMsg
  * @var array $errorMsgs
@@ -90,6 +91,9 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h4 class="text-sm fw-bold m-0 text-color"><?= Html::encode($task->judul) ?></h4>
                                 <div class="position-relative">
+                                    <button onclick="openModal('task-log-modal-<?= $task->id ?>')" class="kanban-card-more-btn" title="Lihat Log">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
                                     <button onclick="toggleDropdown(event, 'card-actions-<?= $task->id ?>')" class="kanban-card-more-btn">
                                         <i class="ri-more-2-line"></i>
                                     </button>
@@ -189,6 +193,14 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
     </div>
 </div>
 
+<!-- TASK LOG MODALS (dikumpulkan di luar board agar tidak terjebak overflow/stacking context) -->
+<?php foreach ($tasks as $task): ?>
+    <?= $this->render('./_task_log', [
+        'task' => $task,
+        'logs' => $taskLogs[$task->id] ?? [],
+    ]) ?>
+<?php endforeach; ?>
+
 <!-- MODAL TAMBAH TUGAS -->
 <div id="add-task-modal" class="kanban-modal">
     <div class="kanban-modal-content">
@@ -229,96 +241,274 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
     </div>
 </div>
 
+<!-- DATA KOLOM UNTUK JAVASCRIPT -->
+<script>
+const KANBAN_COLUMNS = <?= json_encode(array_map(fn($c) => [
+    'id'             => $c->id,
+    'nama'           => $c->nama,
+    'requiresProof'  => (bool)$c->requiresProof,
+    'requiresReason' => (bool)$c->requiresReason,
+], $columns), JSON_UNESCAPED_UNICODE) ?>;
+</script>
+
+<!-- MODAL BUKTI FOTO -->
+<div id="kanban-proof-modal" class="kanban-modal">
+    <div class="kanban-modal-content" style="max-width:480px;">
+        <span onclick="cancelKanbanModal()" class="kanban-modal-close">&times;</span>
+        <h3 class="m-0 mb-1 fw-extrabold"><i class="ri-camera-line text-primary"></i> Upload Bukti Pekerjaan</h3>
+        <p class="text-xs text-muted mb-4" id="proof-modal-subtitle">Upload foto bukti untuk memindahkan tugas ke kolom ini.</p>
+        <div id="proof-dropzone" class="proof-dropzone" onclick="document.getElementById('proof-file-input').click()">
+            <i class="ri-image-add-line" style="font-size:2rem;color:var(--primary);"></i>
+            <p class="text-sm fw-semibold mt-2 mb-1">Klik atau seret foto ke sini</p>
+            <p class="text-xs text-muted">JPG, PNG, WEBP</p>
+        </div>
+        <input type="file" id="proof-file-input" accept="image/*" capture="environment" style="display:none">
+        <button type="button" class="btn btn-secondary btn-w-full mt-2 text-sm" onclick="document.getElementById('proof-file-input').click()">
+            <i class="ri-camera-line"></i> Gunakan Kamera / Pilih File
+        </button>
+        <div id="proof-preview-wrap" style="display:none;margin-top:12px;">
+            <img id="proof-preview-img" src="" alt="Preview" style="width:100%;border-radius:10px;max-height:220px;object-fit:cover;">
+            <button type="button" class="btn btn-secondary text-xs mt-2" onclick="clearProofFile()">
+                <i class="ri-delete-bin-line"></i> Hapus Foto
+            </button>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button type="button" class="btn btn-secondary flex-1" onclick="cancelKanbanModal()">Batal</button>
+            <button type="button" id="proof-submit-btn" class="btn btn-primary flex-1" onclick="submitProofModal()">
+                <i class="ri-upload-cloud-line"></i> Simpan &amp; Pindahkan
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ALASAN -->
+<div id="kanban-reason-modal" class="kanban-modal">
+    <div class="kanban-modal-content" style="max-width:460px;">
+        <span onclick="cancelKanbanModal()" class="kanban-modal-close">&times;</span>
+        <h3 class="m-0 mb-1 fw-extrabold"><i class="ri-question-answer-line text-warning"></i> Berikan Alasan</h3>
+        <p class="text-xs text-muted mb-4" id="reason-modal-subtitle">Jelaskan mengapa tugas ini dipindahkan.</p>
+        <div class="form-group mb-3">
+            <label class="form-label text-sm" for="reason-textarea">Alasan <span class="text-danger">*</span></label>
+            <textarea id="reason-textarea" class="form-control" rows="4" placeholder="Tulis alasan di sini..."></textarea>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+            <button type="button" class="btn btn-secondary flex-1" onclick="cancelKanbanModal()">Batal</button>
+            <button type="button" id="reason-submit-btn" class="btn btn-primary flex-1" onclick="submitReasonModal()">
+                <i class="ri-check-line"></i> Konfirmasi &amp; Pindahkan
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
+    // =============================================
+    // MODAL UTILITIES
+    // =============================================
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
     function toggleDropdown(evt, id) {
         evt.stopPropagation();
         const el = document.getElementById(id);
-        const allDropdowns = document.querySelectorAll('.kanban-dropdown-menu');
-        allDropdowns.forEach(dd => {
+        document.querySelectorAll('.kanban-dropdown-menu').forEach(dd => {
             if (dd.id !== id) dd.style.display = 'none';
         });
-        if (el.style.display === 'none' || el.style.display === '') {
-            el.style.display = 'block';
-        } else {
-            el.style.display = 'none';
-        }
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
     }
-
     document.addEventListener('click', function() {
-        document.querySelectorAll('.kanban-dropdown-menu').forEach(dd => {
-            dd.style.display = 'none';
-        });
+        document.querySelectorAll('.kanban-dropdown-menu').forEach(dd => dd.style.display = 'none');
     });
-
-    function openModal(id) {
-        document.getElementById(id).style.display = 'flex';
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-    }
-
-    // Close modal when clicking outside content
     window.addEventListener('click', function(e) {
         document.querySelectorAll('.kanban-modal').forEach(modal => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
+            if (e.target === modal) modal.style.display = 'none';
         });
     });
 
-    // Initialize SortableJS
+    // =============================================
+    // PHOTO LIGHTBOX
+    // =============================================
+    function openPhotoLightbox(src) {
+        let lb = document.getElementById('kanban-photo-lightbox');
+        if (!lb) {
+            lb = document.createElement('div');
+            lb.id = 'kanban-photo-lightbox';
+            lb.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+            lb.innerHTML = '<img id="kanban-lb-img" style="max-width:92vw;max-height:92vh;border-radius:10px;box-shadow:0 8px 48px #0008;" src="">';
+            lb.addEventListener('click', () => lb.style.display = 'none');
+            document.body.appendChild(lb);
+        }
+        document.getElementById('kanban-lb-img').src = src;
+        lb.style.display = 'flex';
+    }
+
+    // =============================================
+    // KANBAN DRAG STATE
+    // =============================================
+    let _pendingDrag = null; // { taskId, columnId, taskIds, fromEl, fromIndex, item }
+
+    function cancelKanbanModal() {
+        // Rollback: kembalikan card ke posisi asal
+        if (_pendingDrag) {
+            const { fromEl, item, fromIndex } = _pendingDrag;
+            const refNode = fromEl.children[fromIndex] || null;
+            fromEl.insertBefore(item, refNode);
+            _pendingDrag = null;
+        }
+        closeModal('kanban-proof-modal');
+        closeModal('kanban-reason-modal');
+        clearProofFile();
+        document.getElementById('reason-textarea').value = '';
+    }
+
+    // =============================================
+    // PROOF MODAL LOGIC
+    // =============================================
+    document.getElementById('proof-file-input').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('proof-preview-img').src = e.target.result;
+            document.getElementById('proof-preview-wrap').style.display = 'block';
+            document.getElementById('proof-dropzone').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function clearProofFile() {
+        document.getElementById('proof-file-input').value = '';
+        document.getElementById('proof-preview-wrap').style.display = 'none';
+        document.getElementById('proof-dropzone').style.display = 'flex';
+        document.getElementById('proof-preview-img').src = '';
+    }
+
+    function submitProofModal() {
+        if (!_pendingDrag) return;
+        const fileInput = document.getElementById('proof-file-input');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('Silakan pilih foto bukti terlebih dahulu.');
+            return;
+        }
+        const btn = document.getElementById('proof-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line"></i> Menyimpan...';
+
+        const fd = buildFormData();
+        fd.append('bukti_foto', fileInput.files[0]);
+        sendMoveRequest(fd, function() {
+            closeModal('kanban-proof-modal');
+            clearProofFile();
+            btn.disabled = false;
+        });
+    }
+
+    // =============================================
+    // REASON MODAL LOGIC
+    // =============================================
+    function submitReasonModal() {
+        if (!_pendingDrag) return;
+        const alasan = document.getElementById('reason-textarea').value.trim();
+        if (!alasan) {
+            alert('Alasan wajib diisi.');
+            return;
+        }
+        const btn = document.getElementById('reason-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line"></i> Menyimpan...';
+
+        const fd = buildFormData();
+        fd.append('alasan', alasan);
+        sendMoveRequest(fd, function() {
+            closeModal('kanban-reason-modal');
+            document.getElementById('reason-textarea').value = '';
+            btn.disabled = false;
+        });
+    }
+
+    // =============================================
+    // SHARED HELPERS
+    // =============================================
+    function buildFormData() {
+        const { taskId, columnId, taskIds } = _pendingDrag;
+        const fd = new FormData();
+        fd.append('taskId', taskId);
+        fd.append('columnId', columnId);
+        fd.append('_csrf', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        taskIds.forEach(id => fd.append('taskIds[]', id));
+        return fd;
+    }
+
+    function sendMoveRequest(formData, onSuccess) {
+        const moveUrl = "<?= $urlGenerator->generate('kanban/move-task') ?>";
+        fetch(moveUrl, { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Gagal: ' + (data.error || 'Terjadi kesalahan.'));
+                    cancelKanbanModal();
+                    if (onSuccess) onSuccess();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan jaringan.');
+                cancelKanbanModal();
+                if (onSuccess) onSuccess();
+            });
+    }
+
+    // =============================================
+    // SORTABLEJS INIT
+    // =============================================
     document.addEventListener('DOMContentLoaded', function() {
-        const columns = document.querySelectorAll('.kanban-column-body');
-        columns.forEach(col => {
-            new Sortable(col, {
+        const colEls = document.querySelectorAll('.kanban-column-body');
+        colEls.forEach(colEl => {
+            new Sortable(colEl, {
                 group: 'kanban',
                 animation: 150,
                 draggable: '.kanban-card',
                 ghostClass: 'kanban-ghost',
                 onEnd: function(evt) {
-                    const taskId = evt.item.getAttribute('data-task-id');
+                    // Guard: abaikan jika drag dalam kolom yang sama
+                    if (evt.from === evt.to) return;
+
+                    const taskId   = evt.item.getAttribute('data-task-id');
                     const columnId = evt.to.getAttribute('data-column-id');
-                    const taskIds = Array.from(evt.to.querySelectorAll('.kanban-card'))
-                        .map(child => child.getAttribute('data-task-id'))
+                    const taskIds  = Array.from(evt.to.querySelectorAll('.kanban-card'))
+                        .map(c => c.getAttribute('data-task-id'))
                         .filter(id => id !== null && id !== undefined && id !== '');
-                    const moveUrl = "<?= $urlGenerator->generate('kanban/move-task') ?>";
 
-                    const params = new URLSearchParams();
-                    params.append('taskId', taskId);
-                    params.append('columnId', columnId);
-                    params.append('_csrf', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-                    taskIds.forEach(id => {
-                        params.append('taskIds[]', id);
-                    });
+                    const colData = KANBAN_COLUMNS.find(c => c.id == columnId);
 
-                    fetch(moveUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: params
-                    })
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error('Response error');
-                        }
-                        return res.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Gagal memindahkan tugas.');
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Terjadi kesalahan jaringan.');
-                    });
+                    // Simpan state drag
+                    _pendingDrag = {
+                        taskId, columnId, taskIds,
+                        fromEl: evt.from,
+                        fromIndex: evt.oldIndex,
+                        item: evt.item
+                    };
+
+                    if (colData && colData.requiresProof) {
+                        document.getElementById('proof-modal-subtitle').textContent =
+                            'Upload 1 foto bukti untuk memindahkan tugas ke kolom "' + colData.nama + '".';
+                        openModal('kanban-proof-modal');
+
+                    } else if (colData && colData.requiresReason) {
+                        document.getElementById('reason-modal-subtitle').textContent =
+                            'Kenapa tugas ini dipindahkan ke kolom "' + colData.nama + '"?';
+                        openModal('kanban-reason-modal');
+
+                    } else {
+                        // Tidak perlu konfirmasi — langsung kirim
+                        const fd = buildFormData();
+                        sendMoveRequest(fd, null);
+                    }
                 }
             });
         });
     });
 </script>
+

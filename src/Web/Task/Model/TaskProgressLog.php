@@ -23,6 +23,12 @@ class TaskProgressLog
     #[Column(type: 'string(255)', nullable: true)]
     public ?string $keterangan = null;
 
+    #[Column(type: 'string(500)', name: 'bukti_foto', nullable: true)]
+    public ?string $buktiFoto = null;
+
+    #[Column(type: 'text', nullable: true)]
+    public ?string $alasan = null;
+
     #[Column(type: 'integer', name: 'progress_sebelumnya', nullable: true)]
     public ?int $progressSebelumnya = null;
 

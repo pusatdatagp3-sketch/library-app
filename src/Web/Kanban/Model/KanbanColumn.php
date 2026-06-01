@@ -30,6 +30,12 @@ class KanbanColumn
     #[Column(type: 'integer', default: 0)]
     public int $progress = 0;
 
+    #[Column(type: 'boolean', name: 'requires_proof', default: false)]
+    public bool $requiresProof = false;
+
+    #[Column(type: 'boolean', name: 'requires_reason', default: false)]
+    public bool $requiresReason = false;
+
     #[Column(type: 'datetime', name: 'created_at', nullable: true)]
     public ?\DateTimeImmutable $createdAt = null;
 
@@ -43,6 +49,8 @@ class KanbanColumn
         $this->nama = trim((string)($data['nama'] ?? $this->nama));
         $this->urutan = isset($data['urutan']) ? (int)$data['urutan'] : $this->urutan;
         $this->progress = isset($data['progress']) ? (int)$data['progress'] : $this->progress;
+        $this->requiresProof = isset($data['requires_proof']) ? (bool)$data['requires_proof'] : $this->requiresProof;
+        $this->requiresReason = isset($data['requires_reason']) ? (bool)$data['requires_reason'] : $this->requiresReason;
         if (isset($data['entitas_id'])) {
             $this->entitasId = (int)$data['entitas_id'];
         }

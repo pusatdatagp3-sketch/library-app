@@ -19,6 +19,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
  * @var string|null $successMsg
  * @var array $errorMsgs
  * @var array $taskStats
+ * @var array $pendingRejectedTasks  // ['task'=>Task, 'type'=>'pending'|'rejected', 'alasan'=>?string, 'logAt'=>?DateTimeImmutable][]
  */
 
 $this->setTitle("Program Kerja - {$model->namaProgram}");
@@ -308,6 +309,85 @@ $baseUrl = $this->hasParameter('baseUrl') ? $this->getParameter('baseUrl') : '/t
 
     </div>
 </div>
+
+<?php if (!empty($pendingRejectedTasks)): ?>
+<div class="crud-container" style="padding-top:0;">
+    <div class="card p-5">
+        <h2 class="card-section-header mb-4">
+            <i class="ri-error-warning-line" style="color:#f59e0b;"></i> Tugas Bermasalah
+            <span class="text-xs text-muted fw-normal ml-2">Tugas yang sedang Pending atau Ditolak</span>
+        </h2>
+
+        <div class="d-flex flex-col gap-3">
+            <?php foreach ($pendingRejectedTasks as $entry): ?>
+                <?php
+                    $task   = $entry['task'];
+                    $type   = $entry['type'];
+                    $alasan = $entry['alasan'];
+                    $logAt  = $entry['logAt'];
+                    $isPending = $type === 'pending';
+                ?>
+                <div class="d-flex gap-4 align-items-start p-4 rounded-lg" style="
+                    background: <?= $isPending ? 'rgba(245,158,11,.06)' : 'rgba(239,68,68,.06)' ?>;
+                    border: 1px solid <?= $isPending ? 'rgba(245,158,11,.25)' : 'rgba(239,68,68,.25)' ?>;
+                    border-radius: 10px;
+                ">
+                    <!-- Badge type -->
+                    <div style="flex-shrink:0; margin-top:2px;">
+                        <span class="badge" style="
+                            background: <?= $isPending ? 'rgba(245,158,11,.15)' : 'rgba(239,68,68,.15)' ?>;
+                            color: <?= $isPending ? '#f59e0b' : '#ef4444' ?>;
+                            border: 1px solid <?= $isPending ? 'rgba(245,158,11,.4)' : 'rgba(239,68,68,.4)' ?>;
+                            font-size: 10px; padding: 3px 8px; font-weight: 700; text-transform: uppercase;
+                        ">
+                            <i class="<?= $isPending ? 'ri-time-line' : 'ri-close-circle-line' ?>"></i>
+                            <?= $isPending ? 'Pending' : 'Rejected' ?>
+                        </span>
+                    </div>
+
+                    <!-- Konten -->
+                    <div style="flex:1; min-width:0;">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                            <h4 class="text-sm fw-bold m-0 text-color">
+                                <?= Html::encode($task->judul) ?>
+                            </h4>
+                            <span class="text-xs text-muted" style="white-space:nowrap;">
+                                <?= $logAt ? $logAt->format('d M Y, H:i') : '-' ?>
+                            </span>
+                        </div>
+
+                        <?php if ($task->kanbanColumn): ?>
+                            <p class="text-xs text-muted mt-1 mb-0">
+                                <i class="ri-kanban-view"></i>
+                                Kolom: <strong><?= Html::encode($task->kanbanColumn->nama) ?></strong>
+                                &nbsp;·&nbsp;
+                                <i class="ri-user-star-line"></i>
+                                PIC: <strong><?= Html::encode($task->assignedUser?->namaAnggota ?? 'Unassigned') ?></strong>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if ($alasan): ?>
+                            <div style="
+                                margin-top: 8px;
+                                padding: 8px 12px;
+                                border-radius: 6px;
+                                background: <?= $isPending ? 'rgba(245,158,11,.1)' : 'rgba(239,68,68,.1)' ?>;
+                                border-left: 3px solid <?= $isPending ? '#f59e0b' : '#ef4444' ?>;
+                                display: flex; gap: 8px; align-items: flex-start;
+                            ">
+                                <i class="ri-chat-quote-line" style="color:<?= $isPending ? '#f59e0b' : '#ef4444' ?>; flex-shrink:0; margin-top:1px;"></i>
+                                <span class="text-xs text-muted"><?= Html::encode($alasan) ?></span>
+                            </div>
+                        <?php else: ?>
+                            <p class="text-xs text-muted mt-2 mb-0" style="font-style:italic;">Tidak ada alasan yang dicatat.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Image Gallery Modal -->
 <div id="image-gallery-modal" class="modal-overlay">

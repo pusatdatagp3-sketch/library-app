@@ -337,16 +337,16 @@ return [
                 ->action([Web\Kanban\Controller\KanbanController::class, 'board'])
                 ->name('kanban/board'),
             Route::post('/board/{program_id:\d+}/add-task')
-                ->action([Web\Kanban\Controller\KanbanController::class, 'addTask'])
+                ->action([Web\Kanban\Controller\KanbanTaskController::class, 'addTask'])
                 ->name('kanban/add-task'),
             Route::post('/board/{program_id:\d+}/edit-task/{id:\d+}')
-                ->action([Web\Kanban\Controller\KanbanController::class, 'editTask'])
+                ->action([Web\Kanban\Controller\KanbanTaskController::class, 'editTask'])
                 ->name('kanban/edit-task'),
             Route::post('/board/{program_id:\d+}/delete-task/{id:\d+}')
-                ->action([Web\Kanban\Controller\KanbanController::class, 'deleteTask'])
+                ->action([Web\Kanban\Controller\KanbanTaskController::class, 'deleteTask'])
                 ->name('kanban/delete-task'),
             Route::post('/move-task')
-                ->action([Web\Kanban\Controller\KanbanController::class, 'moveTask'])
+                ->action([Web\Kanban\Controller\KanbanTaskController::class, 'moveTask'])
                 ->name('kanban/move-task'),
         ),
 ];

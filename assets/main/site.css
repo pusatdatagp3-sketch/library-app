@@ -2489,3 +2489,130 @@ body[data-theme="dark"] .sticky-page-header {
 }
 
 
+
+/* ============================================
+   KANBAN PROOF DROPZONE
+   ============================================ */
+.proof-dropzone {
+    border: 2px dashed var(--primary);
+    border-radius: 12px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    transition: background 0.2s, border-color 0.2s;
+    min-height: 120px;
+}
+.proof-dropzone:hover {
+    background: rgba(var(--primary-rgb, 99,102,241), 0.07);
+    border-color: var(--primary-hover, var(--primary));
+}
+body[data-theme="dark"] .proof-dropzone {
+    background: var(--surface-dark, #1e1e2e);
+}
+
+/* ============================================
+   TASK LOG MODAL
+   ============================================ */
+.task-log-modal-inner {
+    max-width: 520px;
+    max-height: 82vh;
+    overflow-y: auto;
+}
+
+.task-log-empty {
+    text-align: center;
+    padding: 32px 0;
+}
+
+.task-log-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+}
+
+.task-log-item {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.task-log-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.task-log-dot {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(99,102,241,.3);
+}
+
+body[data-theme="dark"] .task-log-dot {
+    box-shadow: 0 2px 8px rgba(99,102,241,.5);
+}
+
+.task-log-body {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+body[data-theme="dark"] .task-log-body {
+    background: var(--bg-card, #1e1e2e);
+}
+
+.task-log-reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(251,191,36,.08);
+    border-left: 3px solid #fbbf24;
+}
+
+.task-log-photo-wrap {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.task-log-photo {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: zoom-in;
+    transition: opacity .2s;
+    border: 1px solid var(--border);
+}
+
+.task-log-photo:hover {
+    opacity: .85;
+}

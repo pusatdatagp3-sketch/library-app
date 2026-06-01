@@ -11,6 +11,7 @@ use App\Web\Program\Model\Dokumentasi;
 use App\Web\Entitas\Model\Entitas;
 use App\Web\Entitas\Model\AnggotaEntitas;
 use App\Web\Task\Model\Task;
+use App\Web\Task\Model\TaskProgressLog;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -30,6 +31,7 @@ final class ProgramController
     private $entitasRepository;
     private $anggotaRepository;
     private $taskRepository;
+    private $logRepository;
 
     public function __construct(
         private WebViewRenderer $viewRenderer,
@@ -40,13 +42,14 @@ final class ProgramController
         private ORMInterface $orm,
         private EntityManagerInterface $entityManager
     ) {
-        $this->programRepository = $orm->getRepository(Program::class);
-        $this->kendalaRepository = $orm->getRepository(KendalaProgram::class);
-        $this->notulensiRepository = $orm->getRepository(Notulensi::class);
+        $this->programRepository    = $orm->getRepository(Program::class);
+        $this->kendalaRepository    = $orm->getRepository(KendalaProgram::class);
+        $this->notulensiRepository  = $orm->getRepository(Notulensi::class);
         $this->dokumentasiRepository = $orm->getRepository(Dokumentasi::class);
-        $this->entitasRepository = $orm->getRepository(Entitas::class);
-        $this->anggotaRepository = $orm->getRepository(AnggotaEntitas::class);
-        $this->taskRepository = $orm->getRepository(Task::class);
+        $this->entitasRepository    = $orm->getRepository(Entitas::class);
+        $this->anggotaRepository    = $orm->getRepository(AnggotaEntitas::class);
+        $this->taskRepository       = $orm->getRepository(Task::class);
+        $this->logRepository        = $orm->getRepository(TaskProgressLog::class);
     }
 
     public function create(ServerRequestInterface $request): ResponseInterface
@@ -206,18 +209,45 @@ final class ProgramController
         }
 
         $entitas = $this->entitasRepository->findByPK($model->entitasId);
-        $backUrl = $this->getRedirectUrlForEntitas($entitas);
+        $backUrl  = $this->getRedirectUrlForEntitas($entitas);
+
+        // Fetch tasks di kolom Pending & Rejected beserta alasan terakhir dari log
+        $pendingRejectedTasks = [];
+        foreach ($tasks as $task) {
+            if ($task->kanbanColumn === null) {
+                continue;
+            }
+            $colName = strtolower($task->kanbanColumn->nama);
+            $isPending  = str_contains($colName, 'pending') || str_contains($colName, 'tunda');
+            $isRejected = str_contains($colName, 'rejected') || str_contains($colName, 'tolak');
+            if (!$isPending && !$isRejected) {
+                continue;
+            }
+            // Ambil log terbaru yang punya alasan
+            $latestLog = $this->logRepository->select()
+                ->where('task_id', $task->id)
+                ->where('alasan', 'IS NOT', null)
+                ->orderBy('created_at', 'DESC')
+                ->fetchOne();
+            $pendingRejectedTasks[] = [
+                'task'   => $task,
+                'type'   => $isPending ? 'pending' : 'rejected',
+                'alasan' => $latestLog?->alasan ?? null,
+                'logAt'  => $latestLog?->createdAt ?? null,
+            ];
+        }
 
         return $this->viewRenderer->render(__DIR__ . '/../View/view', [
-            'model' => $model,
-            'kendalaList' => $kendalaList,
-            'notulensiList' => $notulensiList,
-            'dokumentasiList' => $dokumentasiList,
-            'backUrl' => $backUrl,
-            'entitas' => $entitas,
-            'taskStats' => $taskStats,
-            'successMsg' => $this->flash->get('success'),
-            'errorMsgs' => $this->flash->get('errors') ?? [],
+            'model'                => $model,
+            'kendalaList'          => $kendalaList,
+            'notulensiList'        => $notulensiList,
+            'dokumentasiList'      => $dokumentasiList,
+            'backUrl'              => $backUrl,
+            'entitas'              => $entitas,
+            'taskStats'            => $taskStats,
+            'pendingRejectedTasks' => $pendingRejectedTasks,
+            'successMsg'           => $this->flash->get('success'),
+            'errorMsgs'            => $this->flash->get('errors') ?? [],
         ]);
     }
 
