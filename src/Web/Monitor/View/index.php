@@ -15,6 +15,38 @@ use Yiisoft\Router\UrlGeneratorInterface;
 $this->setTitle('Monitor');
 ?>
 
+<style>
+    .monitor-modules-grid {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+    .monitor-card-wrapper {
+        width: 100%;
+        padding: 0 0.75rem;
+        margin-bottom: 1.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+    @media (min-width: 768px) {
+        .monitor-card-wrapper {
+            width: 50%;
+        }
+    }
+    @media (min-width: 1200px) {
+        .monitor-card-wrapper {
+            width: 25%;
+            margin-bottom: 0;
+        }
+    }
+    .monitor-card-wrapper .module-card {
+        margin: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+</style>
+
 <div class="monitor-container">
     <!-- Header -->
     <div class="monitor-header">
@@ -32,7 +64,7 @@ $this->setTitle('Monitor');
     </div>
 
     <!-- Modules Grid for Progress Monitor -->
-    <div class="modules-grid">
+    <div class="monitor-modules-grid">
         <?php foreach ($modulData as $modulId => $data): ?>
             <?php
                 $modulName      = $data['modul']->nama;
@@ -55,7 +87,8 @@ $this->setTitle('Monitor');
                 $totalActiveTasks = count($todoTasks) + count($progressTasks);
             ?>
 
-            <div class="module-card">
+            <div class="monitor-card-wrapper">
+                <div class="module-card">
                 <div class="module-card-header <?= $colorClass ?>">
                     <span><?= Html::encode(ucwords($modulName)) ?></span>
                     <span class="badge-on-dark"><?= $totalActiveTasks ?> Tugas Aktif</span>
@@ -218,6 +251,7 @@ $this->setTitle('Monitor');
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
         <?php endforeach; ?>
     </div>
@@ -230,7 +264,7 @@ $this->setTitle('Monitor');
     </div>
 
     <!-- Modules Grid for Pending/Rejected -->
-    <div class="modules-grid">
+    <div class="monitor-modules-grid">
         <?php foreach ($modulData as $modulId => $data): ?>
             <?php
                 $modulName      = $data['modul']->nama;
@@ -252,7 +286,8 @@ $this->setTitle('Monitor');
                 $totalSpecialTasks = count($pendingTasks) + count($rejectedTasks);
             ?>
 
-            <div class="module-card">
+            <div class="monitor-card-wrapper">
+                <div class="module-card">
                 <div class="module-card-header <?= $colorClass ?>">
                     <span><?= Html::encode(ucwords($modulName)) ?></span>
                     <span class="badge-on-dark"><?= $totalSpecialTasks ?> Tugas Terkendala</span>
@@ -362,6 +397,7 @@ $this->setTitle('Monitor');
                             <?php endif; ?>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         <?php endforeach; ?>
