@@ -22,7 +22,9 @@ class TaskRepository extends Repository
     {
         $select = parent::select();
         $activeCampus = $this->tenantContext->getActiveCampusCode();
-        if ($activeCampus !== null) {
+        if ($activeCampus === 'ALL') {
+            $select = $select->where('kode_kampus', 'in', $this->tenantContext->getAllowedCampusCodes());
+        } elseif ($activeCampus !== null) {
             $select = $select->where('kode_kampus', $activeCampus);
         }
         return $select;
@@ -43,10 +45,8 @@ class TaskRepository extends Repository
     public function findById(int $id): ?Task
     {
         $entity = $this->findByPK($id);
-        if ($entity !== null && $this->tenantContext->getActiveCampusCode() !== null) {
-            if ($entity->kodeKampus !== $this->tenantContext->getActiveCampusCode()) {
-                return null;
-            }
+        if ($entity !== null && !$this->tenantContext->hasActiveAccess($entity->kodeKampus)) {
+            return null;
         }
         return $entity;
     }

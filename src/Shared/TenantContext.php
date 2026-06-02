@@ -36,4 +36,15 @@ final class TenantContext
         }
         return in_array($campusCode, $this->allowedCampusCodes, true);
     }
+
+    public function hasActiveAccess(?string $campusCode): bool
+    {
+        if ($campusCode === null) {
+            return false;
+        }
+        if ($this->activeCampusCode === 'ALL') {
+            return in_array($campusCode, $this->allowedCampusCodes, true);
+        }
+        return $this->activeCampusCode === $campusCode;
+    }
 }

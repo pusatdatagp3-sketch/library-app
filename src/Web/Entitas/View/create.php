@@ -11,6 +11,8 @@ use Yiisoft\View\WebView;
  * @var string $prefix
  * @var string $modulTitle
  * @var string $indexRoute
+ * @var string $activeCampus
+ * @var array $campuses
  */
 
 $this->setTitle("Tambah Entitas - {$modulTitle}");
@@ -27,6 +29,23 @@ $this->setTitle("Tambah Entitas - {$modulTitle}");
     <div class="card">
         <form method="POST" class="form-grid">
             <input type="hidden" name="_csrf" value="<?= Html::encode($this->getParameter('csrf')) ?>">
+
+            <?php if ($activeCampus === 'ALL'): ?>
+                <div class="form-group mb-4">
+                    <label class="form-label" for="kode_kampus">Kampus / Unit</label>
+                    <select id="kode_kampus"
+                            name="kode_kampus"
+                            class="form-control"
+                            required>
+                        <option value="">-- Pilih Kampus --</option>
+                        <?php foreach ($campuses as $code => $name): ?>
+                            <option value="<?= Html::encode($code) ?>" <?= $model->kodeKampus === $code ? 'selected' : '' ?>>
+                                <?= Html::encode($name) ?> (<?= Html::encode($code) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
 
             <div class="form-group mb-4">
                 <label class="form-label" for="nama">Nama Entitas</label>

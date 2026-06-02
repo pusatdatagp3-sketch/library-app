@@ -68,6 +68,12 @@ final class ProgramController
         if ($request->getMethod() === 'POST') {
             $data = (array) $request->getParsedBody();
             $model->load($data);
+            if ($model->entitasId !== null) {
+                $entitas = $this->entitasRepository->findByPK($model->entitasId);
+                if ($entitas !== null) {
+                    $model->kodeKampus = $entitas->kodeKampus;
+                }
+            }
             if ($model->validate()) {
                 $successMsg = "Program \"{$model->namaProgram}\" berhasil dibuat.";
                 $this->entityManager->persist($model)->run();

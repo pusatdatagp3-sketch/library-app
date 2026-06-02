@@ -101,9 +101,9 @@ final class TenantIsolationCest
             method: 'POST',
             cookieParams: [$sessionName => $sessionId],
             queryParams: [],
-            parsedBody: ['campus_code' => 'G2'],
             uri: '/select-campus'
         );
+        $requestSelect = $requestSelect->withParsedBody(['campus_code' => 'G2']);
         $responseSelect = $tester->sendRequest($requestSelect);
         assertSame(302, $responseSelect->getStatusCode());
 
@@ -118,7 +118,7 @@ final class TenantIsolationCest
             'cookie_lifetime' => 3600,
             'gc_maxlifetime' => 3600,
         ]);
-        $_SESSION['user_auth_active_campus_code'] = 'G2';
+        assertSame('G2', $_SESSION['user_auth_active_campus_code'] ?? null);
         session_write_close();
 
         $requestG2 = new ServerRequest(
@@ -131,6 +131,41 @@ final class TenantIsolationCest
         $bodyG2 = $responseG2->getBody()->getContents();
         assertStringContainsString('Entitas G2 Test', $bodyG2);
         assertStringNotContainsString('Entitas G1 Test', $bodyG2);
+
+        // 4. Request to select ALL campus
+        $requestSelectAll = new ServerRequest(
+            method: 'POST',
+            cookieParams: [$sessionName => $sessionId],
+            queryParams: [],
+            uri: '/select-campus'
+        );
+        $requestSelectAll = $requestSelectAll->withParsedBody(['campus_code' => 'ALL']);
+        $responseSelectAll = $tester->sendRequest($requestSelectAll);
+        assertSame(302, $responseSelectAll->getStatusCode());
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        session_name('TEQIC_SESSID');
+        session_start([
+            'cookie_secure' => 0,
+            'save_path' => $savePath,
+            'cookie_lifetime' => 3600,
+            'gc_maxlifetime' => 3600,
+        ]);
+        assertSame('ALL', $_SESSION['user_auth_active_campus_code'] ?? null);
+        session_write_close();
+
+        $requestAll = new ServerRequest(
+            method: 'GET',
+            cookieParams: [$sessionName => $sessionId],
+            uri: '/fungsionaris'
+        );
+        $responseAll = $tester->sendRequest($requestAll);
+        assertSame(200, $responseAll->getStatusCode());
+        $bodyAll = $responseAll->getBody()->getContents();
+        assertStringContainsString('Entitas G1 Test', $bodyAll);
+        assertStringContainsString('Entitas G2 Test', $bodyAll);
 
         // Clean up test data
         $em->delete($entitasG1);

@@ -54,10 +54,15 @@ final class KanbanTaskController
             return $this->responseFactory->createResponse(405);
         }
 
+        $program = $this->programRepository->findByPK($programId);
+        if ($program === null) {
+            return $this->responseFactory->createResponse(404);
+        }
+
         $data = (array)$request->getParsedBody();
         $task = new Task();
         $task->programId = $programId;
-        $task->kodeKampus = $this->tenantContext->getActiveCampusCode();
+        $task->kodeKampus = $program->kodeKampus;
         $task->load($data);
 
         // Find the first column as default

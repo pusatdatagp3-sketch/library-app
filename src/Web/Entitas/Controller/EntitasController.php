@@ -17,6 +17,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlGeneratorInterface;
+use App\Web\Auth\Model\UserSession;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 use Yiisoft\Session\Flash\FlashInterface;
 
@@ -36,7 +37,8 @@ final class EntitasController
         private FlashInterface $flash,
         private ORMInterface $orm,
         private EntityManagerInterface $entityManager,
-        private TenantContext $tenantContext
+        private TenantContext $tenantContext,
+        private UserSession $userSession
     ) {
         $this->entitasRepository = $orm->getRepository(Entitas::class);
         $this->anggotaRepository = $orm->getRepository(AnggotaEntitas::class);
@@ -100,11 +102,21 @@ final class EntitasController
         [$modulId, $prefix, $modulTitle, $indexRoute] = $this->getModulContext();
         $model = new Entitas();
         $model->modulId = $modulId;
-        $model->kodeKampus = $this->tenantContext->getActiveCampusCode();
+        
+        $activeCampus = $this->tenantContext->getActiveCampusCode();
+        if ($activeCampus !== 'ALL') {
+            $model->kodeKampus = $activeCampus;
+        }
 
         if ($request->getMethod() === 'POST') {
             $data = (array) $request->getParsedBody();
             $model->load($data);
+            if ($activeCampus === 'ALL') {
+                $model->kodeKampus = $data['kode_kampus'] ?? null;
+            } else {
+                $model->kodeKampus = $activeCampus;
+            }
+
             if ($model->validate()) {
                 $successMsg = "Entitas \"{$model->nama}\" berhasil ditambahkan."; // build dulu sebelum persist
                 $this->entityManager->persist($model)->run();
@@ -119,6 +131,8 @@ final class EntitasController
             'prefix' => $prefix,
             'modulTitle' => $modulTitle,
             'indexRoute' => $indexRoute,
+            'activeCampus' => $activeCampus,
+            'campuses' => $this->userSession->getCampusList(),
         ]);
     }
 
@@ -214,10 +228,15 @@ final class EntitasController
             return $this->responseFactory->createResponse(405);
         }
 
+        $entitas = $this->entitasRepository->findById($id);
+        if ($entitas === null) {
+            return $this->responseFactory->createResponse(404);
+        }
+
         $data = (array) $request->getParsedBody();
         $member = new AnggotaEntitas();
         $member->entitasId = $id;
-        $member->kodeKampus = $this->tenantContext->getActiveCampusCode();
+        $member->kodeKampus = $entitas->kodeKampus;
         $member->load($data);
 
         if ($member->validate()) {

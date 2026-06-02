@@ -78,7 +78,7 @@ final class UserSession
 
     public function setActiveCampus(string $campusCode): void
     {
-        if (in_array($campusCode, $this->getAllowedCampuses(), true)) {
+        if ($campusCode === 'ALL' || in_array($campusCode, $this->getAllowedCampuses(), true)) {
             $this->session->set(self::SESSION_KEY_ACTIVE_CAMPUS_CODE, $campusCode);
         }
     }

@@ -91,7 +91,7 @@ final class AuthController
 
         if ($campusCode !== '') {
             $allowed = $this->userSession->getAllowedCampuses();
-            if (in_array($campusCode, $allowed, true)) {
+            if ($campusCode === 'ALL' || in_array($campusCode, $allowed, true)) {
                 $this->userSession->setActiveCampus($campusCode);
                 $this->flash->set('success', 'Kampus aktif berhasil diubah.');
             } else {

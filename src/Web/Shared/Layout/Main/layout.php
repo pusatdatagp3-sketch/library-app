@@ -284,11 +284,20 @@
                         <div class="campus-dropdown" id="campus-dropdown">
                             <button type="button" class="campus-dropdown-btn" id="campus-dropdown-btn">
                                 <i class="ri-home-office-line campus-icon"></i>
-                                <span class="active-campus-name"><?php echo Html::encode($campuses[$activeCampus] ?? $activeCampus) ?></span>
+                                <span class="active-campus-name"><?php echo $activeCampus === 'ALL' ? 'Semua Kampus' : Html::encode($campuses[$activeCampus] ?? $activeCampus) ?></span>
                                 <i class="ri-arrow-down-s-line campus-arrow"></i>
                             </button>
                             <div class="campus-dropdown-menu" id="campus-dropdown-menu">
                                 <div class="campus-dropdown-header">Pilih Unit/Kampus</div>
+                                <button type="button" 
+                                        class="campus-dropdown-item <?php echo $activeCampus === 'ALL' ? 'active' : '' ?>"
+                                        data-value="ALL">
+                                    <span class="campus-item-code">ALL</span>
+                                    <span class="campus-item-name">Semua Kampus</span>
+                                    <?php if ($activeCampus === 'ALL'): ?>
+                                        <i class="ri-checkbox-circle-fill campus-item-check"></i>
+                                    <?php endif; ?>
+                                </button>
                                 <?php foreach ($campuses as $code => $name): ?>
                                     <button type="button" 
                                             class="campus-dropdown-item <?php echo $code === $activeCampus ? 'active' : '' ?>"
