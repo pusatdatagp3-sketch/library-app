@@ -2737,6 +2737,9 @@ body[data-theme="dark"] .task-log-body {
     gap: 4px;
     z-index: 1000;
     animation: campusDropdownIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
 @keyframes campusDropdownIn {
