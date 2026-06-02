@@ -32,6 +32,7 @@ $this->setTitle('Tambah Pengguna Baru');
 
     <?= $this->render('./_form', [
         'roles' => $roles,
+        'campusList' => $campusList,
         'errors' => $errors,
         'data' => $data,
         'csrf' => $csrf,

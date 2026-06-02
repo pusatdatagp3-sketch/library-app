@@ -34,36 +34,42 @@ final class UserController
     {
         $users = $this->authRepository->getAllUsers();
         $roles = $this->rbacRepository->getAllRoles();
+        $campusList = $this->authRepository->getAllCampuses();
 
         return $this->viewRenderer->render(__DIR__ . '/../View/users/index', [
-            'users' => $users,
-            'roles' => $roles,
+            'users'      => $users,
+            'roles'      => $roles,
+            'campusList' => $campusList,
             'successMsg' => $this->flash->get('success'),
-            'errorMsgs' => $this->flash->get('errors') ?? [],
+            'errorMsgs'  => $this->flash->get('errors') ?? [],
         ]);
     }
 
     public function create(ServerRequestInterface $request): ResponseInterface
     {
-        $roles = $this->rbacRepository->getAllRoles();
-        $errors = [];
+        $roles      = $this->rbacRepository->getAllRoles();
+        $campusList = $this->authRepository->getAllCampuses();
+        $errors     = [];
         $data = [
-            'username' => '',
-            'email' => '',
-            'role' => '',
+            'username'         => '',
+            'email'            => '',
+            'role'             => '',
+            'allowed_campuses' => [],
         ];
 
         if ($request->getMethod() === 'POST') {
             $body = (array) $request->getParsedBody();
-            $data['username'] = trim((string) ($body['username'] ?? ''));
-            $data['email'] = trim((string) ($body['email'] ?? ''));
-            $data['role'] = trim((string) ($body['role'] ?? ''));
+            $data['username']         = trim((string) ($body['username'] ?? ''));
+            $data['email']            = trim((string) ($body['email'] ?? ''));
+            $data['role']             = trim((string) ($body['role'] ?? ''));
+            $data['allowed_campuses'] = (array) ($body['allowed_campuses'] ?? []);
             $password = (string) ($body['password'] ?? '');
 
-            if ($data['username'] === '') $errors[] = 'Username wajib diisi.';
-            if ($data['email'] === '') $errors[] = 'Email wajib diisi.';
-            if ($password === '') $errors[] = 'Password wajib diisi.';
-            if ($data['role'] === '') $errors[] = 'Peran wajib dipilih.';
+            if ($data['username'] === '')         $errors[] = 'Username wajib diisi.';
+            if ($data['email'] === '')             $errors[] = 'Email wajib diisi.';
+            if ($password === '')                  $errors[] = 'Password wajib diisi.';
+            if ($data['role'] === '')              $errors[] = 'Peran wajib dipilih.';
+            if (empty($data['allowed_campuses'])) $errors[] = 'Minimal satu kampus harus dipilih.';
 
             if (empty($errors)) {
                 if ($this->authRepository->findByUsername($data['username']) !== null) {
@@ -71,6 +77,11 @@ final class UserController
                 } else {
                     try {
                         if ($this->authRepository->createUser($data['username'], $data['email'], $password, $data['role'])) {
+                            // Save campus assignments
+                            $newUser = $this->authRepository->findByUsername($data['username']);
+                            if ($newUser !== null) {
+                                $this->authRepository->updateUserCampuses((int)$newUser['id'], $data['allowed_campuses']);
+                            }
                             $this->flash->set('success', 'Pengguna baru "' . htmlspecialchars($data['username']) . '" berhasil didaftarkan.');
                             return $this->responseFactory->createResponse(302)
                                 ->withHeader('Location', $this->urlGenerator->generate('users/index'));
@@ -85,53 +96,58 @@ final class UserController
         }
 
         return $this->viewRenderer->render(__DIR__ . '/../View/users/create', [
-            'roles' => $roles,
-            'errors' => $errors,
-            'data' => $data,
+            'roles'      => $roles,
+            'campusList' => $campusList,
+            'errors'     => $errors,
+            'data'       => $data,
         ]);
     }
 
     public function update(ServerRequestInterface $request): ResponseInterface
     {
-        $id = (int) $this->currentRoute->getArgument('id');
+        $id   = (int) $this->currentRoute->getArgument('id');
         $user = $this->authRepository->findById($id);
 
         if ($user === null) {
             return $this->responseFactory->createResponse(404);
         }
 
-        $roles = $this->rbacRepository->getAllRoles();
-        $errors = [];
+        $roles      = $this->rbacRepository->getAllRoles();
+        $campusList = $this->authRepository->getAllCampuses();
+        $errors     = [];
         $data = [
-            'username' => $user['username'],
-            'email' => $user['email'],
-            'role' => $user['role'],
+            'username'         => $user['username'],
+            'email'            => $user['email'],
+            'role'             => $user['role'],
+            'allowed_campuses' => $user['allowed_campuses'],
         ];
 
         if ($request->getMethod() === 'POST') {
             $body = (array) $request->getParsedBody();
-            $data['username'] = trim((string) ($body['username'] ?? ''));
-            $data['email'] = trim((string) ($body['email'] ?? ''));
-            $data['role'] = trim((string) ($body['role'] ?? ''));
+            $data['username']         = trim((string) ($body['username'] ?? ''));
+            $data['email']            = trim((string) ($body['email'] ?? ''));
+            $data['role']             = trim((string) ($body['role'] ?? ''));
+            $data['allowed_campuses'] = (array) ($body['allowed_campuses'] ?? []);
             $password = (string) ($body['password'] ?? '');
 
             if ($data['username'] === '') $errors[] = 'Username wajib diisi.';
-            if ($data['email'] === '') $errors[] = 'Email wajib diisi.';
-            if ($data['role'] === '') $errors[] = 'Peran wajib dipilih.';
+            if ($data['email'] === '')    $errors[] = 'Email wajib diisi.';
+            if ($data['role'] === '')     $errors[] = 'Peran wajib dipilih.';
+            if (empty($data['allowed_campuses'])) $errors[] = 'Minimal satu kampus harus dipilih.';
 
-            // Proteksi: jangan sampai admin mengubah perannya sendiri secara tidak sengaja sehingga kehilangan akses rbac
+            // Proteksi: jangan sampai admin mengubah perannya sendiri
             if ($id === $this->userSession->getUserId() && $data['role'] !== 'Admin') {
                 $errors[] = 'Anda tidak diperbolehkan mengubah peran Admin Anda sendiri demi keamanan akses.';
             }
 
             if (empty($errors)) {
-                // Cek username unik (jika berubah)
                 $existingUser = $this->authRepository->findByUsername($data['username']);
                 if ($existingUser !== null && (int)$existingUser['id'] !== $id) {
                     $errors[] = 'Username sudah digunakan oleh akun lain.';
                 } else {
                     try {
                         if ($this->authRepository->updateUser($id, $data['username'], $data['email'], $password !== '' ? $password : null, $data['role'])) {
+                            $this->authRepository->updateUserCampuses($id, $data['allowed_campuses']);
                             $this->flash->set('success', 'Pengguna "' . htmlspecialchars($data['username']) . '" berhasil diperbarui.');
                             return $this->responseFactory->createResponse(302)
                                 ->withHeader('Location', $this->urlGenerator->generate('users/index'));
@@ -146,10 +162,11 @@ final class UserController
         }
 
         return $this->viewRenderer->render(__DIR__ . '/../View/users/update', [
-            'user' => $user,
-            'roles' => $roles,
-            'errors' => $errors,
-            'data' => $data,
+            'user'       => $user,
+            'roles'      => $roles,
+            'campusList' => $campusList,
+            'errors'     => $errors,
+            'data'       => $data,
         ]);
     }
 

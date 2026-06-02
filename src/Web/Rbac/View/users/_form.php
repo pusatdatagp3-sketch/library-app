@@ -9,8 +9,9 @@ use Yiisoft\Router\UrlGeneratorInterface;
 /**
  * @var WebView $this
  * @var array $roles
+ * @var array $campusList   [kode => nama]
  * @var array $errors
- * @var array $data
+ * @var array $data          includes allowed_campuses[]
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $csrf
  * @var string $formAction
@@ -42,12 +43,14 @@ use Yiisoft\Router\UrlGeneratorInterface;
 
         <div class="form-group">
             <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" name="username" class="form-control" placeholder="Contoh: ahmad" value="<?= Html::encode($data['username']) ?>" required>
+            <input type="text" id="username" name="username" class="form-control"
+                   placeholder="Contoh: ahmad" value="<?= Html::encode($data['username']) ?>" required>
         </div>
 
         <div class="form-group">
             <label for="email" class="form-label">Email</label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="Contoh: ahmad@gmail.com" value="<?= Html::encode($data['email']) ?>" required>
+            <input type="email" id="email" name="email" class="form-control"
+                   placeholder="Contoh: ahmad@gmail.com" value="<?= Html::encode($data['email']) ?>" required>
         </div>
 
         <div class="form-group">
@@ -79,10 +82,87 @@ use Yiisoft\Router\UrlGeneratorInterface;
             <?php endif; ?>
         </div>
 
-        <div class="form-actions mt-2">
+        <!-- ── Allowed Campuses ─────────────────────────────────────────── -->
+        <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">
+                Akses Kampus <span class="text-danger">*</span>
+            </label>
+            <p class="text-sm text-muted" style="margin-top: 2px; margin-bottom: 10px;">
+                Pilih satu atau lebih kampus yang dapat diakses oleh pengguna ini.
+            </p>
+
+            <?php if (empty($campusList)): ?>
+                <div style="padding: 10px 14px; font-size: 0.85rem; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border);">
+                    <i class="ri-information-line"></i>
+                    Belum ada data kampus di tabel <code>list_kampus</code>.
+                </div>
+            <?php else: ?>
+                <div style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    padding: 14px 16px;
+                    background: var(--bg-hover);
+                    border: 1.5px solid var(--border);
+                    border-radius: 10px;
+                ">
+                    <?php foreach ($campusList as $kode => $nama): ?>
+                        <?php $checked = in_array((string)$kode, array_map('strval', $data['allowed_campuses'] ?? []), true); ?>
+                        <label
+                            for="campus_<?= Html::encode($kode) ?>"
+                            id="campus-label-<?= Html::encode($kode) ?>"
+                            class="campus-checkbox-label"
+                            style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 8px;
+                                padding: 7px 14px 7px 10px;
+                                border-radius: 8px;
+                                border: 1.5px solid <?= $checked ? 'var(--primary)' : 'var(--border)' ?>;
+                                background: <?= $checked ? 'rgba(99,102,241,0.09)' : 'var(--bg-main)' ?>;
+                                cursor: pointer;
+                                font-size: 0.88rem;
+                                font-weight: 500;
+                                transition: border-color 0.15s ease, background 0.15s ease;
+                                user-select: none;
+                            "
+                        >
+                            <input
+                                type="checkbox"
+                                id="campus_<?= Html::encode($kode) ?>"
+                                name="allowed_campuses[]"
+                                value="<?= Html::encode($kode) ?>"
+                                <?= $checked ? 'checked' : '' ?>
+                                style="accent-color: var(--primary); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0;"
+                            >
+                            <span class="badge-campus" style="padding: 2px 7px; font-size: 0.68rem;"><?= Html::encode($kode) ?></span>
+                            <span style="color: var(--text-main);"><?= Html::encode($nama) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="form-actions mt-2" style="grid-column: 1 / -1;">
             <button type="submit" class="btn btn-primary btn-w-full">
                 <?= Html::encode($submitLabel) ?>
             </button>
         </div>
     </form>
 </div>
+
+<script>
+document.querySelectorAll('.campus-checkbox-label').forEach(function(label) {
+    var cb = label.querySelector('input[type="checkbox"]');
+    if (!cb) return;
+    cb.addEventListener('change', function() {
+        if (cb.checked) {
+            label.style.borderColor = 'var(--primary)';
+            label.style.background  = 'rgba(99,102,241,0.09)';
+        } else {
+            label.style.borderColor = 'var(--border)';
+            label.style.background  = 'var(--bg-main)';
+        }
+    });
+});
+</script>

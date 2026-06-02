@@ -6,6 +6,7 @@ namespace App\Web\Auth\Model;
 
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
+use Cycle\Database\DatabaseInterface;
 
 final class AuthRepository
 {
@@ -13,7 +14,8 @@ final class AuthRepository
 
     public function __construct(
         private ORMInterface $orm,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private DatabaseInterface $db
     ) {
         $this->repository = $orm->getRepository(User::class);
         $this->seedDefaultUsers();
@@ -140,6 +142,41 @@ final class AuthRepository
         }
         $this->entityManager->delete($user)->run();
         return true;
+    }
+
+    /**
+     * Return all rows from list_kampus as [kode => nama].
+     */
+    public function getAllCampuses(): array
+    {
+        $rows = $this->db->select('kode', 'nama')->from('list_kampus')->orderBy('kode')->fetchAll();
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row['kode']] = $row['nama'];
+        }
+        return $result;
+    }
+
+    /**
+     * Replace the campus assignments for the given user.
+     * @param array $campuses array of kode_kampus strings
+     */
+    public function updateUserCampuses(int $userId, array $campuses): void
+    {
+        // Delete existing
+        $this->db->delete('auth_user_kampus')->where('user_id', $userId)->run();
+
+        // Insert new
+        $kampusRepo = $this->orm->getRepository(AuthUserKampus::class);
+        foreach ($campuses as $kode) {
+            $kode = trim((string) $kode);
+            if ($kode === '') continue;
+            $auc = new AuthUserKampus();
+            $auc->userId    = $userId;
+            $auc->kodeKampus = $kode;
+            $this->entityManager->persist($auc);
+        }
+        $this->entityManager->run();
     }
 
     private function toArray(User $user): array
