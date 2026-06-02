@@ -9,6 +9,7 @@ use App\Web\Kanban\Model\KanbanColumn;
 use App\Web\Task\Model\Task;
 use App\Web\Task\Model\TaskProgressLog;
 use App\Web\Shared\Service\FileCompressionService;
+use App\Shared\TenantContext;
 
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
@@ -37,7 +38,8 @@ final class KanbanTaskController
         private FlashInterface $flash,
         private ORMInterface $orm,
         private EntityManagerInterface $entityManager,
-        private FileCompressionService $fileCompressionService
+        private FileCompressionService $fileCompressionService,
+        private TenantContext $tenantContext
     ) {
         $this->programRepository = $orm->getRepository(Program::class);
         $this->columnRepository  = $orm->getRepository(KanbanColumn::class);
@@ -55,6 +57,7 @@ final class KanbanTaskController
         $data = (array)$request->getParsedBody();
         $task = new Task();
         $task->programId = $programId;
+        $task->kodeKampus = $this->tenantContext->getActiveCampusCode();
         $task->load($data);
 
         // Find the first column as default

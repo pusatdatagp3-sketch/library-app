@@ -20,6 +20,7 @@ final class HomePageCest
         }
 
         if (session_status() === PHP_SESSION_NONE) {
+            session_name('TEQIC_SESSID');
             session_start([
                 'cookie_secure' => 0,
                 'save_path' => $savePath,

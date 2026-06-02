@@ -25,6 +25,9 @@ class Program
     #[Column(type: 'string(255)', name: 'nama_program')]
     public string $namaProgram = '';
 
+    #[Column(type: 'string(4)', name: 'kode_kampus', nullable: true)]
+    public ?string $kodeKampus = null;
+
     #[Column(type: 'string(50)', nullable: true)]
     public ?string $periode = null;
 

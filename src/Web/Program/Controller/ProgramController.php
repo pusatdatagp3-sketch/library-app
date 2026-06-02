@@ -12,6 +12,7 @@ use App\Web\Entitas\Model\Entitas;
 use App\Web\Entitas\Model\AnggotaEntitas;
 use App\Web\Task\Model\Task;
 use App\Web\Task\Model\TaskProgressLog;
+use App\Shared\TenantContext;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -40,7 +41,8 @@ final class ProgramController
         private CurrentRoute $currentRoute,
         private FlashInterface $flash,
         private ORMInterface $orm,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private TenantContext $tenantContext
     ) {
         $this->programRepository    = $orm->getRepository(Program::class);
         $this->kendalaRepository    = $orm->getRepository(KendalaProgram::class);
@@ -58,6 +60,7 @@ final class ProgramController
         $entitasId = isset($queryParams['entitas_id']) ? (int)$queryParams['entitas_id'] : null;
 
         $model = new Program();
+        $model->kodeKampus = $this->tenantContext->getActiveCampusCode();
         if ($entitasId !== null) {
             $model->entitasId = $entitasId;
         }

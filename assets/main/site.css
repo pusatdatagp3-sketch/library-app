@@ -2668,3 +2668,171 @@ body[data-theme="dark"] .task-log-body {
 .task-log-photo:hover {
     opacity: .85;
 }
+
+/* Campus Switcher Styling */
+.campus-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.campus-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 9999px;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+}
+
+.campus-dropdown-btn:hover {
+    border-color: var(--primary);
+    background: var(--bg-card);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+}
+
+.campus-dropdown-btn .campus-icon {
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.active-campus-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.campus-dropdown-btn .campus-arrow {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.campus-dropdown-btn:hover .campus-arrow {
+    color: var(--primary);
+}
+
+.campus-dropdown.open .campus-dropdown-btn .campus-arrow {
+    transform: rotate(180deg);
+}
+
+.campus-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 260px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 1000;
+    animation: campusDropdownIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes campusDropdownIn {
+    from {
+        transform: translateY(8px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.campus-dropdown.open .campus-dropdown-menu {
+    display: flex;
+}
+
+.campus-dropdown-header {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 8px 12px 6px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+}
+
+.campus-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.campus-dropdown-item:hover {
+    background: var(--bg-hover);
+}
+
+.campus-dropdown-item.active {
+    background: rgba(79, 70, 229, 0.08);
+}
+
+.campus-item-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.campus-dropdown-item.active .campus-item-code {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.campus-item-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    flex-grow: 1;
+    transition: all 0.2s ease;
+}
+
+.campus-dropdown-item.active .campus-item-name {
+    color: var(--primary);
+}
+
+.campus-item-check {
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.campus-badge-single {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}

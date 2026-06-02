@@ -32,6 +32,9 @@ class Task
     #[Column(type: 'string(255)')]
     public string $judul = '';
 
+    #[Column(type: 'string(4)', name: 'kode_kampus', nullable: true)]
+    public ?string $kodeKampus = null;
+
     #[Column(type: 'text', nullable: true)]
     public ?string $deskripsi = null;
 

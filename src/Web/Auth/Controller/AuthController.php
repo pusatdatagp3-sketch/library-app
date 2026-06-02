@@ -78,6 +78,32 @@ final class AuthController
         return $this->responseFactory->createResponse(302)
             ->withHeader('Location', $this->urlGenerator->generate('login'));
     }
+
+    public function selectCampus(ServerRequestInterface $request): ResponseInterface
+    {
+        if (!$this->userSession->isLoggedIn()) {
+            return $this->responseFactory->createResponse(302)
+                ->withHeader('Location', $this->urlGenerator->generate('login'));
+        }
+
+        $body = (array) $request->getParsedBody();
+        $campusCode = trim((string) ($body['campus_code'] ?? ''));
+
+        if ($campusCode !== '') {
+            $allowed = $this->userSession->getAllowedCampuses();
+            if (in_array($campusCode, $allowed, true)) {
+                $this->userSession->setActiveCampus($campusCode);
+                $this->flash->set('success', 'Kampus aktif berhasil diubah.');
+            } else {
+                $this->flash->set('errors', ['Anda tidak memiliki hak akses ke kampus tersebut.']);
+            }
+        }
+
+        $referrer = $request->getHeaderLine('Referer');
+        $redirectUrl = $referrer !== '' ? $referrer : $this->urlGenerator->generate('home');
+        return $this->responseFactory->createResponse(302)
+            ->withHeader('Location', $redirectUrl);
+    }
 }
 
 // Inline helper to prevent importing too many libraries in controller

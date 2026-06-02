@@ -18,6 +18,9 @@ class Entitas
     #[Column(type: 'string(255)')]
     public string $nama = '';
 
+    #[Column(type: 'string(4)', name: 'kode_kampus', nullable: true)]
+    public ?string $kodeKampus = null;
+
     #[Column(type: 'integer', name: 'modul_id', nullable: true)]
     public ?int $modulId = null;
 

@@ -26,6 +26,9 @@ class AnggotaEntitas
     #[Column(type: 'string(255)', name: 'nama_anggota')]
     public string $namaAnggota = '';
 
+    #[Column(type: 'string(4)', name: 'kode_kampus', nullable: true)]
+    public ?string $kodeKampus = null;
+
     #[Column(type: 'string(255)', nullable: true)]
     public ?string $jabatan = null;
 

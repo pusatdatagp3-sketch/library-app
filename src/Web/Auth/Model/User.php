@@ -6,6 +6,7 @@ namespace App\Web\Auth\Model;
 
 use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
+use Cycle\Annotated\Annotation\Relation\HasMany;
 
 #[Entity(role: 'user', table: 'users')]
 class User
@@ -27,4 +28,7 @@ class User
 
     #[Column(type: 'datetime', name: 'created_at', nullable: true)]
     public ?\DateTimeImmutable $createdAt = null;
+
+    #[HasMany(target: AuthUserKampus::class, innerKey: 'id', outerKey: 'userId', load: 'eager')]
+    public array $allowedCampuses = [];
 }

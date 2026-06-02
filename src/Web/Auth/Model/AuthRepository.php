@@ -41,6 +41,35 @@ final class AuthRepository
             $this->entityManager->persist($user);
         }
         $this->entityManager->run();
+
+        // Seed campus mappings
+        $adminUser = $this->repository->select()->where('username', 'admin')->fetchOne();
+        if ($adminUser !== null) {
+            $auc = new AuthUserKampus();
+            $auc->userId = $adminUser->id;
+            $auc->kodeKampus = 'G1';
+            $this->entityManager->persist($auc);
+            
+            $auc2 = new AuthUserKampus();
+            $auc2->userId = $adminUser->id;
+            $auc2->kodeKampus = 'G2';
+            $this->entityManager->persist($auc2);
+        }
+        $operatorUser = $this->repository->select()->where('username', 'operator')->fetchOne();
+        if ($operatorUser !== null) {
+            $auc = new AuthUserKampus();
+            $auc->userId = $operatorUser->id;
+            $auc->kodeKampus = 'G1';
+            $this->entityManager->persist($auc);
+        }
+        $guruUser = $this->repository->select()->where('username', 'guru')->fetchOne();
+        if ($guruUser !== null) {
+            $auc = new AuthUserKampus();
+            $auc->userId = $guruUser->id;
+            $auc->kodeKampus = 'G2';
+            $this->entityManager->persist($auc);
+        }
+        $this->entityManager->run();
     }
 
     public function findByUsername(string $username): ?array
@@ -115,13 +144,18 @@ final class AuthRepository
 
     private function toArray(User $user): array
     {
+        $allowedCampuses = [];
+        foreach ($user->allowedCampuses as $uc) {
+            $allowedCampuses[] = $uc->kodeKampus;
+        }
         return [
-            'id'            => $user->id,
-            'username'      => $user->username,
-            'email'         => $user->email,
-            'password_hash' => $user->passwordHash,
-            'role'          => $user->role,
-            'created_at'    => $user->createdAt?->format('Y-m-d H:i:s'),
+            'id'               => $user->id,
+            'username'         => $user->username,
+            'email'            => $user->email,
+            'password_hash'    => $user->passwordHash,
+            'role'             => $user->role,
+            'created_at'       => $user->createdAt?->format('Y-m-d H:i:s'),
+            'allowed_campuses' => $allowedCampuses,
         ];
     }
 }

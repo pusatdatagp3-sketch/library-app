@@ -38,6 +38,9 @@ return [
     ],
 
     'yiisoft/yii-cycle' => [
+        'migrations' => [
+            'table' => 'cycle_migration',
+        ],
         'dbal' => [
             'default' => 'default',
             'databases' => [

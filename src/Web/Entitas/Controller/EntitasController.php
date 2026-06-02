@@ -9,6 +9,7 @@ use App\Web\Entitas\Model\AnggotaEntitas;
 use App\Web\Modul\Model\Modul;
 use App\Web\Program\Model\Program;
 use App\Web\Auth\Model\User;
+use App\Shared\TenantContext;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -34,7 +35,8 @@ final class EntitasController
         private CurrentRoute $currentRoute,
         private FlashInterface $flash,
         private ORMInterface $orm,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private TenantContext $tenantContext
     ) {
         $this->entitasRepository = $orm->getRepository(Entitas::class);
         $this->anggotaRepository = $orm->getRepository(AnggotaEntitas::class);
@@ -98,6 +100,7 @@ final class EntitasController
         [$modulId, $prefix, $modulTitle, $indexRoute] = $this->getModulContext();
         $model = new Entitas();
         $model->modulId = $modulId;
+        $model->kodeKampus = $this->tenantContext->getActiveCampusCode();
 
         if ($request->getMethod() === 'POST') {
             $data = (array) $request->getParsedBody();
@@ -214,6 +217,7 @@ final class EntitasController
         $data = (array) $request->getParsedBody();
         $member = new AnggotaEntitas();
         $member->entitasId = $id;
+        $member->kodeKampus = $this->tenantContext->getActiveCampusCode();
         $member->load($data);
 
         if ($member->validate()) {

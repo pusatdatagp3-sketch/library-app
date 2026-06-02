@@ -30,6 +30,9 @@ return [
     Route::post('/logout')
         ->action([AuthController::class, 'logout'])
         ->name('logout'),
+    Route::post('/select-campus')
+        ->action([AuthController::class, 'selectCampus'])
+        ->name('select-campus'),
 
 
 

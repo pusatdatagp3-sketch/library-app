@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Web\NotFound\Controller\NotFoundHandler;
+use App\Web\Middleware\TenantContextMiddleware;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
 use Yiisoft\Definitions\DynamicReference;
 use Yiisoft\Definitions\Reference;
@@ -26,14 +27,19 @@ return [
             'dispatcher' => DynamicReference::to([
                 'class' => MiddlewareDispatcher::class,
                 'withMiddlewares()' => [
-                    [
-                        ErrorCatcher::class,
-                        SessionMiddleware::class,
-                        CsrfTokenMiddleware::class,
-                        RequestCatcherMiddleware::class,
-                        Subfolder::class,
-                        Router::class,
-                    ],
+                    array_merge(
+                        \App\Environment::isTest() ? [] : [ErrorCatcher::class],
+                        [
+                            SessionMiddleware::class,
+                        ],
+                        \App\Environment::isTest() ? [] : [CsrfTokenMiddleware::class],
+                        [
+                            TenantContextMiddleware::class,
+                            RequestCatcherMiddleware::class,
+                            Subfolder::class,
+                            Router::class,
+                        ]
+                    ),
                 ],
             ]),
             'fallbackHandler' => Reference::to(NotFoundHandler::class),

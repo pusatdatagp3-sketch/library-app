@@ -276,6 +276,43 @@
 
                     <!-- Profile Info / Login -->
                     <?php if ($userSession->isLoggedIn()): ?>
+                    <?php 
+                        $campuses = $userSession->getCampusList();
+                        $activeCampus = $userSession->getActiveCampus();
+                    ?>
+                    <?php if (count($campuses) > 1): ?>
+                        <div class="campus-dropdown" id="campus-dropdown">
+                            <button type="button" class="campus-dropdown-btn" id="campus-dropdown-btn">
+                                <i class="ri-home-office-line campus-icon"></i>
+                                <span class="active-campus-name"><?php echo Html::encode($campuses[$activeCampus] ?? $activeCampus) ?></span>
+                                <i class="ri-arrow-down-s-line campus-arrow"></i>
+                            </button>
+                            <div class="campus-dropdown-menu" id="campus-dropdown-menu">
+                                <div class="campus-dropdown-header">Pilih Unit/Kampus</div>
+                                <?php foreach ($campuses as $code => $name): ?>
+                                    <button type="button" 
+                                            class="campus-dropdown-item <?php echo $code === $activeCampus ? 'active' : '' ?>"
+                                            data-value="<?php echo Html::encode($code) ?>">
+                                        <span class="campus-item-code"><?php echo Html::encode($code) ?></span>
+                                        <span class="campus-item-name"><?php echo Html::encode($name) ?></span>
+                                        <?php if ($code === $activeCampus): ?>
+                                            <i class="ri-checkbox-circle-fill campus-item-check"></i>
+                                        <?php endif; ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <form action="<?php echo $urlGenerator->generate('select-campus') ?>" method="POST" style="display: none;" id="campus-switcher-form">
+                            <input type="hidden" name="_csrf" value="<?php echo Html::encode($csrf) ?>">
+                            <input type="hidden" name="campus_code" id="campus-switcher-input" value="">
+                        </form>
+                    <?php elseif (count($campuses) === 1): ?>
+                        <div class="campus-badge-single">
+                            <i class="ri-home-office-line campus-icon"></i>
+                            <span><?php echo Html::encode(reset($campuses)) ?></span>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="user-profile-badge">
                         <div class="avatar-circle">
                             <?php echo strtoupper(substr($userSession->getUsername() ?? 'U', 0, 2)) ?>
@@ -368,6 +405,33 @@
         if (sidebarOverlay) {
             sidebarOverlay.addEventListener('click', function() {
                 document.body.classList.remove('sidebar-open');
+            });
+        }
+
+        // Custom Campus Dropdown Toggle and Submission
+        const campusDropdown = document.getElementById('campus-dropdown');
+        const campusDropdownBtn = document.getElementById('campus-dropdown-btn');
+        const campusSwitcherForm = document.getElementById('campus-switcher-form');
+        const campusSwitcherInput = document.getElementById('campus-switcher-input');
+
+        if (campusDropdown && campusDropdownBtn) {
+            campusDropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                campusDropdown.classList.toggle('open');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!campusDropdown.contains(e.target)) {
+                    campusDropdown.classList.remove('open');
+                }
+            });
+
+            campusDropdown.querySelectorAll('.campus-dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    campusSwitcherInput.value = value;
+                    campusSwitcherForm.submit();
+                });
             });
         }
     });

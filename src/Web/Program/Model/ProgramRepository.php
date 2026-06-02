@@ -5,9 +5,29 @@ declare(strict_types=1);
 namespace App\Web\Program\Model;
 
 use Cycle\ORM\Select\Repository;
+use App\Shared\TenantContext;
+use Cycle\ORM\Select;
 
 class ProgramRepository extends Repository
 {
+    private TenantContext $tenantContext;
+
+    public function __construct(Select $select, TenantContext $tenantContext)
+    {
+        parent::__construct($select);
+        $this->tenantContext = $tenantContext;
+    }
+
+    public function select(): Select
+    {
+        $select = parent::select();
+        $activeCampus = $this->tenantContext->getActiveCampusCode();
+        if ($activeCampus !== null) {
+            $select = $select->where('kode_kampus', $activeCampus);
+        }
+        return $select;
+    }
+
     /**
      * @return Program[]
      */
@@ -21,6 +41,12 @@ class ProgramRepository extends Repository
 
     public function findById(int $id): ?Program
     {
-        return $this->findByPK($id);
+        $entity = $this->findByPK($id);
+        if ($entity !== null && $this->tenantContext->getActiveCampusCode() !== null) {
+            if ($entity->kodeKampus !== $this->tenantContext->getActiveCampusCode()) {
+                return null;
+            }
+        }
+        return $entity;
     }
 }
