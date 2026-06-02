@@ -34,6 +34,14 @@ return [
         ->action([AuthController::class, 'selectCampus'])
         ->name('select-campus'),
 
+    // SSO Routes
+    Route::get('/sso/login')
+        ->action([\App\Web\Auth\Controller\SsoController::class, 'redirect'])
+        ->name('sso-login'),
+    Route::get('/auth/callback')
+        ->action([\App\Web\Auth\Controller\SsoController::class, 'callback'])
+        ->name('auth-callback'),
+
 
 
     // Gii Group protected by RBAC middleware

@@ -64,6 +64,16 @@ $this->setTitle('Masuk ke Sistem');
                 <i class="ri-login-box-line" style="font-size: 1.1rem;"></i>
             </button>
         </form>
+
+        <div style="text-align: center; margin: 1.5rem 0; position: relative;">
+            <span style="background: var(--bg-card); padding: 0 10px; color: var(--text-muted); font-size: 0.85rem; position: relative; z-index: 2;">Atau masuk dengan</span>
+            <div style="border-top: 1px solid var(--border); position: absolute; left: 0; right: 0; top: 50%; z-index: 1;"></div>
+        </div>
+
+        <a href="<?= $urlGenerator->generate('sso-login') ?>" class="btn btn-secondary" style="padding: 12px; font-size: 0.95rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; width: 100%; box-sizing: border-box; text-decoration: none; border: 1px solid var(--border); color: var(--text-main); background: var(--bg-card);">
+            <i class="ri-fingerprint-line" style="font-size: 1.1rem; color: var(--primary);"></i>
+            <span>SSO Hawi</span>
+        </a>
     </div>
 </div>
 

@@ -179,6 +179,12 @@ final class AuthRepository
         $this->entityManager->run();
     }
 
+    public function findByEmail(string $email): ?array
+    {
+        $user = $this->repository->select()->where('email', $email)->fetchOne();
+        return $user ? $this->toArray($user) : null;
+    }
+
     private function toArray(User $user): array
     {
         $allowedCampuses = [];

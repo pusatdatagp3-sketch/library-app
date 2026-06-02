@@ -33,7 +33,11 @@ final class Environment
         self::setString('DB_PORT', '3306');
         self::setString('DB_NAME', 'teqic_yii3');
         self::setString('DB_USER', 'root');
-        self::setString('DB_PASSWORD', 'dummy1!');
+        self::setString('DB_PASSWORD', '');
+        self::setString('HAWI_SSO_URL', 'http://localhost');
+        self::setString('HAWI_SSO_CLIENT_ID', '');
+        self::setString('HAWI_SSO_CLIENT_SECRET', '');
+        self::setString('HAWI_SSO_REDIRECT_URI', 'http://localhost/auth/callback');
     }
 
     /**
@@ -104,6 +108,26 @@ final class Environment
     public static function dbPassword(): string
     {
         return (string) self::$values['DB_PASSWORD'];
+    }
+
+    public static function hawiSsoUrl(): string
+    {
+        return (string) self::$values['HAWI_SSO_URL'];
+    }
+
+    public static function hawiSsoClientId(): string
+    {
+        return (string) self::$values['HAWI_SSO_CLIENT_ID'];
+    }
+
+    public static function hawiSsoClientSecret(): string
+    {
+        return (string) self::$values['HAWI_SSO_CLIENT_SECRET'];
+    }
+
+    public static function hawiSsoRedirectUri(): string
+    {
+        return (string) self::$values['HAWI_SSO_REDIRECT_URI'];
     }
 
     private static function setEnvironment(): void
