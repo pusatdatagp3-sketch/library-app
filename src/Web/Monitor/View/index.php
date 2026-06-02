@@ -119,6 +119,9 @@ $this->setTitle('Monitor');
                                                     <?= Html::encode($task->program->namaProgram) ?>
                                                 </a>
                                             </span>
+                                            <?php if ($task->kodeKampus): ?>
+                                                <span class="badge-campus text-xs" style="font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <h4 class="task-title"><?= Html::encode($task->judul) ?></h4>
 
@@ -171,6 +174,9 @@ $this->setTitle('Monitor');
                                                     <?= Html::encode($task->program->namaProgram) ?>
                                                 </a>
                                             </span>
+                                            <?php if ($task->kodeKampus): ?>
+                                                <span class="badge-campus text-xs" style="font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <h4 class="task-title"><?= Html::encode($task->judul) ?></h4>
 
@@ -223,6 +229,9 @@ $this->setTitle('Monitor');
                                                     <?= Html::encode($task->program->namaProgram) ?>
                                                 </a>
                                             </span>
+                                            <?php if ($task->kodeKampus): ?>
+                                                <span class="badge-campus text-xs" style="font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <h4 class="task-title"><?= Html::encode($task->judul) ?></h4>
 
@@ -318,6 +327,9 @@ $this->setTitle('Monitor');
                                                     <?= Html::encode($task->program->namaProgram) ?>
                                                 </a>
                                             </span>
+                                            <?php if ($task->kodeKampus): ?>
+                                                <span class="badge-campus text-xs" style="font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <h4 class="task-title"><?= Html::encode($task->judul) ?></h4>
 
@@ -379,6 +391,9 @@ $this->setTitle('Monitor');
                                                     <?= Html::encode($task->program->namaProgram) ?>
                                                 </a>
                                             </span>
+                                            <?php if ($task->kodeKampus): ?>
+                                                <span class="badge-campus text-xs" style="font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <h4 class="task-title"><?= Html::encode($task->judul) ?></h4>
 

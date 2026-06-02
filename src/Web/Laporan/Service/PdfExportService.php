@@ -144,6 +144,17 @@ final class PdfExportService
                 display: inline-block;
             }
             
+            .badge-campus {
+                background: #eef2ff;
+                color: #4f46e5;
+                border: 0.5pt solid #c7d2fe;
+                padding: 2pt 4pt;
+                border-radius: 2pt;
+                font-size: 8pt;
+                font-weight: bold;
+                display: inline-block;
+            }
+            
             a { color: #000; text-decoration: none; }
             
             small { font-size: 10pt; }

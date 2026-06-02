@@ -37,9 +37,14 @@ $deleteMemberRoute = "{$prefix}/delete-member";
     <div class="card mb-4 overflow-hidden card-accent">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
-                <span class="badge badge-primary-light mb-2">
-                    <?= Html::encode($modulTitle) ?>
-                </span>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge badge-primary-light">
+                        <?= Html::encode($modulTitle) ?>
+                    </span>
+                    <?php if ($model->kodeKampus): ?>
+                        <span class="badge-campus"><?= Html::encode($model->kodeKampus) ?></span>
+                    <?php endif; ?>
+                </div>
                 <h1 class="text-2xl fw-extrabold mb-2 text-color"><?= Html::encode($model->nama) ?></h1>
                 <p class="text-muted mb-0"><?= Html::encode($model->deskripsi ?? 'Tidak ada deskripsi.') ?></p>
             </div>
@@ -95,7 +100,12 @@ $deleteMemberRoute = "{$prefix}/delete-member";
                         <?php foreach ($programs as $prog): ?>
                             <div class="program-row hover-glow">
                                 <div>
-                                    <h4 class="fw-bold mb-1 m-0"><?= Html::encode($prog->namaProgram) ?></h4>
+                                    <h4 class="fw-bold mb-1 m-0">
+                                        <?= Html::encode($prog->namaProgram) ?>
+                                        <?php if ($prog->kodeKampus): ?>
+                                            <span class="badge-campus text-xs" style="margin-left: 6px; font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($prog->kodeKampus) ?></span>
+                                        <?php endif; ?>
+                                    </h4>
                                     <div class="d-flex gap-3 align-items-center text-sm text-muted flex-wrap">
                                         <span class="inline-flex align-items-center gap-1">
                                             <i class="ri-time-line"></i> <?= Html::encode(ucfirst($prog->periode ?? 'tidak ditentukan')) ?>

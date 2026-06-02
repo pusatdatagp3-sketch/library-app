@@ -69,6 +69,9 @@ $viewRoute   = "{$prefix}/view";
                     <div>
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <span class="badge badge-primary-light">ID: #<?= Html::encode((string)$model->id) ?></span>
+                            <?php if ($model->kodeKampus): ?>
+                                <span class="badge-campus"><?= Html::encode($model->kodeKampus) ?></span>
+                            <?php endif; ?>
                         </div>
                         <h3 class="text-lg fw-bold mb-2 text-color"><?= Html::encode((string)$model->nama) ?></h3>
                         <p class="text-muted text-sm mb-4 line-clamp-3">

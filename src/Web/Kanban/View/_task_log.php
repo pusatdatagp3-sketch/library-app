@@ -22,6 +22,9 @@ $logs = $logs ?? [];
         </h3>
         <p class="text-xs text-muted mb-4">
             <i class="ri-task-line"></i> <?= Html::encode($task->judul) ?>
+            <?php if ($task->kodeKampus): ?>
+                <span class="badge-campus text-xs" style="margin-left: 6px; font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+            <?php endif; ?>
         </p>
 
         <?php if (empty($logs)): ?>

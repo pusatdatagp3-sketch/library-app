@@ -36,6 +36,9 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
             </div>
             <h1 class="text-xl fw-extrabold m-0 d-flex align-items-center gap-2">
                 <i class="ri-kanban-view text-primary"></i> Papan Kanban: <?= Html::encode($program->namaProgram) ?>
+                <?php if ($program->kodeKampus): ?>
+                    <span class="badge-campus" style="margin-left: 8px; font-size: 0.85rem; padding: 3px 8px;"><?= Html::encode($program->kodeKampus) ?></span>
+                <?php endif; ?>
             </h1>
         </div>
 
@@ -84,7 +87,12 @@ $this->setTitle("Papan Kanban - {$program->namaProgram}");
                     <?php foreach ($colTasks as $task): ?>
                         <div class="kanban-card hover-glow" data-task-id="<?= $task->id ?>">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h4 class="text-sm fw-bold m-0 text-color"><?= Html::encode($task->judul) ?></h4>
+                                <h4 class="text-sm fw-bold m-0 text-color">
+                                    <?= Html::encode($task->judul) ?>
+                                    <?php if ($task->kodeKampus): ?>
+                                        <span class="badge-campus text-xs" style="margin-left: 6px; font-size: 0.65rem; padding: 1px 4px;"><?= Html::encode($task->kodeKampus) ?></span>
+                                    <?php endif; ?>
+                                </h4>
                                 <div class="position-relative">
                                     <button onclick="openModal('task-log-modal-<?= $task->id ?>')" class="kanban-card-more-btn" title="Lihat Log">
                                         <i class="ri-eye-line"></i>

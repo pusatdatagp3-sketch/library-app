@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Web\Laporan\Controller;
 
+use App\Web\Auth\Model\UserSession;
 use App\Web\Entitas\Model\Entitas;
 use App\Web\Modul\Model\Modul;
 use App\Web\Program\Model\Program;
 use App\Web\Task\Model\Task;
 use App\Web\Laporan\Service\PdfExportService;
 use Cycle\ORM\ORMInterface;
+use Cycle\Database\DatabaseInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -26,7 +28,9 @@ final class LaporanController
     public function __construct(
         private WebViewRenderer $viewRenderer,
         private ResponseFactoryInterface $responseFactory,
-        private ORMInterface $orm
+        private ORMInterface $orm,
+        private UserSession $userSession,
+        private DatabaseInterface $db
     ) {
         $this->modulRepository = $orm->getRepository(Modul::class);
         $this->entitasRepository = $orm->getRepository(Entitas::class);
@@ -42,26 +46,18 @@ final class LaporanController
         $today = new \DateTime();
         $currentDay = (int)$today->format('w'); // 0=Sunday, 1=Monday, ..., 6=Saturday
         
-        // Calculate Wednesday of current week (or next week if today is Sunday)
-        // Sunday (0) -> skip to next Wed
-        // Monday-Saturday (1-6) -> find Wed of this week
-        
         if ($currentDay == 0) {
-            // Today is Sunday: next Wednesday is 3 days away
             $daysToWednesday = 3;
         } else {
-            // Mon-Sat: Wednesday is at position 3, so:
             $daysToWednesday = 3 - $currentDay;
         }
         
         $wednesday = clone $today;
         $wednesday->modify("{$daysToWednesday} days");
         
-        // Calculate Friday (2 days after Wednesday)
         $friday = clone $wednesday;
         $friday->modify('+2 days');
         
-        // Get dates from query params or use defaults
         $dateFrom = isset($queryParams['date_from']) 
             ? new \DateTime($queryParams['date_from'])
             : $wednesday;
@@ -69,116 +65,20 @@ final class LaporanController
             ? new \DateTime($queryParams['date_to'])
             : $friday;
 
-        // Get all moduls
-        $moduls = $this->modulRepository->select()->orderBy('id', 'ASC')->fetchAll();
-
-        // Get all entitas with their modul
-        $allEntitas = $this->entitasRepository->select()->fetchAll();
-        
-        // Get all tasks with related data
-        $tasks = $this->taskRepository->select()
-            ->load('kanbanColumn')
-            ->load('program')
-            ->load('program.entitas')
-            ->load('program.entitas.modul')
-            ->load('assignedUser')
-            ->fetchAll();
-
-        // Filter tasks by date range if needed
-        // For now, we'll include all tasks and let the view handle filtering
-        
-        // Build hierarchical data: Modul -> Entitas -> Task Status
-        $reportData = [];
-        
-        foreach ($moduls as $modul) {
-            $reportData[$modul->id] = [
-                'modul' => $modul,
-                'entitas' => []
-            ];
-        }
-
-        // Group entitas by modul
-        foreach ($allEntitas as $entitas) {
-            if ($entitas->modulId !== null && isset($reportData[$entitas->modulId])) {
-                $reportData[$entitas->modulId]['entitas'][$entitas->id] = [
-                    'entitas' => $entitas,
-                    'todo' => [],
-                    'done' => [],
-                    'pending' => [],
-                    'rejected' => []
-                ];
-            }
-        }
-
-        // Categorize tasks
-        foreach ($tasks as $task) {
-            if ($task->kanbanColumn === null || $task->program === null) {
-                continue;
-            }
-
-            $program = $task->program;
-            if ($program->entitas === null || $program->entitas->modulId === null) {
-                continue;
-            }
-
-            $modulId = $program->entitas->modulId;
-            $entitasId = $program->entitasId;
-
-            // Check if entitas exists in report data
-            if (!isset($reportData[$modulId]['entitas'][$entitasId])) {
-                continue;
-            }
-
-            $colNameLower = strtolower($task->kanbanColumn->nama);
-            
-            // Categorize based on kanban column name
-            $isTodo = str_contains($colNameLower, 'todo') || 
-                     str_contains($colNameLower, 'to do') || 
-                     str_contains($colNameLower, 'rencana');
-            $isDone = str_contains($colNameLower, 'done') || 
-                     str_contains($colNameLower, 'selesai');
-            $isPending = str_contains($colNameLower, 'pending') || 
-                        str_contains($colNameLower, 'tunda');
-            $isRejected = str_contains($colNameLower, 'rejected') || 
-                         str_contains($colNameLower, 'tolak');
-
-            // Skip if none of the categories match
-            if (!$isTodo && !$isDone && !$isPending && !$isRejected) {
-                continue;
-            }
-
-            // Add task to appropriate category
-            if ($isDone) {
-                $reportData[$modulId]['entitas'][$entitasId]['done'][] = $task;
-            } elseif ($isRejected) {
-                $reportData[$modulId]['entitas'][$entitasId]['rejected'][] = $task;
-            } elseif ($isPending) {
-                $reportData[$modulId]['entitas'][$entitasId]['pending'][] = $task;
-            } elseif ($isTodo) {
-                $reportData[$modulId]['entitas'][$entitasId]['todo'][] = $task;
-            }
-        }
-
-        // Remove moduls with no entitas
-        foreach ($reportData as $modulId => $data) {
-            if (empty($data['entitas'])) {
-                unset($reportData[$modulId]);
-            }
-        }
+        $reportData = $this->buildReportData();
 
         return $this->viewRenderer->render(__DIR__ . '/../View/index', [
             'reportData' => $reportData,
-            'dateFrom' => $dateFrom,
-            'dateTo' => $dateTo,
+            'dateFrom'   => $dateFrom,
+            'dateTo'     => $dateTo,
         ]);
     }
 
     public function exportPdf(ServerRequestInterface $request): ResponseInterface
     {
         $queryParams = $request->getQueryParams();
-        $parsedBody = $request->getParsedBody();
+        $parsedBody  = $request->getParsedBody();
         
-        // Get date range from query params or parsed body
         $today = new \DateTime();
         $currentDay = (int)$today->format('w');
         
@@ -195,7 +95,7 @@ final class LaporanController
         $friday->modify('+2 days');
         
         $dateFromVal = $parsedBody['date_from'] ?? $queryParams['date_from'] ?? null;
-        $dateToVal = $parsedBody['date_to'] ?? $queryParams['date_to'] ?? null;
+        $dateToVal   = $parsedBody['date_to']   ?? $queryParams['date_to']   ?? null;
 
         $dateFrom = !empty($dateFromVal) && is_string($dateFromVal)
             ? new \DateTime($dateFromVal)
@@ -204,100 +104,13 @@ final class LaporanController
             ? new \DateTime($dateToVal)
             : $friday;
 
-        // Get all moduls, entitas, and tasks (same as index method)
-        $moduls = $this->modulRepository->select()->orderBy('id', 'ASC')->fetchAll();
-        $allEntitas = $this->entitasRepository->select()->fetchAll();
-        
-        $tasks = $this->taskRepository->select()
-            ->load('kanbanColumn')
-            ->load('program')
-            ->load('program.entitas')
-            ->load('program.entitas.modul')
-            ->load('assignedUser')
-            ->fetchAll();
+        $reportData = $this->buildReportData();
 
-        // Build hierarchical data
-        $reportData = [];
-        
-        foreach ($moduls as $modul) {
-            $reportData[$modul->id] = [
-                'modul' => $modul,
-                'entitas' => []
-            ];
-        }
-
-        foreach ($allEntitas as $entitas) {
-            if ($entitas->modulId !== null && isset($reportData[$entitas->modulId])) {
-                $reportData[$entitas->modulId]['entitas'][$entitas->id] = [
-                    'entitas' => $entitas,
-                    'todo' => [],
-                    'done' => [],
-                    'pending' => [],
-                    'rejected' => []
-                ];
-            }
-        }
-
-        // Categorize tasks
-        foreach ($tasks as $task) {
-            if ($task->kanbanColumn === null || $task->program === null) {
-                continue;
-            }
-
-            $program = $task->program;
-            if ($program->entitas === null || $program->entitas->modulId === null) {
-                continue;
-            }
-
-            $modulId = $program->entitas->modulId;
-            $entitasId = $program->entitasId;
-
-            if (!isset($reportData[$modulId]['entitas'][$entitasId])) {
-                continue;
-            }
-
-            $colNameLower = strtolower($task->kanbanColumn->nama);
-            
-            $isTodo = str_contains($colNameLower, 'todo') || 
-                     str_contains($colNameLower, 'to do') || 
-                     str_contains($colNameLower, 'rencana');
-            $isDone = str_contains($colNameLower, 'done') || 
-                     str_contains($colNameLower, 'selesai');
-            $isPending = str_contains($colNameLower, 'pending') || 
-                        str_contains($colNameLower, 'tunda');
-            $isRejected = str_contains($colNameLower, 'rejected') || 
-                         str_contains($colNameLower, 'tolak');
-
-            if (!$isTodo && !$isDone && !$isPending && !$isRejected) {
-                continue;
-            }
-
-            if ($isDone) {
-                $reportData[$modulId]['entitas'][$entitasId]['done'][] = $task;
-            } elseif ($isRejected) {
-                $reportData[$modulId]['entitas'][$entitasId]['rejected'][] = $task;
-            } elseif ($isPending) {
-                $reportData[$modulId]['entitas'][$entitasId]['pending'][] = $task;
-            } elseif ($isTodo) {
-                $reportData[$modulId]['entitas'][$entitasId]['todo'][] = $task;
-            }
-        }
-
-        // Remove moduls with no entitas
-        foreach ($reportData as $modulId => $data) {
-            if (empty($data['entitas'])) {
-                unset($reportData[$modulId]);
-            }
-        }
-
-        // Generate HTML directly (without rendering view to avoid SVG icons)
         $html = $this->generateHtmlReport($reportData, $dateFrom, $dateTo);
 
-        // Generate PDF
         $pdfService = new PdfExportService();
         $pdf = $pdfService->generatePdf($html);
 
-        // Return PDF response
         $response = $this->responseFactory->createResponse();
         $response = $response
             ->withHeader('Content-Type', 'application/pdf')
@@ -309,13 +122,140 @@ final class LaporanController
         return $response;
     }
 
+    /**
+     * Build hierarchical report data: kampus → modul → entitas → task buckets.
+     * Only campuses allowed by the current user session are included.
+     */
+    private function buildReportData(): array
+    {
+        // Resolve kampus list: use allowed campuses from session
+        $allowedCampuses = $this->userSession->getAllowedCampuses();
+        if (empty($allowedCampuses)) {
+            return [];
+        }
+
+        // Load kampus names from list_kampus
+        $campusNames = [];
+        $rows = $this->db->select('kode', 'nama')
+            ->from('list_kampus')
+            ->where('kode', 'in', $allowedCampuses)
+            ->fetchAll();
+        foreach ($rows as $row) {
+            $campusNames[$row['kode']] = $row['nama'];
+        }
+
+        // Load moduls
+        $moduls = $this->modulRepository->select()->orderBy('id', 'ASC')->fetchAll();
+
+        // Load entitas with their campus code
+        $allEntitas = $this->entitasRepository->select()->fetchAll();
+
+        // Load tasks with relations
+        $tasks = $this->taskRepository->select()
+            ->load('kanbanColumn')
+            ->load('program')
+            ->load('program.entitas')
+            ->load('program.entitas.modul')
+            ->load('assignedUser')
+            ->fetchAll();
+
+        // Build skeleton: kampus → modul → entitas
+        $reportData = [];
+
+        foreach ($allowedCampuses as $kode) {
+            $reportData[$kode] = [
+                'kode'  => $kode,
+                'nama'  => $campusNames[$kode] ?? $kode,
+                'modul' => [],
+            ];
+            foreach ($moduls as $modul) {
+                $reportData[$kode]['modul'][$modul->id] = [
+                    'modul'   => $modul,
+                    'entitas' => [],
+                ];
+            }
+        }
+
+        // Group entitas into the skeleton (filtered by allowed campuses)
+        foreach ($allEntitas as $entitas) {
+            $kode    = $entitas->kodeKampus;
+            $modulId = $entitas->modulId;
+            if ($kode === null || !isset($reportData[$kode])) {
+                continue;
+            }
+            if ($modulId === null || !isset($reportData[$kode]['modul'][$modulId])) {
+                continue;
+            }
+            $reportData[$kode]['modul'][$modulId]['entitas'][$entitas->id] = [
+                'entitas'  => $entitas,
+                'todo'     => [],
+                'done'     => [],
+                'pending'  => [],
+                'rejected' => [],
+            ];
+        }
+
+        // Categorise tasks
+        foreach ($tasks as $task) {
+            if ($task->kanbanColumn === null || $task->program === null) {
+                continue;
+            }
+            $program = $task->program;
+            if ($program->entitas === null || $program->entitas->modulId === null) {
+                continue;
+            }
+
+            $kode      = $program->entitas->kodeKampus;
+            $modulId   = $program->entitas->modulId;
+            $entitasId = $program->entitasId;
+
+            if ($kode === null || !isset($reportData[$kode]['modul'][$modulId]['entitas'][$entitasId])) {
+                continue;
+            }
+
+            $colNameLower = strtolower($task->kanbanColumn->nama);
+
+            $isTodo     = str_contains($colNameLower, 'todo')     || str_contains($colNameLower, 'to do')   || str_contains($colNameLower, 'rencana');
+            $isDone     = str_contains($colNameLower, 'done')     || str_contains($colNameLower, 'selesai');
+            $isPending  = str_contains($colNameLower, 'pending')  || str_contains($colNameLower, 'tunda');
+            $isRejected = str_contains($colNameLower, 'rejected') || str_contains($colNameLower, 'tolak');
+
+            if (!$isTodo && !$isDone && !$isPending && !$isRejected) {
+                continue;
+            }
+
+            $bucket = &$reportData[$kode]['modul'][$modulId]['entitas'][$entitasId];
+            if ($isDone)         { $bucket['done'][]     = $task; }
+            elseif ($isRejected) { $bucket['rejected'][] = $task; }
+            elseif ($isPending)  { $bucket['pending'][]  = $task; }
+            elseif ($isTodo)     { $bucket['todo'][]     = $task; }
+            unset($bucket);
+        }
+
+        // Prune empty moduls, then empty campuses
+        foreach ($reportData as $kode => &$campusData) {
+            foreach ($campusData['modul'] as $modulId => &$modulData) {
+                if (empty($modulData['entitas'])) {
+                    unset($campusData['modul'][$modulId]);
+                }
+            }
+            unset($modulData);
+            if (empty($campusData['modul'])) {
+                unset($reportData[$kode]);
+            }
+        }
+        unset($campusData);
+
+        return $reportData;
+    }
+
     private function generateHtmlReport(array $reportData, \DateTime $dateFrom, \DateTime $dateTo): string
     {
         $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Laporan Program Kerja</title></head><body>';
         
         $kopPath = '';
         foreach (['png', 'jpg', 'jpeg'] as $ext) {
-            $path = dirname(__DIR__, 4) . '/public/assets/kop-surat.' . $ext;
+            $path = dirname(__DIR__, 4) . '/public/kop-surat.' . $ext;
             if (is_file($path)) {
                 $kopPath = $path;
                 break;
@@ -323,8 +263,8 @@ final class LaporanController
         }
         
         if ($kopPath !== '') {
-            $ext = pathinfo($kopPath, PATHINFO_EXTENSION);
-            $mimeType = strtolower($ext) === 'png' ? 'image/png' : 'image/jpeg';
+            $ext       = pathinfo($kopPath, PATHINFO_EXTENSION);
+            $mimeType  = strtolower($ext) === 'png' ? 'image/png' : 'image/jpeg';
             $imageData = base64_encode(file_get_contents($kopPath));
             
             $html .= '<div style="margin: -1cm -1cm 0cm -1cm; width: 21cm; height: 4cm; overflow: hidden;">';
@@ -332,13 +272,8 @@ final class LaporanController
             $html .= '</div>';
         }
         
-        // No margins
         $html .= '<div style="margin: 0; padding: 0; font-family: \'Book Antiqua\', Georgia, serif; line-height: 1.5;">';
-        
-        // Title
         $html .= '<h1 style="text-align: center; font-size: 16pt; font-weight: bold; margin: 0 0 12pt 0;">Laporan Program Kerja</h1>';
-        
-        // Date range
         $html .= '<p style="text-align: center; font-size: 11pt; margin: 0 0 18pt 0; line-height: 1.5;">';
         $html .= 'Periode: <strong>' . $dateFrom->format('d-m-Y') . '</strong> s/d <strong>' . $dateTo->format('d-m-Y') . '</strong><br>';
         $html .= 'Tanggal Generate: ' . date('d-m-Y H:i:s');
@@ -347,118 +282,127 @@ final class LaporanController
         if (empty($reportData)) {
             $html .= '<p style="text-align: center; color: #666; margin: 12pt 0;">Tidak ada data untuk periode yang dipilih.</p>';
         } else {
-            $modulCounter = 0;
-            foreach ($reportData as $modulId => $modulData) {
-                $modulCounter++;
-                $modulLetter = chr(64 + $modulCounter); // A, B, C, D, etc.
-                
-                $html .= '<div style="margin: 0 0 18pt 0;">';
-                
-                // H1: Modul dengan format A. B. C.
-                $html .= '<h2 style="font-size: 14pt; font-weight: bold; border-bottom: 1pt solid #000; padding: 0 0 6pt 0; margin: 0 0 12pt 0;">';
-                $html .= $modulLetter . '. ' . strtoupper(htmlspecialchars($modulData['modul']->nama ?? 'Unknown'));
+            $campusCounter = 0;
+            foreach ($reportData as $kode => $campusData) {
+                $campusCounter++;
+                $campusLetter = chr(64 + $campusCounter); // A, B, C …
+
+                // ── Campus heading ──────────────────────────────────────────────
+                $html .= '<div style="margin: 0 0 24pt 0;">';
+                $html .= '<h2 style="font-size: 15pt; font-weight: bold; background: #333; color: #fff; padding: 6pt 10pt; margin: 0 0 14pt 0;">';
+                $html .= $campusLetter . '. ' . strtoupper(htmlspecialchars($campusData['nama']));
+                $html .= ' <span style="font-size: 9pt; font-weight: normal; color: #ccc;">(' . htmlspecialchars($kode) . ')</span>';
                 $html .= '</h2>';
-                
-                $entitasCounter = 0;
-                foreach ($modulData['entitas'] as $entitasId => $entitasData) {
-                    $entitasCounter++;
-                    
-                    $html .= '<div style="margin: 0 0 12pt 0;">';
-                    
-                    // H2: Entitas dengan format 1. 2. 3.
-                    $html .= '<h3 style="font-size: 12pt; font-weight: bold; border-left: 2pt solid #333; padding: 0 0 0 12pt; margin: 0 0 10pt 0; line-height: 1.5;">';
-                    $html .= $entitasCounter . '. ' . htmlspecialchars($entitasData['entitas']->nama);
+
+                $modulCounter = 0;
+                foreach ($campusData['modul'] as $modulId => $modulData) {
+                    $modulCounter++;
+                    $modulLetter = chr(64 + $modulCounter); // A, B, C …
+
+                    // ── Modul heading ────────────────────────────────────────────
+                    $html .= '<div style="margin: 0 0 16pt 12pt;">';
+                    $html .= '<h3 style="font-size: 13pt; font-weight: bold; border-bottom: 1pt solid #555; padding: 0 0 4pt 0; margin: 0 0 10pt 0;">';
+                    $html .= $campusLetter . $modulLetter . '. ' . strtoupper(htmlspecialchars($modulData['modul']->nama ?? 'Unknown'));
                     $html .= '</h3>';
-                    
-                    $html .= '<div style="margin-left: 20pt;">';
-                    
-                    // Hasil Usaha
-                    if (!empty($entitasData['done'])) {
-                        $html .= '<div style="margin: 0 0 12pt 0;">';
-                        $html .= '<h4 style="font-size: 11pt; font-weight: bold; margin: 0 0 6pt 0;">Hasil Usaha</h4>';
-                        $html .= '<div style="margin-left: 12pt;">';
-                        foreach ($entitasData['done'] as $index => $task) {
-                            $line2Parts = [];
-                            if ($task->deskripsi) {
-                                $line2Parts[] = htmlspecialchars($task->deskripsi);
+
+                    $entitasCounter = 0;
+                    foreach ($modulData['entitas'] as $entitasId => $entitasData) {
+                        $entitasCounter++;
+
+                        // ── Entitas heading ──────────────────────────────────────
+                        $html .= '<div style="margin: 0 0 12pt 14pt;">';
+                        $html .= '<h4 style="font-size: 12pt; font-weight: bold; border-left: 2pt solid #555; padding: 0 0 0 10pt; margin: 0 0 8pt 0; line-height: 1.5;">';
+                        $html .= $entitasCounter . '. ' . htmlspecialchars($entitasData['entitas']->nama);
+                        $html .= '</h4>';
+                        $html .= '<div style="margin-left: 20pt;">';
+
+                        // Hasil Usaha (Done)
+                        if (!empty($entitasData['done'])) {
+                            $html .= '<div style="margin: 0 0 10pt 0;">';
+                            $html .= '<h5 style="font-size: 11pt; font-weight: bold; margin: 0 0 5pt 0;">Hasil Usaha</h5>';
+                            $html .= '<div style="margin-left: 10pt;">';
+                            foreach ($entitasData['done'] as $index => $task) {
+                                $line2Parts = [];
+                                if ($task->deskripsi) {
+                                    $line2Parts[] = htmlspecialchars($task->deskripsi);
+                                }
+                                if ($task->assignedUser) {
+                                    $line2Parts[] = 'PIC: ' . htmlspecialchars($task->assignedUser->namaAnggota ?? 'N/A');
+                                }
+                                $html .= '<p style="margin: 0 0 5pt 0; font-size: 11pt; line-height: 1.5;">';
+                                $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
+                                if (!empty($line2Parts)) {
+                                    $html .= '<br>' . implode(' | ', $line2Parts);
+                                }
+                                $html .= '</p>';
                             }
-                            if ($task->assignedUser) {
-                                $line2Parts[] = 'PIC: ' . htmlspecialchars($task->assignedUser->namaAnggota ?? 'N/A');
-                            }
-                            
-                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
-                            $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
-                            if (!empty($line2Parts)) {
-                                $html .= '<br>' . implode(' | ', $line2Parts);
-                            }
-                            $html .= '</p>';
+                            $html .= '</div></div>';
                         }
-                        $html .= '</div></div>';
+
+                        // Kendala (Rejected & Pending)
+                        if (!empty($entitasData['rejected']) || !empty($entitasData['pending'])) {
+                            $html .= '<div style="margin: 0 0 10pt 0;">';
+                            $html .= '<h5 style="font-size: 11pt; font-weight: bold; margin: 0 0 5pt 0;">Kendala</h5>';
+                            $html .= '<div style="margin-left: 10pt;">';
+                            $kendalaIndex = 1;
+                            foreach ($entitasData['rejected'] as $task) {
+                                $html .= '<p style="margin: 0 0 5pt 0; font-size: 11pt; line-height: 1.5;">';
+                                $html .= '<strong>' . ($kendalaIndex++) . '. ' . htmlspecialchars($task->judul) . '</strong> ';
+                                $html .= '<span style="background: #ccc; padding: 1pt 3pt; font-size: 9pt;">DITOLAK</span>';
+                                if ($task->deskripsi) {
+                                    $html .= '<br>' . nl2br(htmlspecialchars($task->deskripsi));
+                                }
+                                $html .= '</p>';
+                            }
+                            foreach ($entitasData['pending'] as $task) {
+                                $html .= '<p style="margin: 0 0 5pt 0; font-size: 11pt; line-height: 1.5;">';
+                                $html .= '<strong>' . ($kendalaIndex++) . '. ' . htmlspecialchars($task->judul) . '</strong> ';
+                                $html .= '<span style="background: #fcc; padding: 1pt 3pt; font-size: 9pt;">TERTUNDA</span>';
+                                if ($task->deskripsi) {
+                                    $html .= '<br>' . nl2br(htmlspecialchars($task->deskripsi));
+                                }
+                                $html .= '</p>';
+                            }
+                            $html .= '</div></div>';
+                        }
+
+                        // Program Kerja Mendatang (Todo)
+                        if (!empty($entitasData['todo'])) {
+                            $html .= '<div style="margin: 0 0 10pt 0;">';
+                            $html .= '<h5 style="font-size: 11pt; font-weight: bold; margin: 0 0 5pt 0;">Program Kerja Mendatang</h5>';
+                            $html .= '<div style="margin-left: 10pt;">';
+                            foreach ($entitasData['todo'] as $index => $task) {
+                                $line2Parts = [];
+                                if ($task->deskripsi) {
+                                    $line2Parts[] = htmlspecialchars($task->deskripsi);
+                                }
+                                $details = [];
+                                if ($task->deadline) {
+                                    $details[] = 'Target: ' . $task->deadline->format('d-m-Y');
+                                }
+                                if ($task->progress > 0) {
+                                    $details[] = 'Progress: ' . $task->progress . '%';
+                                }
+                                if (!empty($details)) {
+                                    $line2Parts[] = implode(', ', $details);
+                                }
+                                $html .= '<p style="margin: 0 0 5pt 0; font-size: 11pt; line-height: 1.5;">';
+                                $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
+                                if (!empty($line2Parts)) {
+                                    $html .= '<br>' . implode(' | ', $line2Parts);
+                                }
+                                $html .= '</p>';
+                            }
+                            $html .= '</div></div>';
+                        }
+
+                        $html .= '</div></div>'; // close entitas body + wrapper
                     }
-                    
-                    // Kendala
-                    if (!empty($entitasData['rejected']) || !empty($entitasData['pending'])) {
-                        $html .= '<div style="margin: 0 0 12pt 0;">';
-                        $html .= '<h4 style="font-size: 11pt; font-weight: bold; margin: 0 0 6pt 0;">Kendala</h4>';
-                        $html .= '<div style="margin-left: 12pt;">';
-                        $kendalaIndex = 1;
-                        foreach ($entitasData['rejected'] as $task) {
-                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
-                            $html .= '<strong>' . ($kendalaIndex++) . '. ' . htmlspecialchars($task->judul) . '</strong> ';
-                            $html .= '<span style="background: #ccc; padding: 1pt 3pt; font-size: 9pt;">DITOLAK</span>';
-                            if ($task->deskripsi) {
-                                $html .= '<br>' . nl2br(htmlspecialchars($task->deskripsi));
-                            }
-                            $html .= '</p>';
-                        }
-                        foreach ($entitasData['pending'] as $task) {
-                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
-                            $html .= '<strong>' . ($kendalaIndex++) . '. ' . htmlspecialchars($task->judul) . '</strong> ';
-                            $html .= '<span style="background: #fcc; padding: 1pt 3pt; font-size: 9pt;">TERTUNDA</span>';
-                            if ($task->deskripsi) {
-                                $html .= '<br>' . nl2br(htmlspecialchars($task->deskripsi));
-                            }
-                            $html .= '</p>';
-                        }
-                        $html .= '</div></div>';
-                    }
-                    
-                    // Program Kerja Minggu Depan
-                    if (!empty($entitasData['todo'])) {
-                        $html .= '<div style="margin: 0 0 12pt 0;">';
-                        $html .= '<h4 style="font-size: 11pt; font-weight: bold; margin: 0 0 6pt 0;">Program Kerja Minggu Depan</h4>';
-                        $html .= '<div style="margin-left: 12pt;">';
-                        foreach ($entitasData['todo'] as $index => $task) {
-                            $line2Parts = [];
-                            if ($task->deskripsi) {
-                                $line2Parts[] = htmlspecialchars($task->deskripsi);
-                            }
-                            
-                            $details = [];
-                            if ($task->deadline) {
-                                $details[] = 'Target: ' . $task->deadline->format('d-m-Y');
-                            }
-                            if ($task->progress > 0) {
-                                $details[] = 'Progress: ' . $task->progress . '%';
-                            }
-                            if (!empty($details)) {
-                                $line2Parts[] = implode(', ', $details);
-                            }
-                            
-                            $html .= '<p style="margin: 0 0 6pt 0; font-size: 11pt; line-height: 1.5;">';
-                            $html .= '<strong>' . ($index + 1) . '. ' . htmlspecialchars($task->judul) . '</strong>';
-                            if (!empty($line2Parts)) {
-                                $html .= '<br>' . implode(' | ', $line2Parts);
-                            }
-                            $html .= '</p>';
-                        }
-                        $html .= '</div></div>';
-                    }
-                    
-                    $html .= '</div></div>';
+
+                    $html .= '</div>'; // close modul wrapper
                 }
-                
-                $html .= '</div>';
+
+                $html .= '</div>'; // close campus wrapper
             }
         }
         
@@ -467,4 +411,3 @@ final class LaporanController
         return $html;
     }
 }
-

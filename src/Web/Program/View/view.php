@@ -46,7 +46,12 @@ $baseUrl = $aliases->get('@baseUrl');
                         <?= Html::encode(strtoupper($model->status)) ?>
                     </span>
                 </div>
-                <h1 class="text-2xl fw-extrabold mb-2 text-color"><?= Html::encode($model->namaProgram) ?></h1>
+                <h1 class="text-2xl fw-extrabold mb-2 text-color">
+                    <?= Html::encode($model->namaProgram) ?>
+                    <?php if ($model->kodeKampus): ?>
+                        <span class="badge-campus" style="margin-left: 8px; font-size: 0.85rem; padding: 3px 8px;"><?= Html::encode($model->kodeKampus) ?></span>
+                    <?php endif; ?>
+                </h1>
                 <p class="text-muted mb-2">
                     <i class="ri-user-star-line"></i> Penanggung Jawab: <strong><?= Html::encode($model->penanggungJawab?->namaAnggota ?? 'Belum Ditentukan') ?></strong>
                 </p>
