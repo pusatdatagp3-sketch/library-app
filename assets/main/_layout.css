@@ -1,0 +1,575 @@
+/* Layout Wrapper */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar */
+.admin-sidebar {
+    width: 260px;
+    background: #0f172a;
+    color: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #1e293b;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    z-index: 100;
+}
+
+.sidebar-brand {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px;
+    border-bottom: 1px solid #1e293b;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.sidebar-brand svg {
+    height: 32px;
+    width: auto;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-group-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    margin-bottom: 6px;
+    padding-left: 12px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-menu a svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.sidebar-menu a:hover {
+    color: #ffffff;
+    background: #1e293b;
+}
+
+.sidebar-menu a:hover svg {
+    transform: translateX(2px);
+}
+
+.sidebar-menu a.active {
+    color: #ffffff;
+    background: var(--primary);
+}
+
+/* Main Content Area */
+.admin-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bg-main);
+    transition: background 0.3s ease;
+}
+
+/* Top Header */
+.admin-header {
+    height: 70px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.header-left-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sidebar-toggle {
+    display: flex;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-main);
+    padding: 6px;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+    background: var(--bg-hover);
+}
+
+.sidebar-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+.page-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.header-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Dark Mode Toggle Button */
+.theme-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* App Switcher Shortcut Button */
+.app-shortcut-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.app-shortcut-btn:hover {
+    color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.app-shortcut-btn i {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Content */
+.admin-content {
+    flex-grow: 1;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.content a {
+    color: var(--primary);
+}
+
+.content a:hover {
+    color: var(--primary-hover);
+}
+
+/* CRUD Container */
+.crud-container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.max-w-lg {
+    max-width: 640px;
+}
+
+.crud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.crud-title {
+    font-size: 1.85rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--text-main);
+    letter-spacing: -0.025em;
+}
+
+.crud-subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* Footer styling */
+.admin-footer {
+    padding: 24px 32px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.admin-footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.admin-footer a:hover {
+    color: var(--primary);
+}
+
+.footer_icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.footer_icons a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.footer_icons svg {
+    height: 24px;
+    width: 24px;
+    fill: var(--text-muted);
+    transition: fill 0.2s ease;
+}
+
+.footer_icons a:hover svg {
+    fill: var(--primary);
+}
+
+/* Sticky page/view headers */
+.sticky-page-header {
+    position: sticky;
+    top: 70px; /* Right below the 70px admin-header */
+    z-index: 80;
+    background: var(--bg-main);
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem !important;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body[data-theme="dark"] .sticky-page-header {
+    background: var(--bg-main);
+    border-bottom-color: var(--border);
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    body.sidebar-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    /* Overlay when sidebar open */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 95;
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+    }
+
+    .admin-header {
+        padding: 0 16px;
+    }
+
+    .admin-content {
+        padding: 20px;
+    }
+}
+
+/* Sidebar Collapse on Desktop */
+@media (min-width: 1025px) {
+    .admin-sidebar {
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.sidebar-collapsed .admin-sidebar {
+        width: 70px;
+    }
+
+    body.sidebar-collapsed .sidebar-brand {
+        padding: 0;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    body.sidebar-collapsed .sidebar-brand .logo-full {
+        display: none !important;
+    }
+
+    body.sidebar-collapsed .sidebar-brand .logo-icon {
+        display: block !important;
+    }
+
+    body.sidebar-collapsed .sidebar-brand .brand-text {
+        display: none;
+    }
+
+    body.sidebar-collapsed .nav-group-title {
+        display: none;
+    }
+
+    body.sidebar-collapsed .sidebar-menu a {
+        justify-content: center;
+        padding: 10px 0;
+        /* margin: 0 10px; */
+        gap: 0;
+        overflow: hidden;
+    }
+
+    body.sidebar-collapsed .sidebar-menu a span {
+        display: none;
+    }
+}
+
+/* ==========================
+   DROPDOWN SIDEBAR
+   ========================== */
+
+.sidebar-dropdown {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-dropdown-toggle {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.sidebar-dropdown-toggle:hover {
+    background: #1e293b;
+    color: #fff;
+}
+
+.sidebar-dropdown-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-dropdown-left i {
+    width: 18px;
+    min-width: 18px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.sidebar-dropdown-toggle.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.sidebar-dropdown-toggle.active .dropdown-arrow {
+    color: #fff;
+}
+
+/* ==========================
+   SUBMENU
+   ========================== */
+
+.sidebar-submenu {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+    margin-left: 20px;
+}
+
+.sidebar-dropdown.open .sidebar-submenu {
+    display: flex;
+}
+
+.sidebar-submenu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #94a3b8;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-submenu a:hover {
+    background: #1e293b;
+    color: #fff;
+}
+
+.sidebar-submenu a i {
+    width: 18px;
+    min-width: 18px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.sidebar-submenu a.active {
+    background: rgba(79, 70, 229, 0.15);
+    color: #818cf8;
+}
+
+/* ==========================
+   ARROW
+   ========================== */
+
+.dropdown-arrow {
+    transition: transform 0.3s ease;
+}
+
+.sidebar-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* ==========================
+   COLLAPSED SIDEBAR
+   ========================== */
+
+body.sidebar-collapsed .sidebar-dropdown-toggle {
+    justify-content: center;
+    padding: 10px 0;
+}
+
+body.sidebar-collapsed .sidebar-dropdown-left {
+    justify-content: center;
+}
+
+body.sidebar-collapsed .sidebar-dropdown-left span,
+body.sidebar-collapsed .dropdown-arrow {
+    display: none;
+}
+/* Collapse: default sembunyikan submenu */
+body.sidebar-collapsed .sidebar-submenu {
+    display: none;
+    margin-left: 0;
+}
+
+/* Collapse: tampilkan submenu jika dropdown open */
+body.sidebar-collapsed .sidebar-dropdown.open .sidebar-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Hanya tampilkan icon submenu */
+body.sidebar-collapsed .sidebar-submenu a {
+    justify-content: center;
+    padding: 8px 0;
+}
+
+body.sidebar-collapsed .sidebar-submenu a span {
+    display: none;
+}
+
+body.sidebar-collapsed .sidebar-submenu a i {
+    margin: 0;
+}

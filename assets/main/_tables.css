@@ -1,0 +1,117 @@
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.05),
+        0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.table th {
+    background: var(--bg-hover);
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover td {
+    background: var(--bg-hover);
+}
+
+.email-text {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.email-text:hover {
+    text-decoration: underline;
+}
+
+/* Table Matrix switch controls */
+.table-matrix td {
+    padding: 12px 16px !important;
+}
+
+.perm-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.perm-info strong {
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.perm-info small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* User avatars in table */
+.user-avatar-initials {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-hover);
+    color: var(--text-main);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    border: 1px solid var(--border);
+}
+
+/* --- User row in table (avatar + name) --- */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Filter Row Styles */
+.filter-row {
+    background: var(--bg-hover);
+}
+
+.filter-row td {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid var(--border);
+}
+
+.filter-row .form-control {
+    padding: 6px 12px;
+    font-size: 0.825rem;
+    height: 34px;
+    border-radius: 6px;
+}
+
+.filter-row .gap-1 {
+    gap: 4px;
+}
