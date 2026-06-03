@@ -328,6 +328,35 @@ body {
     height: 20px;
 }
 
+/* App Switcher Shortcut Button */
+.app-shortcut-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.app-shortcut-btn:hover {
+    color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.app-shortcut-btn i {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Content */
 .admin-content {
     flex-grow: 1;

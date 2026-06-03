@@ -258,6 +258,40 @@
                 </div>
 
                 <div class="header-right-actions">
+                    <!-- Dropdown Switch Aplikasi SSO -->
+                    <?php if ($userSession->isLoggedIn()): ?>
+                        <div class="campus-dropdown" id="app-switcher-dropdown" style="margin-right: 8px;">
+                            <button type="button" class="campus-dropdown-btn" id="app-switcher-dropdown-btn" title="Pindah Aplikasi">
+                                <i class="ri-apps-2-line campus-icon"></i>
+                                <span class="active-campus-name">TEQIC</span>
+                                <i class="ri-arrow-down-s-line campus-arrow"></i>
+                            </button>
+                            <div class="campus-dropdown-menu" id="app-switcher-dropdown-menu" style="min-width: 200px;">
+                                <div class="campus-dropdown-header">Pindah Aplikasi</div>
+                                
+                                <a href="<?php echo rtrim(\App\Environment::hawiSsoUrl(), '/') . '/public' ?>" 
+                                   class="campus-dropdown-item font-medium" 
+                                   style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: space-between; width: 100%; border: none; background: transparent; padding: 10px 16px;">
+                                    <span class="campus-item-name">Hawi SSO Portal</span>
+                                </a>
+
+                                <a href="<?php echo rtrim(\App\Environment::dorehUrl(), '/') . '/api/auth/sso/hawi/redirect' ?>" 
+                                   class="campus-dropdown-item" 
+                                   style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: space-between; width: 100%; border: none; background: transparent; padding: 10px 16px;">
+                                    <span class="campus-item-name">DOREH</span>
+                                </a>
+
+                                <button type="button" 
+                                        class="campus-dropdown-item active"
+                                        style="display: flex; align-items: center; justify-content: space-between; width: 100%; border: none; background: transparent; padding: 10px 16px; cursor: default;"
+                                        disabled>
+                                    <span class="campus-item-name">TEQIC</span>
+                                    <i class="ri-checkbox-circle-fill campus-item-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Theme Toggle Button -->
                     <button class="theme-toggle" id="theme-toggle" title="Ubah Tema">
                         <!-- Sun Icon -->
@@ -441,6 +475,30 @@
                     campusSwitcherInput.value = value;
                     campusSwitcherForm.submit();
                 });
+            });
+        }
+
+        // App Switcher Dropdown Toggle
+        const appSwitcherDropdown = document.getElementById('app-switcher-dropdown');
+        const appSwitcherDropdownBtn = document.getElementById('app-switcher-dropdown-btn');
+
+        if (appSwitcherDropdown && appSwitcherDropdownBtn) {
+            appSwitcherDropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                appSwitcherDropdown.classList.toggle('open');
+                if (campusDropdown) campusDropdown.classList.remove('open');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!appSwitcherDropdown.contains(e.target)) {
+                    appSwitcherDropdown.classList.remove('open');
+                }
+            });
+        }
+
+        if (campusDropdownBtn && appSwitcherDropdown) {
+            campusDropdownBtn.addEventListener('click', function() {
+                appSwitcherDropdown.classList.remove('open');
             });
         }
     });

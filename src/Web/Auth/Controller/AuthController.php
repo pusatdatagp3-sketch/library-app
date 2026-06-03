@@ -75,8 +75,14 @@ final class AuthController
     {
         $this->userSession->logout();
         $this->flash->set('success', 'Anda telah berhasil keluar dari sistem.');
+
+        $postLogoutRedirect = str_replace('/auth/callback', '/login', \App\Environment::hawiSsoRedirectUri());
+        $ssoLogoutUrl = \App\Environment::hawiSsoUrl() . '/site/logout?' . http_build_query([
+            'post_logout_redirect_uri' => $postLogoutRedirect
+        ]);
+
         return $this->responseFactory->createResponse(302)
-            ->withHeader('Location', $this->urlGenerator->generate('login'));
+            ->withHeader('Location', $ssoLogoutUrl);
     }
 
     public function selectCampus(ServerRequestInterface $request): ResponseInterface

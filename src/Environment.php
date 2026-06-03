@@ -38,6 +38,7 @@ final class Environment
         self::setString('HAWI_SSO_CLIENT_ID', '');
         self::setString('HAWI_SSO_CLIENT_SECRET', '');
         self::setString('HAWI_SSO_REDIRECT_URI', 'http://localhost/auth/callback');
+        self::setString('DOREH_URL', 'http://localhost:3000');
     }
 
     /**
@@ -128,6 +129,11 @@ final class Environment
     public static function hawiSsoRedirectUri(): string
     {
         return (string) self::$values['HAWI_SSO_REDIRECT_URI'];
+    }
+
+    public static function dorehUrl(): string
+    {
+        return (string) self::$values['DOREH_URL'];
     }
 
     private static function setEnvironment(): void
