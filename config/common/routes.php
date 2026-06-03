@@ -41,6 +41,9 @@ return [
     Route::get('/auth/callback')
         ->action([\App\Web\Auth\Controller\SsoController::class, 'callback'])
         ->name('auth-callback'),
+    Route::get('/auth/sso/logout')
+        ->action([\App\Web\Auth\Controller\SsoController::class, 'logout'])
+        ->name('sso-logout'),
 
 
 

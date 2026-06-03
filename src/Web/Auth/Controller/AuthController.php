@@ -78,6 +78,7 @@ final class AuthController
 
         $postLogoutRedirect = str_replace('/auth/callback', '/login', \App\Environment::hawiSsoRedirectUri());
         $ssoLogoutUrl = \App\Environment::hawiSsoUrl() . '/site/logout?' . http_build_query([
+            'client_id' => 'teqic-client',
             'post_logout_redirect_uri' => $postLogoutRedirect
         ]);
 

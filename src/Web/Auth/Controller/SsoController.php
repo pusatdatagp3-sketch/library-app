@@ -171,4 +171,21 @@ final class SsoController
         return $this->responseFactory->createResponse(302)
             ->withHeader('Location', $this->urlGenerator->generate('home'));
     }
+
+    public function logout(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->userSession->logout();
+
+        $params = $request->getQueryParams();
+        $redirectUrl = $params['post_logout_redirect_uri'] ?? null;
+
+        if ($redirectUrl !== null) {
+            return $this->responseFactory->createResponse(302)
+                ->withHeader('Location', (string)$redirectUrl);
+        }
+
+        $response = $this->responseFactory->createResponse(200);
+        $response->getBody()->write('OK');
+        return $response;
+    }
 }
