@@ -35,7 +35,7 @@ $this->setTitle('Monitor');
             width: 50%;
         }
     }
-    @media (min-width: 1200px) {
+    @media (min-width: 1366px) {
         .monitor-card-wrapper {
             width: 25%;
             margin-bottom: 0;
