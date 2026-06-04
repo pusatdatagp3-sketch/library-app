@@ -59,18 +59,18 @@ $urlGenerator = $this->getParameter('urlGenerator');
         </div>
     </div>
 
-    <!-- TQC Modules Grid -->
+    <!-- Active Modules Grid -->
     <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-color); display: flex; align-items: center; gap: 0.5rem;">
-        <i class="ri-layout-grid-line text-primary"></i> Modul KMI (TQC)
+        <i class="ri-layout-grid-line text-primary"></i> Modul Sistem Aktif
     </h2>
     
     <style>
-        .tqc-modules-grid {
+        .system-modules-grid {
             display: flex;
             flex-wrap: wrap;
             margin: 0 -0.75rem;
         }
-        .tqc-card-wrapper {
+        .system-card-wrapper {
             width: 100%;
             padding: 0 0.75rem;
             margin-bottom: 1.5rem;
@@ -79,17 +79,11 @@ $urlGenerator = $this->getParameter('urlGenerator');
             flex-direction: column;
         }
         @media (min-width: 640px) {
-            .tqc-card-wrapper {
+            .system-card-wrapper {
                 width: 50%;
             }
         }
-        @media (min-width: 1024px) {
-            .tqc-card-wrapper {
-                width: 25%;
-                margin-bottom: 0;
-            }
-        }
-        .tqc-card-wrapper .card {
+        .system-card-wrapper .card {
             margin: 0;
             height: 100%;
             display: flex;
@@ -99,75 +93,39 @@ $urlGenerator = $this->getParameter('urlGenerator');
         }
     </style>
 
-    <div class="tqc-modules-grid">
-        <!-- Card 1: Fungsionaris -->
-        <div class="tqc-card-wrapper">
+    <div class="system-modules-grid">
+        <!-- Card 1: Gii Generator -->
+        <div class="system-card-wrapper">
             <div class="card hover-glow" style="border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease;">
                 <div>
-                    <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.25rem;">
-                        <i class="ri-group-3-line"></i>
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(79, 70, 229, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.25rem;">
+                        <i class="ri-code-box-line"></i>
                     </div>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Fungsionaris KMI</h3>
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Gii Generator</h3>
                     <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                        Kelola struktur kepengurusan fungsionaris utama, alokasi penanggung jawab bagian, dan tupoksi resmi.
+                        Buat modul CRUD (ActiveRecord, Controller, Views, Routes & RBAC) secara instan berdasarkan skema database Anda.
                     </p>
                 </div>
-                <a href="<?= $urlGenerator->generate('fungsionaris/index') ?>" class="btn btn-primary w-100" style="width: 100%; justify-content: center; box-sizing: border-box;">
-                    Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
+                <a href="<?= $urlGenerator->generate('gii/index') ?>" class="btn btn-primary w-100" style="width: 100%; justify-content: center; box-sizing: border-box;">
+                    Buka Generator <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
                 </a>
             </div>
         </div>
 
-        <!-- Card 2: Kepanitiaan -->
-        <div class="tqc-card-wrapper">
+        <!-- Card 2: RBAC Management -->
+        <div class="system-card-wrapper">
             <div class="card hover-glow" style="border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease;">
                 <div>
                     <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.25rem;">
-                        <i class="ri-calendar-event-line"></i>
+                        <i class="ri-shield-user-line"></i>
                     </div>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Kepanitiaan KMI</h3>
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Manajemen RBAC</h3>
                     <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                        Organisasi kepanitiaan ad-hoc untuk program formal, event tahunan, dan kepanitiaan berkala KMI.
+                        Kelola hak akses pengguna, peran (roles), izin (permissions), dan pemetaan rute secara dinamis dan aman.
                     </p>
                 </div>
-                <a href="<?= $urlGenerator->generate('kepanitiaan/index') ?>" class="btn btn-success w-100" style="width: 100%; justify-content: center; background: #10b981; border-color: #10b981; color: #fff; box-sizing: border-box;">
-                    Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- Card 3: Empowering -->
-        <div class="tqc-card-wrapper">
-            <div class="card hover-glow" style="border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease;">
-                <div>
-                    <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.25rem;">
-                        <i class="ri-sparkling-line"></i>
-                    </div>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Empowering KMI</h3>
-                    <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                        Program penguatan, pembinaan karakter pembina, dan peningkatan mutu tata kelola kehidupan holistik santri.
-                    </p>
-                </div>
-                <a href="<?= $urlGenerator->generate('empowering/index') ?>" class="btn btn-warning w-100" style="width: 100%; justify-content: center; background: #f59e0b; border-color: #f59e0b; color: #fff; box-sizing: border-box;">
-                    Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- Card 4: Koordinator -->
-        <div class="tqc-card-wrapper">
-            <div class="card hover-glow" style="border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease;">
-                <div>
-                    <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(236, 72, 153, 0.1); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.25rem;">
-                        <i class="ri-user-star-line"></i>
-                    </div>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-color);">Koordinator KMI</h3>
-                    <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
-                        Kelola pembagian penugasan koordinator kegiatan, koordinasi lintas divisi, dan monitoring agenda kerja koordinator.
-                    </p>
-                </div>
-                <a href="<?= $urlGenerator->generate('koordinator/index') ?>" class="btn w-100" style="width: 100%; justify-content: center; background: #ec4899; border-color: #ec4899; color: #fff; box-sizing: border-box;">
-                    Buka Modul <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
+                <a href="<?= $urlGenerator->generate('users/index') ?>" class="btn btn-success w-100" style="width: 100%; justify-content: center; background: #10b981; border-color: #10b981; color: #fff; box-sizing: border-box;">
+                    Kelola Pengguna <i class="ri-arrow-right-line" style="margin-left: 0.25rem;"></i>
                 </a>
             </div>
         </div>

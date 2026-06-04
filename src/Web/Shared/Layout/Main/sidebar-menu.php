@@ -10,48 +10,6 @@ return [
                 'icon'  => 'ri-home-5',
                 'route' => 'home',
             ],
-            [
-                'label' => 'Monitor',
-                'icon'  => 'ri-dashboard',
-                'route' => 'monitor/index',
-            ],
-            [
-                'label' => 'Laporan',
-                'icon'  => 'ri-file',
-                'route' => 'laporan/index',
-            ],
-        ],
-    ],
-
-
-
-    [
-        'group' => 'TQC KMI',
-        'items' => [
-            [
-                'label'      => 'Fungsionaris KMI',
-                'icon'       => 'ri-group-3',
-                'route'      => 'fungsionaris/index',
-                'permission' => 'view_fungsionaris',
-            ],
-            [
-                'label'      => 'Kepanitiaan KMI',
-                'icon'       => 'ri-calendar-event',
-                'route'      => 'kepanitiaan/index',
-                'permission' => 'view_kepanitiaan',
-            ],
-            [
-                'label'      => 'Empowering KMI',
-                'icon'       => 'ri-sparkling',
-                'route'      => 'empowering/index',
-                'permission' => 'view_empowering',
-            ],
-            [
-                'label'      => 'Koordinator KMI',
-                'icon'       => 'ri-user-star',
-                'route'      => 'koordinator/index',
-                'permission' => 'view_koordinator',
-            ],
         ],
     ],
 

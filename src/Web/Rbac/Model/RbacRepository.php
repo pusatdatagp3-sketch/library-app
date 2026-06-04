@@ -52,8 +52,8 @@ final class RbacRepository
         if ((int)$this->db->query("SELECT COUNT(*) FROM `rbac_roles`")->fetchColumn() === 0) {
             $roles = [
                 ['name' => 'Admin',    'description' => 'Administrator dengan akses penuh ke sistem dan konfigurasi RBAC.'],
-                ['name' => 'Operator', 'description' => 'Staf / Operator yang dapat melakukan CRUD pada modul Guru.'],
-                ['name' => 'Guru',     'description' => 'Pengguna Guru yang hanya memiliki hak akses untuk melihat data.'],
+                ['name' => 'Operator', 'description' => 'Staf / Operator dengan akses terbatas.'],
+                ['name' => 'Guru',     'description' => 'Pengguna Guru dengan akses dasar.'],
             ];
             foreach ($roles as $role) {
                 $this->db->execute("INSERT INTO `rbac_roles` (`name`, `description`) VALUES (?, ?)", [$role['name'], $role['description']]);
@@ -63,26 +63,6 @@ final class RbacRepository
         $allPermissions = [
             ['name' => 'manage_rbac',          'description' => 'Mengelola RBAC (Role, Permission, User).'],
             ['name' => 'manage_gii',           'description' => 'Mengakses Gii Code Generator.'],
-            ['name' => 'view_fungsionaris',    'description' => 'Melihat entitas Fungsionaris KMI.'],
-            ['name' => 'create_fungsionaris',  'description' => 'Menambahkan entitas Fungsionaris KMI.'],
-            ['name' => 'update_fungsionaris',  'description' => 'Mengubah entitas Fungsionaris KMI.'],
-            ['name' => 'delete_fungsionaris',  'description' => 'Menghapus entitas Fungsionaris KMI.'],
-            ['name' => 'view_kepanitiaan',     'description' => 'Melihat entitas Kepanitiaan KMI.'],
-            ['name' => 'create_kepanitiaan',   'description' => 'Menambahkan entitas Kepanitiaan KMI.'],
-            ['name' => 'update_kepanitiaan',   'description' => 'Mengubah entitas Kepanitiaan KMI.'],
-            ['name' => 'delete_kepanitiaan',   'description' => 'Menghapus entitas Kepanitiaan KMI.'],
-            ['name' => 'view_empowering',      'description' => 'Melihat entitas Empowering KMI.'],
-            ['name' => 'create_empowering',    'description' => 'Menambahkan entitas Empowering KMI.'],
-            ['name' => 'update_empowering',    'description' => 'Mengubah entitas Empowering KMI.'],
-            ['name' => 'delete_empowering',    'description' => 'Menghapus entitas Empowering KMI.'],
-            ['name' => 'view_koordinator',     'description' => 'Melihat entitas Koordinator KMI.'],
-            ['name' => 'create_koordinator',   'description' => 'Menambahkan entitas Koordinator KMI.'],
-            ['name' => 'update_koordinator',   'description' => 'Mengubah entitas Koordinator KMI.'],
-            ['name' => 'delete_koordinator',   'description' => 'Menghapus entitas Koordinator KMI.'],
-            ['name' => 'view_program',         'description' => 'Melihat Program Kerja.'],
-            ['name' => 'create_program',       'description' => 'Menambahkan Program Kerja.'],
-            ['name' => 'update_program',       'description' => 'Mengubah/mengelola Program Kerja.'],
-            ['name' => 'delete_program',       'description' => 'Menghapus Program Kerja.'],
         ];
         foreach ($allPermissions as $perm) {
             $exists = (int)$this->db->query("SELECT COUNT(*) FROM `rbac_permissions` WHERE `name` = ?", [$perm['name']])->fetchColumn();
@@ -91,12 +71,21 @@ final class RbacRepository
             }
         }
 
+        // Clean up permissions not in the seed list
+        $permNames = array_column($allPermissions, 'name');
+        if (!empty($permNames)) {
+            $inClause = implode(',', array_map(fn($n) => $this->db->getDriver()->quote($n), $permNames));
+            $this->db->execute("DELETE FROM `rbac_permissions` WHERE `name` NOT IN ($inClause)");
+        } else {
+            $this->db->execute("DELETE FROM `rbac_permissions`");
+        }
+
         // Seed Role Permissions matrix
         if ((int)$this->db->query("SELECT COUNT(*) FROM `rbac_role_permissions`")->fetchColumn() === 0) {
             $matrix = [
-                'Admin'    => ['manage_rbac', 'manage_gii', 'view_fungsionaris', 'create_fungsionaris', 'update_fungsionaris', 'delete_fungsionaris', 'view_kepanitiaan', 'create_kepanitiaan', 'update_kepanitiaan', 'delete_kepanitiaan', 'view_empowering', 'create_empowering', 'update_empowering', 'delete_empowering', 'view_koordinator', 'create_koordinator', 'update_koordinator', 'delete_koordinator', 'view_program', 'create_program', 'update_program', 'delete_program'],
-                'Operator' => ['view_fungsionaris', 'view_kepanitiaan', 'view_empowering', 'view_koordinator', 'view_program'],
-                'Guru'     => ['view_program'],
+                'Admin'    => ['manage_rbac', 'manage_gii'],
+                'Operator' => [],
+                'Guru'     => [],
             ];
             foreach ($matrix as $roleName => $perms) {
                 foreach ($perms as $permName) {
@@ -136,68 +125,21 @@ final class RbacRepository
             ['route_name' => 'permissions/delete',           'permission_name' => 'manage_rbac'],
             ['route_name' => 'routes/index',                 'permission_name' => 'manage_rbac'],
             ['route_name' => 'routes/save-route-permissions','permission_name' => 'manage_rbac'],
-            ['route_name' => 'fungsionaris/index',           'permission_name' => 'view_fungsionaris'],
-            ['route_name' => 'fungsionaris/create',          'permission_name' => 'create_fungsionaris'],
-            ['route_name' => 'fungsionaris/create/post',     'permission_name' => 'create_fungsionaris'],
-            ['route_name' => 'fungsionaris/update',          'permission_name' => 'update_fungsionaris'],
-            ['route_name' => 'fungsionaris/update/post',     'permission_name' => 'update_fungsionaris'],
-            ['route_name' => 'fungsionaris/delete',          'permission_name' => 'delete_fungsionaris'],
-            ['route_name' => 'fungsionaris/view',            'permission_name' => 'view_fungsionaris'],
-            ['route_name' => 'fungsionaris/add-member',      'permission_name' => 'update_fungsionaris'],
-            ['route_name' => 'fungsionaris/delete-member',   'permission_name' => 'update_fungsionaris'],
-            ['route_name' => 'kepanitiaan/index',            'permission_name' => 'view_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/create',           'permission_name' => 'create_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/create/post',      'permission_name' => 'create_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/update',           'permission_name' => 'update_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/update/post',      'permission_name' => 'update_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/delete',           'permission_name' => 'delete_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/view',             'permission_name' => 'view_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/add-member',       'permission_name' => 'update_kepanitiaan'],
-            ['route_name' => 'kepanitiaan/delete-member',    'permission_name' => 'update_kepanitiaan'],
-            ['route_name' => 'empowering/index',            'permission_name' => 'view_empowering'],
-            ['route_name' => 'empowering/create',           'permission_name' => 'create_empowering'],
-            ['route_name' => 'empowering/create/post',      'permission_name' => 'create_empowering'],
-            ['route_name' => 'empowering/update',           'permission_name' => 'update_empowering'],
-            ['route_name' => 'empowering/update/post',      'permission_name' => 'update_empowering'],
-            ['route_name' => 'empowering/delete',           'permission_name' => 'delete_empowering'],
-            ['route_name' => 'empowering/view',             'permission_name' => 'view_empowering'],
-            ['route_name' => 'empowering/add-member',       'permission_name' => 'update_empowering'],
-            ['route_name' => 'empowering/delete-member',    'permission_name' => 'update_empowering'],
-            ['route_name' => 'koordinator/index',            'permission_name' => 'view_koordinator'],
-            ['route_name' => 'koordinator/create',           'permission_name' => 'create_koordinator'],
-            ['route_name' => 'koordinator/create/post',      'permission_name' => 'create_koordinator'],
-            ['route_name' => 'koordinator/update',           'permission_name' => 'update_koordinator'],
-            ['route_name' => 'koordinator/update/post',      'permission_name' => 'update_koordinator'],
-            ['route_name' => 'koordinator/delete',           'permission_name' => 'delete_koordinator'],
-            ['route_name' => 'koordinator/view',             'permission_name' => 'view_koordinator'],
-            ['route_name' => 'koordinator/add-member',       'permission_name' => 'update_koordinator'],
-            ['route_name' => 'koordinator/delete-member',    'permission_name' => 'update_koordinator'],
-            ['route_name' => 'koordinator/update-member',    'permission_name' => 'update_koordinator'],
-            ['route_name' => 'program/create',               'permission_name' => 'create_program'],
-            ['route_name' => 'program/create/post',          'permission_name' => 'create_program'],
-            ['route_name' => 'program/update',               'permission_name' => 'update_program'],
-            ['route_name' => 'program/update/post',          'permission_name' => 'update_program'],
-            ['route_name' => 'program/delete',               'permission_name' => 'delete_program'],
-            ['route_name' => 'program/view',                 'permission_name' => 'view_program'],
-            ['route_name' => 'program/add-kendala',          'permission_name' => 'update_program'],
-            ['route_name' => 'program/resolve-kendala',      'permission_name' => 'update_program'],
-            ['route_name' => 'program/delete-kendala',       'permission_name' => 'update_program'],
-            ['route_name' => 'program/add-notulensi',        'permission_name' => 'update_program'],
-            ['route_name' => 'program/delete-notulensi',     'permission_name' => 'update_program'],
-            ['route_name' => 'program/add-dokumentasi',      'permission_name' => 'update_program'],
-            ['route_name' => 'program/delete-dokumentasi',   'permission_name' => 'update_program'],
-            ['route_name' => 'monitor/index',                'permission_name' => null],
-            ['route_name' => 'kanban/board',                 'permission_name' => 'view_program'],
-            ['route_name' => 'kanban/add-task',              'permission_name' => 'update_program'],
-            ['route_name' => 'kanban/edit-task',             'permission_name' => 'update_program'],
-            ['route_name' => 'kanban/delete-task',            'permission_name' => 'update_program'],
-            ['route_name' => 'kanban/move-task',             'permission_name' => 'update_program'],
         ];
         foreach ($allRoutes as $mapping) {
             $exists = (int)$this->db->query("SELECT COUNT(*) FROM `rbac_route_permissions` WHERE `route_name` = ?", [$mapping['route_name']])->fetchColumn();
             if ($exists === 0) {
                 $this->db->execute("INSERT INTO `rbac_route_permissions` (`route_name`, `permission_name`) VALUES (?, ?)", [$mapping['route_name'], $mapping['permission_name']]);
             }
+        }
+
+        // Clean up route permissions not in the seed list
+        $routeNames = array_column($allRoutes, 'route_name');
+        if (!empty($routeNames)) {
+            $inClause = implode(',', array_map(fn($n) => $this->db->getDriver()->quote($n), $routeNames));
+            $this->db->execute("DELETE FROM `rbac_route_permissions` WHERE `route_name` NOT IN ($inClause)");
+        } else {
+            $this->db->execute("DELETE FROM `rbac_route_permissions`");
         }
     }
 

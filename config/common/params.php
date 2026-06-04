@@ -72,11 +72,6 @@ return [
         ],
         'entity-paths' => [
             '@src/Web/Auth/Model',
-            '@src/Web/Modul/Model',
-            '@src/Web/Entitas/Model',
-            '@src/Web/Program/Model',
-            '@src/Web/Kanban/Model',
-            '@src/Web/Task/Model',
         ],
     ],
 ];
