@@ -7,7 +7,7 @@ namespace App\Shared;
 final readonly class ApplicationParams
 {
     public function __construct(
-        public string $name = 'Teqic',
+        public string $name = 'Kutubia',
         public string $charset = 'UTF-8',
         public string $locale = 'en',
     ) {}

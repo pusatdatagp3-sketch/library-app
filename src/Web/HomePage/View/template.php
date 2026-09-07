@@ -44,10 +44,10 @@ $urlGenerator = $this->getParameter('urlGenerator');
         <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
         
         <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; color: #fff;">
-            Selamat Datang di TEQIC
+            Selamat Datang di KUTUBIA
         </h1>
         <p style="font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto 2rem auto;">
-            Sistem Total Quality Control Kinerja Akademis KMI Pondok Modern Darussalam Gontor.
+            Sistem Informasi Perpustakaan Pondok Modern Darussalam Gontor.
         </p>
         <div style="display: inline-flex; gap: 1rem; justify-content: center;">
             <span class="badge" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 0.4rem 1rem; border-radius: 50px; font-weight: 600; font-size: 0.85rem;">

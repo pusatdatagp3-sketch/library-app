@@ -32,12 +32,12 @@ $this->setTitle('Tambah Pengguna Baru');
 
     <?= $this->render('./_form', [
         'roles' => $roles,
-        'campusList' => $campusList,
         'errors' => $errors,
         'data' => $data,
         'csrf' => $csrf,
         'formAction' => $urlGenerator->generate('users/create/post'),
         'submitLabel' => 'Simpan Pengguna',
         'isUpdate' => false,
+        'user' => null,
     ]) ?>
 </div>

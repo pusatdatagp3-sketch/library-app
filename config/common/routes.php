@@ -13,10 +13,12 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 return [
+    // Halaman Utama: Dashboard Perpustakaan
     Group::create()
+        ->middleware(RbacAccessControlMiddleware::class)
         ->routes(
             Route::get('/')
-                ->action(Web\HomePage\Controller\Action::class)
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'dashboard'])
                 ->name('home'),
         ),
 
@@ -29,20 +31,6 @@ return [
     Route::post('/logout')
         ->action([AuthController::class, 'logout'])
         ->name('logout'),
-    Route::post('/select-campus')
-        ->action([AuthController::class, 'selectCampus'])
-        ->name('select-campus'),
-
-    // SSO Routes
-    Route::get('/sso/login')
-        ->action([\App\Web\Auth\Controller\SsoController::class, 'redirect'])
-        ->name('sso-login'),
-    Route::get('/auth/callback')
-        ->action([\App\Web\Auth\Controller\SsoController::class, 'callback'])
-        ->name('auth-callback'),
-    Route::get('/auth/sso/logout')
-        ->action([\App\Web\Auth\Controller\SsoController::class, 'logout'])
-        ->name('sso-logout'),
 
 
 

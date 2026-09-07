@@ -20,7 +20,7 @@ final class HomePageCest
         }
 
         if (session_status() === PHP_SESSION_NONE) {
-            session_name('TEQIC_SESSID');
+            session_name('KUTUBIA_SESSID');
             session_start([
                 'cookie_secure' => 0,
                 'save_path' => $savePath,
@@ -45,7 +45,7 @@ final class HomePageCest
 
         assertSame(200, $response->getStatusCode());
         assertStringContainsString(
-            'Selamat Datang di TEQIC',
+            'Selamat Datang di KUTUBIA',
             $response->getBody()->getContents(),
         );
     }

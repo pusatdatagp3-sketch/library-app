@@ -67,7 +67,6 @@ $this->setTitle('Manajemen Pengguna');
                         <th>Username</th>
                         <th>Email</th>
                         <th>Peran (Role)</th>
-                        <th>Kampus</th>
                         <th class="text-center" style="width:200px">Aksi</th>
                     </tr>
                 </thead>
@@ -84,22 +83,9 @@ $this->setTitle('Manajemen Pengguna');
                             </td>
                             <td><?= Html::encode($user['email']) ?></td>
                             <td>
-                                <span class="badge badge-role badge-role-<?= strtolower($user['role']) ?>">
+                                <span class="badge badge-role badge-role-<?= strtolower(str_replace(' ', '-', $user['role'])) ?>">
                                     <?= Html::encode($user['role']) ?>
                                 </span>
-                            </td>
-                            <td>
-                                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                                    <?php if (!empty($user['allowed_campuses'])): ?>
-                                        <?php foreach ($user['allowed_campuses'] as $campus): ?>
-                                            <span class="badge" style="background: var(--primary); color: white; font-size: 0.75rem;">
-                                                <?= Html::encode($campus) ?>
-                                            </span>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
-                                    <?php endif; ?>
-                                </div>
                             </td>
                             <td>
                                 <div class="action-buttons">

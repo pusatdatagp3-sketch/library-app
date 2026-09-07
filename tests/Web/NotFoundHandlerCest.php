@@ -29,6 +29,6 @@ final class NotFoundHandlerCest
         $I->amOnPage('/non-existent-page');
         $I->canSeeResponseCodeIs(404);
         $I->click('Go Back Home');
-        $I->see('Selamat Datang di TEQIC');
+        $I->see('Selamat Datang di KUTUBIA');
     }
 }

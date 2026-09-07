@@ -18,6 +18,9 @@ use Yiisoft\Session\Flash\FlashInterface;
 
 final class RbacAccessControlMiddleware implements MiddlewareInterface
 {
+    /** Role yang mendapat bypass penuh tanpa pengecekan tabel RBAC */
+    private const SUPER_ADMIN_ROLE = 'super-admin';
+
     public function __construct(
         private UserSession $userSession,
         private RbacRepository $rbacRepository,
@@ -38,27 +41,33 @@ final class RbacAccessControlMiddleware implements MiddlewareInterface
                 ->withHeader('Location', $this->urlGenerator->generate('login'));
         }
 
-        // 2. Dapatkan nama rute saat ini
-        $routeName = $this->currentRoute->getName();
+        // 2. BYPASS: Super Admin memiliki akses penuh ke seluruh sistem tanpa
+        //    perlu mengecek tabel rbac_route_permissions maupun rbac_role_permissions.
+        if ($this->userSession->getUserRole() === self::SUPER_ADMIN_ROLE) {
+            return $handler->handle($request);
+        }
+
+        // 3. Dapatkan nama rute saat ini dan peta izin rute dari DB
+        $routeName          = $this->currentRoute->getName();
         $routePermissionMap = $this->rbacRepository->getRoutePermissionMap();
 
         if ($routeName !== null && isset($routePermissionMap[$routeName])) {
             $requiredPermission = $routePermissionMap[$routeName];
 
-            // Cek jika rute membutuhkan izin tertentu (jika null, berarti hanya butuh login saja)
+            // Jika rute memiliki permission yang dipersyaratkan (bukan null/kosong)
             if ($requiredPermission !== null && $requiredPermission !== '') {
-                // 3. Cek apakah user memiliki permission yang dibutuhkan
+                // 4. Cek apakah user memiliki permission yang dibutuhkan
                 if (!$this->userSession->hasPermission($requiredPermission)) {
                     if ($request->getMethod() === 'POST') {
-                        // Jika POST (aksi), redirect kembali dengan pesan kesalahan flash
+                        // Jika POST (aksi), redirect kembali dengan pesan flash
                         $this->flash->set('errors', ['Anda tidak memiliki hak akses untuk melakukan aksi ini.']);
-                        $referrer = $request->getHeaderLine('Referer');
+                        $referrer    = $request->getHeaderLine('Referer');
                         $redirectUrl = $referrer !== '' ? $referrer : $this->urlGenerator->generate('home');
                         return $this->responseFactory->createResponse(302)
                             ->withHeader('Location', $redirectUrl);
                     }
 
-                    // Jika GET (navigasi), tampilkan halaman error 403 yang cantik
+                    // Jika GET (navigasi), tampilkan halaman 403
                     return $this->viewRenderer->render(__DIR__ . '/../Shared/View/error403');
                 }
             }

@@ -6,8 +6,8 @@ return [
         'group' => 'Utama',
         'items' => [
             [
-                'label' => 'Home',
-                'icon'  => 'ri-home-5',
+                'label' => 'Dashboard',
+                'icon'  => 'ri-dashboard-3-line',
                 'route' => 'home',
             ],
         ],
@@ -16,11 +16,6 @@ return [
     [
         'group' => 'Perpustakaan',
         'items' => [
-            [
-                'label' => 'Dashboard',
-                'icon'  => 'ri-book-read-line',
-                'route' => 'perpustakaan/dashboard',
-            ],
             [
                 'label' => 'Scan Kunjungan',
                 'icon'  => 'ri-barcode-box-line',

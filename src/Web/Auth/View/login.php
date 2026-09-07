@@ -27,10 +27,10 @@ $this->setTitle('Masuk ke Sistem');
     <div class="login-card card" style="width: 100%; max-width: 420px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); background: var(--bg-card); border: 1px solid var(--border);">
         <div class="login-header" style="text-align: center; margin-bottom: 2rem;">
             <div style="width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem auto; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">
-                <i class="ri-shield-user-line"></i>
+                <i class="ri-book-open-line"></i>
             </div>
-            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0; letter-spacing: -0.025em;">Sign In</h2>
-            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.5; margin: 0;">Masukkan kredensial Anda untuk mengakses sistem TEQIC.</p>
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; letter-spacing: -0.025em;">KUTUBIA</h2>
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.5; margin: 0;">Masukkan kredensial Anda untuk mengakses sistem KUTUBIA Perpustakaan.</p>
         </div>
 
         <?php if ($error !== null): ?>
@@ -64,16 +64,6 @@ $this->setTitle('Masuk ke Sistem');
                 <i class="ri-login-box-line" style="font-size: 1.1rem;"></i>
             </button>
         </form>
-
-        <div style="text-align: center; margin: 1.5rem 0; position: relative;">
-            <span style="background: var(--bg-card); padding: 0 10px; color: var(--text-muted); font-size: 0.85rem; position: relative; z-index: 2;">Atau masuk dengan</span>
-            <div style="border-top: 1px solid var(--border); position: absolute; left: 0; right: 0; top: 50%; z-index: 1;"></div>
-        </div>
-
-        <a href="<?= $urlGenerator->generate('sso-login') ?>" class="btn btn-secondary" style="padding: 12px; font-size: 0.95rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; width: 100%; box-sizing: border-box; text-decoration: none; border: 1px solid var(--border); color: var(--text-main); background: var(--bg-card);">
-            <i class="ri-fingerprint-line" style="font-size: 1.1rem; color: var(--primary);"></i>
-            <span>SSO Hawi</span>
-        </a>
     </div>
 </div>
 
@@ -93,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Set initial toggle icons based on current applied theme
     const currentTheme = document.body.getAttribute('data-theme') || 'light';
     updateToggleIcons(currentTheme);
 

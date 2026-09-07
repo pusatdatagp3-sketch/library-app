@@ -107,8 +107,7 @@ final class PerpustakaanController
             }
 
             // 2. Tentukan nama penginput dari user yang sedang login
-            $currentUser = $this->userSession->getUser();
-            $penginput = $currentUser['username'] ?? 'Petugas Perpustakaan';
+            $penginput = $this->userSession->getUsername() ?? 'Petugas Perpustakaan';
 
             // 3. Catat kunjungan ke tabel record_perpustakaan_kunjungan
             $santriId = (int) ($santri['santri_id'] ?? $santri['kds'] ?? 0);

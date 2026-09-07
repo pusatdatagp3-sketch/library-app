@@ -35,7 +35,6 @@ $this->setTitle('Edit Pengguna: ' . $user['username']);
     <?= $this->render('./_form', [
         'user' => $user,
         'roles' => $roles,
-        'campusList' => $campusList,
         'errors' => $errors,
         'data' => $data,
         'csrf' => $csrf,
