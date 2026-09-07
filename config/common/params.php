@@ -72,6 +72,7 @@ return [
         ],
         'entity-paths' => [
             '@src/Web/Auth/Model',
+            '@src/Web/Perpustakaan/Model',
         ],
     ],
 ];

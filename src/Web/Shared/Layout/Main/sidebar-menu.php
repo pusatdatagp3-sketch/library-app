@@ -14,6 +14,22 @@ return [
     ],
 
     [
+        'group' => 'Perpustakaan',
+        'items' => [
+            [
+                'label' => 'Dashboard',
+                'icon'  => 'ri-book-read-line',
+                'route' => 'perpustakaan/dashboard',
+            ],
+            [
+                'label' => 'Scan Kunjungan',
+                'icon'  => 'ri-barcode-box-line',
+                'route' => 'perpustakaan/scan',
+            ],
+        ],
+    ],
+
+    [
         'group' => 'Sistem',
         'items' => [
 

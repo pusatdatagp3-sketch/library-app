@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /redent-yii3/public/
+RewriteBase /librarytest/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

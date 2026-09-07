@@ -8,7 +8,7 @@ return [
     '@assets' => '@root/public/assets',
     '@assetsUrl' => '@baseUrl/assets',
     '@assetsSource' => '@root/assets',
-    '@baseUrl' => '/redent-yii3/public',
+    '@baseUrl' => '/librarytest',
     '@public' => '@root/public',
     '@runtime' => '@root/runtime',
     '@vendor' => '@root/vendor',

@@ -148,5 +148,20 @@ return [
                 ->name('routes/save-route-permissions'),
         ),
 
+    // Modul Perpustakaan Group
+    Group::create('/perpustakaan')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'dashboard'])
+                ->name('perpustakaan/index'),
+            Route::get('/dashboard')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'dashboard'])
+                ->name('perpustakaan/dashboard'),
+            Route::methods(['GET', 'POST'], '/scan')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'scan'])
+                ->name('perpustakaan/scan'),
+        ),
+
 ];
 
