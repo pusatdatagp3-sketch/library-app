@@ -57,10 +57,10 @@ use Yiisoft\Router\UrlGeneratorInterface;
                 <label for="password" class="form-label">
                     Password Baru <span class="fw-normal text-muted">(Biarkan kosong jika tidak ingin mengubah)</span>
                 </label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Masukkan password baru (min. 6 karakter)">
+                <input type="password" id="password" name="password" class="form-control" placeholder="Masukkan password baru">
             <?php else: ?>
                 <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Masukkan password" required>
             <?php endif; ?>
         </div>
 

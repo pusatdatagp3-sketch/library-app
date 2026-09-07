@@ -65,9 +65,6 @@ final class UserController
             if ($data['email'] === '')    $errors[] = 'Email wajib diisi.';
             if ($password === '')         $errors[] = 'Password wajib diisi.';
             if ($data['role'] === '')     $errors[] = 'Peran wajib dipilih.';
-            if (strlen($password) < 6 && $password !== '') {
-                $errors[] = 'Password minimal 6 karakter.';
-            }
 
             if (empty($errors)) {
                 // Cek duplikasi username
@@ -129,9 +126,6 @@ final class UserController
             if ($data['username'] === '') $errors[] = 'Username wajib diisi.';
             if ($data['email'] === '')    $errors[] = 'Email wajib diisi.';
             if ($data['role'] === '')     $errors[] = 'Peran wajib dipilih.';
-            if ($password !== '' && strlen($password) < 6) {
-                $errors[] = 'Password baru minimal 6 karakter.';
-            }
 
             // Proteksi: pengguna tidak boleh mengubah peran akunnya sendiri
             if ($id === $this->userSession->getUserId() && $data['role'] !== $user['role']) {

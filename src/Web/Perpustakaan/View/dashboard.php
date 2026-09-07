@@ -22,252 +22,348 @@ $this->setTitle('Dashboard Perpustakaan');
 // Siapkan data JSON untuk Chart.js
 $labels = array_keys($chartPerKelasMingguIni);
 $values = array_values($chartPerKelasMingguIni);
+
+// Total kelas aktif
+$totalKelasAktif = count($chartPerKelasMingguIni);
+
+// Format tanggal lokal Indonesia
+$hariList = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+$bulanList = [
+    1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+$hariIni = $hariList[(int)date('w')];
+$tgl = (int)date('j');
+$bln = $bulanList[(int)date('n')];
+$thn = date('Y');
+$tanggalLengkap = "{$hariIni}, {$tgl} {$bln} {$thn}";
 ?>
 
+<!-- Bootstrap 5 CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+/* KUTUBIA Custom Pastel Color Scheme (Light & Dark Mode) */
+:root {
+    --k-purple: #8b5cf6;
+    --k-purple-bg: rgba(139, 92, 246, 0.12);
+    --k-purple-border: rgba(139, 92, 246, 0.25);
+
+    --k-pink: #ec4899;
+    --k-pink-bg: rgba(236, 72, 153, 0.12);
+    --k-pink-border: rgba(236, 72, 153, 0.25);
+
+    --k-blue: #3b82f6;
+    --k-blue-bg: rgba(59, 130, 246, 0.12);
+    --k-blue-border: rgba(59, 130, 246, 0.25);
+
+    /* Override Bootstrap primary */
+    --bs-primary: #8b5cf6;
+    --bs-primary-rgb: 139, 92, 246;
+}
+
+[data-bs-theme="dark"] {
+    --k-purple: #a78bfa;
+    --k-purple-bg: rgba(167, 139, 250, 0.18);
+    --k-purple-border: rgba(167, 139, 250, 0.35);
+
+    --k-pink: #f472b6;
+    --k-pink-bg: rgba(244, 114, 182, 0.18);
+    --k-pink-border: rgba(244, 114, 182, 0.35);
+
+    --k-blue: #60a5fa;
+    --k-blue-bg: rgba(96, 165, 250, 0.18);
+    --k-blue-border: rgba(96, 165, 250, 0.35);
+
+    /* Override Bootstrap primary in dark mode */
+    --bs-primary: #a78bfa;
+    --bs-primary-rgb: 167, 139, 250;
+}
+
+/* Brand Utama (KUTUBIA Purple) */
+.bg-kutubia {
+    background-color: var(--k-purple) !important;
+    color: #ffffff !important;
+}
+.text-kutubia {
+    color: var(--k-purple) !important;
+}
+.border-kutubia {
+    border-color: var(--k-purple) !important;
+}
+
+/* Soft Purple Classes */
+.text-k-purple {
+    color: var(--k-purple) !important;
+}
+.border-k-purple {
+    border-color: var(--k-purple) !important;
+}
+.bg-k-purple-subtle {
+    background-color: var(--k-purple-bg) !important;
+}
+
+/* Soft Pink Classes */
+.text-k-pink {
+    color: var(--k-pink) !important;
+}
+.border-k-pink {
+    border-color: var(--k-pink) !important;
+}
+.bg-k-pink-subtle {
+    background-color: var(--k-pink-bg) !important;
+}
+
+/* Soft Blue Classes */
+.text-k-blue {
+    color: var(--k-blue) !important;
+}
+.border-k-blue {
+    border-color: var(--k-blue) !important;
+}
+.bg-k-blue-subtle {
+    background-color: var(--k-blue-bg) !important;
+}
+
+/* Button Kutubia */
+.btn-kutubia {
+    background-color: var(--k-purple) !important;
+    border-color: var(--k-purple) !important;
+    color: #ffffff !important;
+}
+.btn-kutubia:hover, .btn-kutubia:focus {
+    opacity: 0.92;
+    color: #ffffff !important;
+}
+.btn-outline-kutubia {
+    color: var(--k-purple) !important;
+    border-color: var(--k-purple) !important;
+    background-color: transparent !important;
+}
+.btn-outline-kutubia:hover, .btn-outline-kutubia:focus {
+    background-color: var(--k-purple) !important;
+    border-color: var(--k-purple) !important;
+    color: #ffffff !important;
+}
+
+/* Penyesuaian Elemen Dark Mode */
+[data-bs-theme="dark"] .card {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+}
+[data-bs-theme="dark"] .list-group-item {
+    border-color: #1f2937 !important;
+}
+</style>
+
 <div class="container-fluid py-3">
-    <!-- Header Title & Quick Actions -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h1 class="h3 mb-1 fw-bold text-dark">
-                <i class="ri-book-read-line me-2 text-primary"></i>Dashboard Perpustakaan
-            </h1>
-            <p class="text-muted mb-0 small">
-                Rekapitulasi statistik kunjungan santri & monitoring sirkulasi perpustakaan pesantren.
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-                <i class="ri-barcode-box-line fs-5"></i>
-                <span class="fw-semibold">Scan Barcode Kunjungan</span>
-            </a>
+
+    <!-- 1. HERO BANNER -->
+    <div class="p-4 p-md-5 mb-4 text-white rounded-4 shadow-sm bg-kutubia">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h1 class="h2 fw-bold text-white mb-2">Selamat Datang di KUTUBIA</h1>
+                <p class="text-white-50 fs-6 mb-0">Sistem Informasi &amp; Manajemen Perpustakaan Terpadu</p>
+            </div>
+            <div class="text-md-end">
+                <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill fs-6 fw-normal">
+                    <i class="ri-calendar-line me-1"></i><?= Html::encode($tanggalLengkap) ?>
+                </span>
+            </div>
         </div>
     </div>
 
-    <!-- Statistik Cards -->
-    <div class="row g-3 mb-4">
-        <!-- Card Hari Ini -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100" style="background: linear-gradient(135deg, #2563eb15 0%, #3b82f605 100%); border-left: 4px solid #2563eb !important;">
-                <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted text-uppercase fw-semibold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">Kunjungan Hari Ini</span>
-                        <h2 class="display-6 fw-bold mb-0 text-primary mt-1"><?= number_format($totalHariIni) ?></h2>
-                        <small class="text-muted"><i class="ri-calendar-check-line me-1"></i><?= date('d M Y') ?></small>
+    <!-- 2. KARTU METRIK BERJEJER (BARIS PERTAMA) - WARNA ANALOGOUS LEMBUT / PASTEL -->
+    <div class="row g-4 mb-4">
+        <!-- Kartu 1: Kunjungan Hari Ini (Soft Blue) -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-k-blue h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-k-blue"><i class="ri-user-line fs-4"></i></div>
+                        <span class="badge bg-k-blue-subtle text-k-blue rounded-pill">Hari ini</span>
                     </div>
-                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
-                        <i class="ri-user-follow-line fs-2"></i>
-                    </div>
+                    <h2 class="fw-bold text-body-emphasis mb-1"><?= number_format($totalHariIni) ?></h2>
+                    <p class="text-body-secondary small mb-0">Kunjungan Hari Ini</p>
                 </div>
             </div>
         </div>
 
-        <!-- Card Minggu Ini -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100" style="background: linear-gradient(135deg, #10b98115 0%, #10b98105 100%); border-left: 4px solid #10b981 !important;">
-                <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted text-uppercase fw-semibold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">Kunjungan Minggu Ini</span>
-                        <h2 class="display-6 fw-bold mb-0 text-success mt-1"><?= number_format($totalMingguIni) ?></h2>
-                        <small class="text-muted"><i class="ri-history-line me-1"></i>Senin - Ahad</small>
+        <!-- Kartu 2: Kunjungan Minggu Ini (Soft Pink) -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-k-pink h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-k-pink"><i class="ri-calendar-event-line fs-4"></i></div>
+                        <span class="badge bg-k-pink-subtle text-k-pink rounded-pill">Minggu ini</span>
                     </div>
-                    <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
-                        <i class="ri-calendar-event-line fs-2"></i>
-                    </div>
+                    <h2 class="fw-bold text-body-emphasis mb-1"><?= number_format($totalMingguIni) ?></h2>
+                    <p class="text-body-secondary small mb-0">Kunjungan Minggu Ini</p>
                 </div>
             </div>
         </div>
 
-        <!-- Card Kelas Aktif -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100" style="background: linear-gradient(135deg, #f59e0b15 0%, #f59e0b05 100%); border-left: 4px solid #f59e0b !important;">
-                <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted text-uppercase fw-semibold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Kelas Aktif</span>
-                        <h2 class="display-6 fw-bold mb-0 text-warning mt-1"><?= count($chartPerKelasMingguIni) ?></h2>
-                        <small class="text-muted"><i class="ri-community-line me-1"></i>Tercatat berkunjung</small>
+        <!-- Kartu 3: Total Kelas Aktif (Soft Purple) -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-k-purple h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-k-purple"><i class="ri-book-mark-line fs-4"></i></div>
+                        <span class="badge bg-k-purple-subtle text-k-purple rounded-pill">Kelas Aktif</span>
                     </div>
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
-                        <i class="ri-book-mark-line fs-2"></i>
-                    </div>
+                    <h2 class="fw-bold text-body-emphasis mb-1"><?= number_format($totalKelasAktif) ?></h2>
+                    <p class="text-body-secondary small mb-0">Total Kelas Aktif</p>
                 </div>
             </div>
         </div>
 
-        <!-- Card Scanner Quick Link -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100" style="background: linear-gradient(135deg, #6366f115 0%, #8b5cf605 100%); border-left: 4px solid #6366f1 !important;">
-                <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted text-uppercase fw-semibold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">Mode Input</span>
-                        <h5 class="fw-bold mb-1 text-indigo mt-1">Barcode USB</h5>
-                        <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-sm btn-outline-primary py-1 px-2 mt-1">
-                            Buka Scanner <i class="ri-arrow-right-line"></i>
-                        </a>
+        <!-- Kartu 4: Mode Input (Soft Blue) -->
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-k-blue h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-k-blue"><i class="ri-barcode-box-line fs-4"></i></div>
+                        <span class="badge bg-k-blue-subtle text-k-blue rounded-pill">Online</span>
                     </div>
-                    <div class="bg-indigo bg-opacity-10 p-3 rounded-circle text-primary">
-                        <i class="ri-qr-scan-2-line fs-2"></i>
-                    </div>
+                    <h2 class="fw-bold text-body-emphasis mb-1 fs-3">Barcode USB</h2>
+                    <p class="text-body-secondary small mb-0">Mode Input Aktif</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bar Chart Rekap Kunjungan per Kelas -->
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-lg-8">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-header bg-transparent border-0 pt-3 px-3 d-flex justify-content-between align-items-center">
+    <!-- 3. GRAFIK BATANG & TABEL (BARIS KEDUA) -->
+    <div class="row g-4">
+        <!-- Kolom Kiri: Grafik (75% lebar di desktop) -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="card-title fw-bold mb-0 text-dark">
-                            <i class="ri-bar-chart-box-line me-2 text-primary"></i>Statistik Kunjungan per Kelas
+                        <h5 class="card-title fw-bold mb-0 text-body-emphasis">
+                            <i class="ri-bar-chart-box-line text-k-purple me-2"></i>Grafik Kunjungan per Kelas
                         </h5>
-                        <span class="text-muted small">Rekapitulasi distribusi kehadiran santri berdasarkan tingkatan kelas</span>
+                        <p class="text-body-secondary small mb-0">Statistik volume santri berkunjung berdasarkan kelas minggu ini</p>
                     </div>
-                    <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">Minggu Ini</span>
+                    <span class="badge bg-k-purple-subtle text-k-purple px-3 py-2 rounded-pill fw-semibold">Minggu Ini</span>
                 </div>
-                <div class="card-body p-3">
+                <div class="card-body p-4">
                     <?php if (empty($labels)): ?>
-                        <div class="text-center py-5">
-                            <i class="ri-bar-chart-line text-muted fs-1 mb-2"></i>
-                            <p class="text-muted mb-2">Belum ada rekaman kunjungan santri untuk minggu ini.</p>
-                            <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-sm btn-primary">
+                        <div class="text-center py-5 text-body-secondary">
+                            <i class="ri-bar-chart-line fs-1 mb-2 d-block"></i>
+                            <p class="mb-2">Belum ada rekaman kunjungan santri untuk minggu ini.</p>
+                            <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-sm bg-kutubia text-white">
                                 <i class="ri-barcode-box-line me-1"></i>Mulai Scan Barcode
                             </a>
                         </div>
                     <?php else: ?>
-                        <div style="position: relative; height: 320px; width: 100%;">
-                            <canvas id="kunjunganKelasChart"></canvas>
+                        <div style="position: relative; height: 350px; width: 100%;">
+                            <canvas id="kunjunganChart"></canvas>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        <!-- Ringkasan Kelas Terbanyak -->
-        <div class="col-12 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-header bg-transparent border-0 pt-3 px-3">
-                    <h5 class="card-title fw-bold mb-0 text-dark">
-                        <i class="ri-trophy-line me-2 text-warning"></i>Kelas Teraktif
-                    </h5>
-                    <span class="text-muted small">Peringkat kelas dengan kunjungan terbanyak</span>
+        <!-- Kolom Kanan: Aksi & Pengunjung Terbaru (25% lebar di desktop) -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
+            <!-- Kartu Aksi Cepat -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2">
+                    <h6 class="card-title fw-bold mb-0 text-body-emphasis">
+                        <i class="ri-flashlight-line text-k-purple me-2"></i>Aksi Cepat
+                    </h6>
                 </div>
-                <div class="card-body p-3">
-                    <?php if (empty($chartPerKelasMingguIni)): ?>
-                        <p class="text-muted text-center py-4 mb-0 small">Belum ada data tersedia.</p>
+                <div class="card-body px-4 pb-4 pt-2">
+                    <p class="text-body-secondary small mb-3">Mulai proses pencatatan presensi atau segarkan data.</p>
+                    <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn bg-kutubia text-white w-100 py-2 d-flex align-items-center justify-content-center gap-2 mb-2 rounded-3 shadow-sm">
+                        <i class="ri-barcode-box-line fs-5"></i>
+                        <span class="fw-semibold">Buka Scanner Barcode</span>
+                    </a>
+                    <a href="<?= $urlGenerator->generate('perpustakaan/dashboard') ?>" class="btn btn-outline-kutubia w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-3">
+                        <i class="ri-refresh-line"></i>
+                        <span>Segarkan Data</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Kartu Pengunjung Terbaru -->
+            <div class="card border-0 shadow-sm rounded-4 flex-grow-1">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title fw-bold mb-0 text-body-emphasis">
+                        <i class="ri-time-line text-k-purple me-2"></i>Pengunjung Terbaru
+                    </h6>
+                    <span class="badge bg-k-purple-subtle text-k-purple border border-k-purple border-opacity-25">Hari Ini</span>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($kunjunganTerbaru)): ?>
+                        <div class="text-center py-4 text-body-secondary small">
+                            <i class="ri-inbox-line fs-3 d-block mb-1"></i>
+                            Belum ada santri yang berkunjung hari ini.
+                        </div>
                     <?php else: ?>
-                        <?php
-                            $sortedKelas = $chartPerKelasMingguIni;
-                            arsort($sortedKelas);
-                            $topKelas = array_slice($sortedKelas, 0, 5, true);
-                            $rank = 1;
-                        ?>
-                        <ul class="list-group list-group-flush">
-                            <?php foreach ($topKelas as $kls => $jml): ?>
-                                <li class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge rounded-circle <?= $rank === 1 ? 'bg-warning text-dark' : ($rank === 2 ? 'bg-secondary text-white' : 'bg-light text-muted border') ?>" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">
-                                            <?= $rank++ ?>
-                                        </span>
-                                        <span class="fw-semibold text-dark">Kelas <?= Html::encode((string)$kls) ?></span>
+                        <?php $sepuluhTerbaru = array_slice($kunjunganTerbaru, 0, 10); ?>
+                        <div class="list-group list-group-flush bg-transparent">
+                            <?php foreach ($sepuluhTerbaru as $index => $item): ?>
+                                <div class="list-group-item bg-transparent px-4 py-2 border-0 d-flex justify-content-between align-items-center <?= $index < count($sepuluhTerbaru) - 1 ? 'border-bottom' : '' ?>">
+                                    <div class="overflow-hidden me-2">
+                                        <div class="fw-semibold text-body-emphasis small text-truncate">
+                                            <?= Html::encode((string)($item->nama_santri ?? '-')) ?>
+                                        </div>
+                                        <div class="text-body-secondary" style="font-size: 0.75rem;">
+                                            <span class="text-k-purple font-monospace fw-semibold"><?= Html::encode((string)$item->stambuk) ?></span>
+                                            • Kls <?= Html::encode((string)($item->kelas ?? '-')) ?>
+                                        </div>
                                     </div>
-                                    <span class="badge bg-primary rounded-pill px-3 py-1"><?= (int)$jml ?> kunjungan</span>
-                                </li>
+                                    <span class="badge bg-k-purple-subtle text-k-purple border border-k-purple border-opacity-25 font-monospace" style="font-size: 0.72rem;">
+                                        <?= $item->waktu_kunjungan ? $item->waktu_kunjungan->format('H:i') : '-' ?>
+                                    </span>
+                                </div>
                             <?php endforeach; ?>
-                        </ul>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabel Kunjungan Terbaru Hari Ini -->
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-transparent border-0 pt-3 px-3 d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="card-title fw-bold mb-0 text-dark">
-                    <i class="ri-time-line me-2 text-primary"></i>Kunjungan Terbaru Hari Ini
-                </h5>
-                <span class="text-muted small">Daftar santri yang telah melakukan scan kunjungan</span>
-            </div>
-            <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-sm btn-outline-primary">
-                <i class="ri-add-line me-1"></i>Scan Baru
-            </a>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3" style="width: 50px;">No</th>
-                            <th style="width: 110px;">Waktu</th>
-                            <th style="width: 120px;">Stambuk</th>
-                            <th>Nama Santri</th>
-                            <th style="width: 100px;">Kelas</th>
-                            <th>Rayon</th>
-                            <th>Konsulat</th>
-                            <th class="pe-3">Penginput</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($kunjunganTerbaru)): ?>
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    <i class="ri-inbox-line fs-2 d-block mb-1 text-secondary"></i>
-                                    Belum ada santri yang berkunjung hari ini.
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($kunjunganTerbaru as $index => $item): ?>
-                                <tr>
-                                    <td class="ps-3 text-muted small"><?= $index + 1 ?></td>
-                                    <td>
-                                        <span class="badge bg-light text-dark border">
-                                            <?= $item->waktu_kunjungan ? $item->waktu_kunjungan->format('H:i:s') : '-' ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="font-monospace fw-semibold text-primary">
-                                            <?= Html::encode((string)$item->stambuk) ?>
-                                        </span>
-                                    </td>
-                                    <td class="fw-semibold text-dark">
-                                        <?= Html::encode((string)($item->nama_santri ?? '-')) ?>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2">
-                                            <?= Html::encode((string)($item->kelas ?? '-')) ?>
-                                        </span>
-                                    </td>
-                                    <td class="text-muted small"><?= Html::encode((string)($item->rayon ?? '-')) ?></td>
-                                    <td class="text-muted small"><?= Html::encode((string)($item->konsulat ?? '-')) ?></td>
-                                    <td class="pe-3 text-muted small"><?= Html::encode((string)$item->penginput) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
+
+<!-- Sinkronisasi Otomatis Tema Dark/Light Mode dengan Layout Utama -->
+<script>
+(function() {
+    function applyTheme() {
+        const currentTheme = document.body.getAttribute('data-theme') || localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        document.body.setAttribute('data-bs-theme', currentTheme);
+    }
+    applyTheme();
+
+    // Pantau perubahan atribut data-theme saat tombol tema di navbar diklik
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'data-theme') {
+                applyTheme();
+            }
+        });
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
 
 <!-- Load Chart.js dari CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.getElementById('kunjunganKelasChart');
+    const canvas = document.getElementById('kunjunganChart') || document.getElementById('kunjunganKelasChart');
     if (!canvas) return;
 
     const labels = <?= json_encode($labels, JSON_UNESCAPED_UNICODE) ?>;
     const dataValues = <?= json_encode($values) ?>;
 
     const ctx = canvas.getContext('2d');
-
-    // Gradien modern untuk bar chart
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.85)');
-    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.25)');
+    const isDarkMode = (document.body.getAttribute('data-theme') || localStorage.getItem('theme')) === 'dark';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+    const textColor = isDarkMode ? '#94a3b8' : '#6c757d';
 
     new Chart(ctx, {
         type: 'bar',
@@ -276,8 +372,8 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'Jumlah Kunjungan',
                 data: dataValues,
-                backgroundColor: gradient,
-                borderColor: '#2563eb',
+                backgroundColor: isDarkMode ? 'rgba(167, 139, 250, 0.75)' : 'rgba(139, 92, 246, 0.75)',
+                borderColor: isDarkMode ? '#a78bfa' : '#8b5cf6',
                 borderWidth: 1.5,
                 borderRadius: 6,
                 borderSkipped: false,
@@ -292,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: '#1e293b',
+                    backgroundColor: isDarkMode ? '#1e293b' : '#212529',
                     titleFont: { size: 13, weight: 'bold' },
                     bodyFont: { size: 12 },
                     padding: 10,
@@ -310,15 +406,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     ticks: {
                         stepSize: 1,
                         precision: 0,
-                        color: '#64748b'
+                        color: textColor
                     },
                     grid: {
-                        color: 'rgba(226, 232, 240, 0.6)'
+                        color: gridColor
                     }
                 },
                 x: {
                     ticks: {
-                        color: '#64748b',
+                        color: textColor,
                         font: { weight: '500' }
                     },
                     grid: {
