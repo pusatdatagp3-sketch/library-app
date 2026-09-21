@@ -159,4 +159,21 @@ class KunjunganRepository extends Repository
         ksort($rekap);
         return $rekap;
     }
+
+    /**
+     * Mengambil daftar riwayat kunjungan perpustakaan terbaru dengan batas limit.
+     *
+     * @param int $limit Batas maksimal rekaman yang diambil (default: 100)
+     * @return KunjunganEntity[]
+     */
+    public function getRiwayatKunjungan(int $limit = 100): array
+    {
+        /** @var KunjunganEntity[] $results */
+        $results = $this->select()
+            ->orderBy('waktu_kunjungan', 'DESC')
+            ->limit($limit)
+            ->fetchAll();
+
+        return $results;
+    }
 }

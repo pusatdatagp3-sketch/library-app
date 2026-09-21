@@ -21,6 +21,11 @@ return [
                 'icon'  => 'ri-barcode-box-line',
                 'route' => 'perpustakaan/scan',
             ],
+            [
+                'label' => 'Rekap Kunjungan',
+                'icon'  => 'ri-history-line',
+                'route' => 'perpustakaan/rekap',
+            ],
         ],
     ],
 

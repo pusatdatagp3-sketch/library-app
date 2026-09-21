@@ -33,8 +33,9 @@
     color: #ffffff;
 }
 
-.sidebar-brand svg {
-    height: 32px;
+.sidebar-brand svg,
+.sidebar-brand img {
+    height: 38px;
     width: auto;
 }
 

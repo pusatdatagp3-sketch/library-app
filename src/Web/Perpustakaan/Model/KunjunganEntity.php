@@ -56,24 +56,6 @@ class KunjunganEntity
         $this->created_at = new DateTimeImmutable();
     }
 
-    /**
-     * Helper accessor untuk mendukung pemanggilan camelCase maupun snake_case.
-     */
-    public function __get(string $name): mixed
-    {
-        $snake = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
-        return $this->$snake ?? null;
-    }
-
-    /**
-     * Helper mutator untuk mendukung pengisian camelCase maupun snake_case.
-     */
-    public function __set(string $name, mixed $value): void
-    {
-        $snake = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
-        $this->$snake = $value;
-    }
-
     public function toArray(): array
     {
         return [

@@ -25,10 +25,21 @@ $this->beginPage()
 <!DOCTYPE html>
 <html lang="<?= Html::encode($applicationParams->locale) ?>">
 <head>
+    <?php
+    $faviconFilePath = $aliases->get('@public/images/kutubia_favicon.svg');
+    if (!file_exists($faviconFilePath)) {
+        $faviconFilePath = $aliases->get('@public/images/kutubia_logo.svg');
+    }
+    $faviconData = file_exists($faviconFilePath)
+        ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($faviconFilePath))
+        : '/librarytest/public/images/kutubia_logo.svg';
+    ?>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="<?= $aliases->get('@baseUrl/favicon.svg') ?>" type="image/svg+xml">
-    <title><?= Html::encode($this->getTitle()) ?></title>
+    <link rel="icon" href="<?= $faviconData ?>" type="image/svg+xml">
+    <link rel="shortcut icon" href="<?= $faviconData ?>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<?= $faviconData ?>">
+    <title><?= Html::encode($this->getTitle() ? $this->getTitle() . ' - KUTUBIA' : 'KUTUBIA') ?></title>
     <?php $this->head() ?>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
 </head>

@@ -11,7 +11,9 @@ use HttpSoft\Message\Stream;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
@@ -148,6 +150,28 @@ final class PerpustakaanController
                 'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Halaman Rekap Kunjungan:
+     * Menampilkan riwayat lengkap santri yang telah melakukan presensi/scan barcode di perpustakaan.
+     * Mengambil 100 data kunjungan terbaru (atau sesuai query param limit).
+     */
+    public function rekap(CurrentRoute $route, Request $request): ResponseInterface
+    {
+        $queryParams = $request->getQueryParams();
+        $limit = isset($queryParams['limit']) ? (int) $queryParams['limit'] : 100;
+        if ($limit <= 0 || $limit > 500) {
+            $limit = 100;
+        }
+
+        $kunjunganList = $this->kunjunganRepository->getRiwayatKunjungan($limit);
+
+        return $this->viewRenderer->render(__DIR__ . '/../View/rekap', [
+            'kunjunganList' => $kunjunganList,
+            'limit' => $limit,
+            'route' => $route,
+        ]);
     }
 
     /**

@@ -149,6 +149,9 @@ return [
             Route::methods(['GET', 'POST'], '/scan')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'scan'])
                 ->name('perpustakaan/scan'),
+            Route::get('/rekap')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'rekap'])
+                ->name('perpustakaan/rekap'),
         ),
 
 ];
