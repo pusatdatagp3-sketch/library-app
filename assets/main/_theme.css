@@ -1,0 +1,46 @@
+/*
+ * ==========================================
+ * Theme: KUTUBIA (Royal Purple / Violet)
+ * ==========================================
+ */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+
+:root {
+    /* Font */
+    --font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Primary Brand Color */
+    --primary: #5c34a4;
+    --primary-hover: #48238f;
+    --primary-light: rgba(92, 52, 164, 0.15);
+    --primary-gradient: linear-gradient(135deg, #48238f 0%, #5c34a4 50%, #7c52d8 100%);
+
+    /* Hover background slightly tinted */
+    --bg-hover: #f7f4fc;
+
+    /* Buttons */
+    --btn-edit-bg: #f3effb;
+
+    /* Badges */
+    --badge-admin-bg: #ede7f8;
+    --badge-admin-text: #48238f;
+    --badge-operator-bg: #e0f2fe;
+    --badge-operator-text: #0369a1;
+    --badge-guru-bg: #fef9c3;
+    --badge-guru-text: #854d0e;
+    --badge-siswa-bg: #dbeafe;
+    --badge-siswa-text: #1e40af;
+}
+
+body[data-theme="dark"] {
+    --primary: #7c52d8;
+    --primary-hover: #936cee;
+    --primary-light: rgba(124, 82, 216, 0.2);
+    --primary-gradient: linear-gradient(135deg, #5c34a4 0%, #7c52d8 50%, #936cee 100%);
+
+    --bg-hover: #1e1b2e;
+    --btn-edit-bg: rgba(124, 82, 216, 0.15);
+
+    --badge-admin-bg: rgba(92, 52, 164, 0.25);
+    --badge-admin-text: #c4a9f8;
+}

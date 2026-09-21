@@ -10,13 +10,19 @@ use Yiisoft\View\WebView;
 /**
  * @var WebView $this
  * @var KunjunganEntity[] $kunjunganHariIni
+ * @var array{Library: array, Staff: array} $groupedStaff
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $csrf
  */
 
 $this->setTitle('Scan Kunjungan Perpustakaan');
 $totalHariIni = count($kunjunganHariIni);
+$groupedStaff = $groupedStaff ?? ['Library' => [], 'Staff' => []];
 ?>
+
+<!-- Bootstrap 5 CSS & JS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
 /* ── Scan Page Styles ───────────────────────────────────────────────────── */
@@ -24,22 +30,22 @@ $totalHariIni = count($kunjunganHariIni);
 
 /* Scanner Card */
 .scanner-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border, #e2e8f0);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 24px rgba(0,0,0,0.06);
 }
 .scanner-card-accent {
     height: 4px;
-    background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%);
+    background: linear-gradient(90deg, #8b5cf6 0%, #818cf8 100%);
 }
 .scanner-card-body {
     padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 /* Pulse Icon */
@@ -56,7 +62,7 @@ $totalHariIni = count($kunjunganHariIni);
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: var(--primary);
+    background: #8b5cf6;
     opacity: 0.12;
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
@@ -69,13 +75,13 @@ $totalHariIni = count($kunjunganHariIni);
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+    background: linear-gradient(135deg, #8b5cf6 0%, #818cf8 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.75rem;
     color: #fff;
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
     position: relative;
     z-index: 1;
 }
@@ -87,15 +93,58 @@ $totalHariIni = count($kunjunganHariIni);
 .scanner-heading h2 {
     font-size: 1.25rem;
     font-weight: 800;
-    color: var(--text-main);
+    color: var(--text-main, #0f172a);
     margin: 0 0 0.35rem 0;
     letter-spacing: -0.02em;
 }
 .scanner-heading p {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
     margin: 0;
     line-height: 1.6;
+}
+
+/* Petugas Piket Bar */
+.petugas-piket-box {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-hover, #f8fafc);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 12px;
+    padding: 0.65rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.petugas-piket-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: left;
+}
+.petugas-piket-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+.petugas-piket-label {
+    font-size: 0.72rem;
+    color: var(--text-muted, #64748b);
+    line-height: 1.1;
+}
+.petugas-piket-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main, #0f172a);
 }
 
 /* Input Scan */
@@ -106,19 +155,19 @@ $totalHariIni = count($kunjunganHariIni);
 .scan-input-group {
     display: flex;
     align-items: center;
-    background: var(--bg-main);
-    border: 2px solid var(--border);
+    background: var(--bg-main, #ffffff);
+    border: 2px solid var(--border, #cbd5e1);
     border-radius: 12px;
     overflow: hidden;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .scan-input-group:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
 }
 .scan-input-icon {
     padding: 0 1rem;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
     font-size: 1.35rem;
     flex-shrink: 0;
     line-height: 1;
@@ -127,7 +176,7 @@ $totalHariIni = count($kunjunganHariIni);
     flex: 1;
     border: none;
     background: transparent;
-    color: var(--text-main);
+    color: var(--text-main, #0f172a);
     font-size: 1.35rem;
     font-weight: 700;
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
@@ -137,14 +186,14 @@ $totalHariIni = count($kunjunganHariIni);
     min-width: 0;
 }
 #stambuk-input::placeholder {
-    color: var(--text-muted);
+    color: var(--text-muted, #94a3b8);
     font-weight: 400;
     font-size: 1rem;
     letter-spacing: 0;
 }
 .scan-submit-btn {
     border: none;
-    background: var(--primary);
+    background: #8b5cf6;
     color: #fff;
     padding: 0.9rem 1.4rem;
     font-size: 1rem;
@@ -156,7 +205,7 @@ $totalHariIni = count($kunjunganHariIni);
     transition: background 0.2s ease;
     flex-shrink: 0;
 }
-.scan-submit-btn:hover { background: var(--primary-hover, #4f46e5); }
+.scan-submit-btn:hover { background: #7c3aed; }
 .scan-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Quick fill badges */
@@ -167,16 +216,16 @@ $totalHariIni = count($kunjunganHariIni);
     flex-wrap: wrap;
     justify-content: center;
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
     width: 100%;
     max-width: 480px;
 }
 .quick-fill-badge {
     padding: 3px 10px;
     border-radius: 6px;
-    background: var(--bg-hover);
-    border: 1px solid var(--border);
-    color: var(--primary);
+    background: var(--bg-hover, #f1f5f9);
+    border: 1px solid var(--border, #cbd5e1);
+    color: #8b5cf6;
     font-family: monospace;
     font-weight: 600;
     font-size: 0.8rem;
@@ -185,8 +234,8 @@ $totalHariIni = count($kunjunganHariIni);
     text-decoration: none;
 }
 .quick-fill-badge:hover {
-    background: rgba(99,102,241,0.1);
-    border-color: var(--primary);
+    background: rgba(139,92,246,0.1);
+    border-color: #8b5cf6;
 }
 
 /* Alert feedback */
@@ -219,11 +268,11 @@ $totalHariIni = count($kunjunganHariIni);
     font-size: 0.9rem;
     font-weight: 700;
     margin: 0 0 0.2rem 0;
-    color: var(--text-main);
+    color: var(--text-main, #0f172a);
 }
 .scan-alert-body p {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
     margin: 0;
     line-height: 1.5;
 }
@@ -237,14 +286,14 @@ $totalHariIni = count($kunjunganHariIni);
 .scan-alert-time {
     font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
     font-family: monospace;
 }
 
 /* Live Table */
 .live-table-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border, #e2e8f0);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 2px 12px rgba(0,0,0,0.04);
@@ -254,7 +303,7 @@ $totalHariIni = count($kunjunganHariIni);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border, #e2e8f0);
     gap: 1rem;
     flex-wrap: wrap;
 }
@@ -278,12 +327,12 @@ $totalHariIni = count($kunjunganHariIni);
 .live-table-header h3 {
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--text-main, #0f172a);
     margin: 0;
 }
 .live-table-header p {
     font-size: 0.78rem;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
     margin: 0.1rem 0 0 0;
 }
 .badge-total {
@@ -310,7 +359,7 @@ $totalHariIni = count($kunjunganHariIni);
 .empty-state {
     padding: 3rem 1rem;
     text-align: center;
-    color: var(--text-muted);
+    color: var(--text-muted, #64748b);
 }
 .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.4; }
 .empty-state p { font-size: 0.9rem; margin: 0; }
@@ -336,6 +385,22 @@ $totalHariIni = count($kunjunganHariIni);
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.3; }
+}
+
+/* Penyesuaian Elemen Dark Mode */
+[data-bs-theme="dark"] .petugas-piket-box {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #1f2937;
+}
+[data-bs-theme="dark"] .modal-content {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+    color: #f1f5f9;
+}
+[data-bs-theme="dark"] .form-select {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f1f5f9;
 }
 </style>
 
@@ -374,6 +439,20 @@ $totalHariIni = count($kunjunganHariIni);
                     <kbd style="background: var(--bg-hover); border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px; font-size: 0.8rem; color: var(--text-main);">Enter</kbd>
                 </p>
                 <div class="status-dot" style="margin-top: 0.5rem;">Input Aktif &amp; Siap</div>
+            </div>
+
+            <!-- On-Duty Staff Bar (Petugas Piket) -->
+            <div class="petugas-piket-box">
+                <div class="petugas-piket-info">
+                    <span class="petugas-piket-icon"><i class="ri-user-star-line"></i></span>
+                    <div>
+                        <div class="petugas-piket-label">Petugas Piket Saat Ini:</div>
+                        <strong class="petugas-piket-name" id="label-petugas-aktif">Memuat...</strong>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" id="btn-ganti-petugas">
+                    <i class="ri-swap-line me-1"></i>Ganti Petugas
+                </button>
             </div>
 
             <!-- Input Form -->
@@ -467,7 +546,7 @@ $totalHariIni = count($kunjunganHariIni);
                                     </span>
                                 </td>
                                 <td>
-                                    <span style="font-family: monospace; font-weight: 700; color: var(--primary); font-size: 0.95rem;">
+                                    <span style="font-family: monospace; font-weight: 700; color: #8b5cf6; font-size: 0.95rem;">
                                         <?= Html::encode((string)$item->stambuk) ?>
                                     </span>
                                 </td>
@@ -475,13 +554,18 @@ $totalHariIni = count($kunjunganHariIni);
                                     <?= Html::encode((string)($item->nama_santri ?? '-')) ?>
                                 </td>
                                 <td>
-                                    <span class="badge" style="background: rgba(99,102,241,0.1); color: var(--primary); border: 1px solid rgba(99,102,241,0.2); font-size: 0.78rem;">
+                                    <span class="badge" style="background: rgba(139,92,246,0.1); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); font-size: 0.78rem;">
                                         <?= Html::encode((string)($item->kelas ?? '-')) ?>
                                     </span>
                                 </td>
                                 <td style="color: var(--text-muted); font-size: 0.85rem;"><?= Html::encode((string)($item->rayon ?? '-')) ?></td>
                                 <td style="color: var(--text-muted); font-size: 0.85rem;"><?= Html::encode((string)($item->konsulat ?? '-')) ?></td>
-                                <td style="padding-right: 1.5rem; color: var(--text-muted); font-size: 0.85rem;"><?= Html::encode((string)$item->penginput) ?></td>
+                                <td style="padding-right: 1.5rem; color: var(--text-muted); font-size: 0.85rem;">
+                                    <span class="badge bg-light text-dark border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
+                                        <i class="ri-user-line text-secondary"></i>
+                                        <?= Html::encode((string)$item->penginput) ?>
+                                    </span>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -492,6 +576,62 @@ $totalHariIni = count($kunjunganHariIni);
 
 </div><!-- /.scan-page -->
 
+<!-- ── MODAL IDENTIFIKASI PETUGAS PIKET (STATIC BACKDROP) ──────────────── -->
+<div class="modal fade" id="modalPetugas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalPetugasTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-body p-4 text-center">
+                <!-- User Icon Badge -->
+                <div class="d-inline-flex align-items-center justify-content-center mb-3 rounded-circle" style="width: 72px; height: 72px; background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
+                    <i class="ri-user-shared-2-line" style="font-size: 2.25rem;"></i>
+                </div>
+
+                <h4 class="fw-bold mb-1 text-body-emphasis" id="modalPetugasTitle">Siapa yang Sedang Bertugas?</h4>
+                <p class="text-secondary small mb-4">
+                    Pilih nama Anda dari daftar staf untuk mencatat riwayat transaksi kunjungan santri.
+                </p>
+
+                <div class="mb-4 text-start">
+                    <label for="selectPetugas" class="form-label small fw-semibold text-secondary">
+                        Nama Staf / Petugas Perpustakaan:
+                    </label>
+                    <select id="selectPetugas" class="form-select form-select-lg rounded-3" required>
+                        <option value="" selected disabled>-- Pilih Nama Anda --</option>
+                        <optgroup label="Library">
+                            <?php foreach ($groupedStaff['Library'] ?? [] as $staf): ?>
+                                <?php
+                                $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? '');
+                                ?>
+                                <?php if ($namaStaf !== ''): ?>
+                                    <option value="<?= Html::encode($namaStaf) ?>"><?= Html::encode($namaStaf) ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </optgroup>
+                        <optgroup label="Staff">
+                            <?php foreach ($groupedStaff['Staff'] ?? [] as $staf): ?>
+                                <?php
+                                $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? '');
+                                ?>
+                                <?php if ($namaStaf !== ''): ?>
+                                    <option value="<?= Html::encode($namaStaf) ?>"><?= Html::encode($namaStaf) ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </optgroup>
+                    </select>
+                    <div class="invalid-feedback" id="selectPetugasFeedback">
+                        Silakan pilih nama petugas terlebih dahulu sebelum memindai.
+                    </div>
+                </div>
+
+                <button id="btnMulaiBertugas" type="button" class="btn btn-primary bg-kutubia border-0 w-100 py-2.5 rounded-3 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #8b5cf6 !important;">
+                    <i class="ri-check-line fs-5"></i>
+                    <span>Mulai Bertugas</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 @keyframes spin {
     to { transform: rotate(360deg); }
@@ -499,7 +639,7 @@ $totalHariIni = count($kunjunganHariIni);
 </style>
 
 <script>
-// ── Audio Feedback via Web Audio API (no external file needed) ────────────
+// ── Audio Feedback via Web Audio API ──────────────────────────────────────
 const AudioFeedback = {
     ctx: null,
     init() {
@@ -548,23 +688,90 @@ function quickFill(stambuk) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const form          = document.getElementById('barcode-scan-form');
-    const input         = document.getElementById('stambuk-input');
-    const alertBox      = document.getElementById('scan-alert-container');
-    const tbody         = document.getElementById('kunjungan-tbody');
-    const badgeCount    = document.getElementById('badge-total-count');
-    const spinner       = document.getElementById('scan-spinner');
-    const btnText       = document.getElementById('btn-submit-text');
-    const btnIcon       = document.getElementById('btn-submit-icon');
-    const btn           = document.getElementById('btn-submit-scan');
-    const csrfInput     = document.getElementById('csrf-token');
+    const form              = document.getElementById('barcode-scan-form');
+    const input             = document.getElementById('stambuk-input');
+    const alertBox          = document.getElementById('scan-alert-container');
+    const tbody             = document.getElementById('kunjungan-tbody');
+    const badgeCount        = document.getElementById('badge-total-count');
+    const spinner           = document.getElementById('scan-spinner');
+    const btnText           = document.getElementById('btn-submit-text');
+    const btnIcon           = document.getElementById('btn-submit-icon');
+    const btn               = document.getElementById('btn-submit-scan');
+    const csrfInput         = document.getElementById('csrf-token');
+
+    // ── Elemen Petugas Piket & Modal ──────────────────────────────────────
+    const modalEl           = document.getElementById('modalPetugas');
+    const modalPetugas      = modalEl && typeof bootstrap !== 'undefined' ? bootstrap.Modal.getOrCreateInstance(modalEl) : null;
+    const selectPetugas     = document.getElementById('selectPetugas');
+    const btnMulaiBertugas  = document.getElementById('btnMulaiBertugas');
+    const btnGantiPetugas   = document.getElementById('btn-ganti-petugas');
+    const labelPetugasAktif = document.getElementById('label-petugas-aktif');
 
     let total = <?= $totalHariIni ?>;
 
-    // ── Auto-focus: selalu fokus kecuali klik tombol/link/input lain ─────
+    function updatePetugasUI(name) {
+        if (labelPetugasAktif) {
+            labelPetugasAktif.textContent = name || 'Belum Dipilih';
+        }
+        if (selectPetugas && name) {
+            selectPetugas.value = name;
+        }
+    }
+
+    // Cek apakah petugas sudah tersimpan di localStorage
+    const savedPetugas = localStorage.getItem('petugas_piket');
+    if (!savedPetugas) {
+        if (modalPetugas) {
+            modalPetugas.show();
+        }
+    } else {
+        updatePetugasUI(savedPetugas);
+    }
+
+    // Handler konfirmasi petugas bertugas
+    if (btnMulaiBertugas) {
+        btnMulaiBertugas.addEventListener('click', function() {
+            const selected = selectPetugas ? selectPetugas.value.trim() : '';
+            if (!selected) {
+                if (selectPetugas) selectPetugas.classList.add('is-invalid');
+                return;
+            }
+            if (selectPetugas) selectPetugas.classList.remove('is-invalid');
+            localStorage.setItem('petugas_piket', selected);
+            updatePetugasUI(selected);
+            if (modalPetugas) {
+                modalPetugas.hide();
+            }
+            setTimeout(() => {
+                if (input) input.focus();
+            }, 350);
+        });
+    }
+
+    // Handler tombol Ganti Petugas
+    if (btnGantiPetugas) {
+        btnGantiPetugas.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            localStorage.removeItem('petugas_piket');
+            updatePetugasUI('');
+            if (selectPetugas) {
+                selectPetugas.value = '';
+                selectPetugas.classList.remove('is-invalid');
+            }
+            if (modalPetugas) {
+                modalPetugas.show();
+            }
+        });
+    }
+
+    // ── Auto-focus: selalu fokus kecuali klik tombol/link/input/modal ─────
     input.focus();
     document.addEventListener('click', function (e) {
-        if (!e.target.closest('a, button, input, select, textarea')) {
+        if (document.body.classList.contains('modal-open') || (modalEl && modalEl.classList.contains('show'))) {
+            return;
+        }
+        if (!e.target.closest('a, button, input, select, textarea, .modal')) {
             input.focus();
         }
     });
@@ -576,13 +783,23 @@ document.addEventListener('DOMContentLoaded', function () {
         const stambuk = input.value.trim();
         if (!stambuk) return;
 
+        // Validasi petugas piket: jika belum ada, munculkan modal
+        const currentPetugas = localStorage.getItem('petugas_piket') || '';
+        if (!currentPetugas) {
+            if (modalPetugas) modalPetugas.show();
+            return;
+        }
+
         // Loading state
         btn.disabled         = true;
         spinner.style.display = 'inline-block';
         btnText.textContent   = 'Mencatat…';
         btnIcon.style.display = 'none';
 
-        const payload = new URLSearchParams({ stambuk });
+        const payload = new URLSearchParams({
+            stambuk: stambuk,
+            petugas_piket: currentPetugas
+        });
         if (csrfInput?.value) payload.append('_csrf', csrfInput.value);
 
         fetch('<?= $urlGenerator->generate('perpustakaan/scan') ?>', {
@@ -617,6 +834,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 &bull; Kelas: <strong>${escapeHtml(s.kelas)}</strong>
                                 &bull; Rayon: ${escapeHtml(s.rayon)}
                                 ${s.konsulat ? '&bull; Konsulat: ' + escapeHtml(s.konsulat) : ''}
+                                &bull; Petugas: <strong>${escapeHtml(s.penginput)}</strong>
                             </p>
                         </div>
                         <div class="scan-alert-meta">
@@ -637,15 +855,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span style="font-family:monospace;font-size:0.85rem;font-weight:600;color:var(--text-muted);">${escapeHtml(s.waktu)}</span>
                     </td>
                     <td>
-                        <span style="font-family:monospace;font-weight:700;color:var(--primary);font-size:0.95rem;">${escapeHtml(s.stambuk)}</span>
+                        <span style="font-family:monospace;font-weight:700;color:#8b5cf6;font-size:0.95rem;">${escapeHtml(s.stambuk)}</span>
                     </td>
                     <td style="font-weight:600;color:var(--text-main);">${escapeHtml(s.nama)}</td>
                     <td>
-                        <span class="badge" style="background:rgba(99,102,241,0.1);color:var(--primary);border:1px solid rgba(99,102,241,0.2);font-size:0.78rem;">${escapeHtml(s.kelas)}</span>
+                        <span class="badge" style="background:rgba(139,92,246,0.1);color:#8b5cf6;border:1px solid rgba(139,92,246,0.2);font-size:0.78rem;">${escapeHtml(s.kelas)}</span>
                     </td>
                     <td style="color:var(--text-muted);font-size:0.85rem;">${escapeHtml(s.rayon || '-')}</td>
                     <td style="color:var(--text-muted);font-size:0.85rem;">${escapeHtml(s.konsulat || '-')}</td>
-                    <td style="padding-right:1.5rem;color:var(--text-muted);font-size:0.85rem;">${escapeHtml(s.penginput)}</td>
+                    <td style="padding-right:1.5rem;color:var(--text-muted);font-size:0.85rem;">
+                        <span class="badge bg-light text-dark border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
+                            <i class="ri-user-line text-secondary"></i>${escapeHtml(s.penginput)}
+                        </span>
+                    </td>
                 `;
                 tbody.insertBefore(tr, tbody.firstChild);
 

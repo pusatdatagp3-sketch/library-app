@@ -176,4 +176,73 @@ class KunjunganRepository extends Repository
 
         return $results;
     }
+
+    /**
+     * Mengambil data agregasi kunjungan per group kolom (kelas, rayon, konsulat).
+     *
+     * @param string $field 'kelas' | 'rayon' | 'konsulat'
+     * @return array<array<string, mixed>>
+     */
+    public function getRekapAgregasi(string $field): array
+    {
+        $allowed = ['kelas', 'rayon', 'konsulat'];
+        if (!in_array($field, $allowed, true)) {
+            $field = 'kelas';
+        }
+
+        $db = $this->select()->getBuilder()->getLoader()->getSource()->getDatabase();
+        $sql = "SELECT `{$field}`, COUNT(`id`) AS `total` 
+                FROM `record_perpustakaan_kunjungan` 
+                GROUP BY `{$field}` 
+                ORDER BY `{$field}` ASC";
+
+        /** @var array<array<string, mixed>> $rows */
+        $rows = $db->query($sql)->fetchAll();
+
+        return array_map(static function (array $row) use ($field) {
+            $val = trim((string) ($row[$field] ?? ''));
+            $displayName = $val !== '' ? $val : 'Lainnya / Tidak Terdata';
+            return [
+                $field => $displayName,
+                'nama' => $displayName,
+                'total' => (int) ($row['total'] ?? 0),
+            ];
+        }, $rows);
+    }
+
+    /**
+     * Mengambil daftar santri yang berkunjung berdasarkan kategori dan nilainya (drill-down).
+     *
+     * @param string $field 'kelas' | 'rayon' | 'konsulat'
+     * @param string $value Nilai filter (contoh: '5B', 'Syam 2')
+     * @return array<array<string, mixed>>
+     */
+    public function getDetailKunjunganBy(string $field, string $value): array
+    {
+        $allowed = ['kelas', 'rayon', 'konsulat'];
+        if (!in_array($field, $allowed, true)) {
+            return [];
+        }
+
+        $db = $this->select()->getBuilder()->getLoader()->getSource()->getDatabase();
+
+        if ($value === 'Lainnya / Tidak Terdata' || $value === '' || $value === '-') {
+            $sql = "SELECT `id`, `santri_id`, `stambuk`, `nama_santri`, `kelas`, `rayon`, `konsulat`, `waktu_kunjungan`, `penginput`
+                    FROM `record_perpustakaan_kunjungan`
+                    WHERE (`{$field}` IS NULL OR `{$field}` = '' OR `{$field}` = :val)
+                    ORDER BY `waktu_kunjungan` DESC";
+            $params = [':val' => $value];
+        } else {
+            $sql = "SELECT `id`, `santri_id`, `stambuk`, `nama_santri`, `kelas`, `rayon`, `konsulat`, `waktu_kunjungan`, `penginput`
+                    FROM `record_perpustakaan_kunjungan`
+                    WHERE `{$field}` = :val
+                    ORDER BY `waktu_kunjungan` DESC";
+            $params = [':val' => $value];
+        }
+
+        /** @var array<array<string, mixed>> $rows */
+        $rows = $db->query($sql, $params)->fetchAll();
+
+        return $rows;
+    }
 }

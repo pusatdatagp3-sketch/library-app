@@ -32,4 +32,14 @@ return [
     ): \App\Web\Perpustakaan\Model\SiswaRepository {
         return new \App\Web\Perpustakaan\Model\SiswaRepository($db);
     },
+
+    \App\Web\Staf\Model\StafRepository::class => static function (
+        ORMInterface $orm,
+        EntityManagerInterface $em
+    ): \App\Web\Staf\Model\StafRepository {
+        /** @var \App\Web\Staf\Model\StafRepository $repo */
+        $repo = $orm->getRepository(\App\Web\Staf\Model\StafEntity::class);
+        $repo->setEntityManager($em);
+        return $repo;
+    },
 ];

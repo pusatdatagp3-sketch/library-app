@@ -1,67 +1,185 @@
-/* Import Google Font */
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
+/*
+ * ==================================================
+ * UI Framework - Base Variables
+ * ==================================================
+ * Primary color is intentionally NOT defined here.
+ * It must be provided by each project's _theme.css.
+ * ==================================================
+ */
 
 :root {
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
+    /* Primary (fallback if not defined by theme) */
+    --primary: #5c34a4;
+    --primary-hover: #48238f;
+    --primary-light: rgba(92, 52, 164, 0.15);
+    --primary-gradient: linear-gradient(135deg, #48238f 0%, #5c34a4 50%, #7c52d8 100%);
+
+    /* Secondary */
     --secondary: #64748b;
     --secondary-hover: #475569;
+
+    /* Backgrounds */
     --bg-main: #f8fafc;
     --bg-card: #ffffff;
     --bg-hover: #f1f5f9;
+
+    /* Text */
     --text-main: #0f172a;
     --text-muted: #64748b;
+
+    /* Border */
     --border: #e2e8f0;
+    --border-focus: var(--primary);
+
+    /* Semantic Colors */
     --danger: #ef4444;
     --danger-hover: #dc2626;
+    --danger-light: rgba(239, 68, 68, 0.1);
     --success: #10b981;
+    --success-hover: #059669;
+    --success-light: rgba(16, 185, 129, 0.1);
+    --warning: #f59e0b;
+    --warning-hover: #d97706;
+    --warning-light: rgba(245, 158, 11, 0.1);
+    --info: #0ea5e9;
+    --info-hover: #0284c7;
+    --info-light: rgba(14, 165, 233, 0.1);
+
+    /* Button Backgrounds */
     --btn-edit-bg: #eef2ff;
     --btn-delete-bg: #fef2f2;
     --btn-secondary-bg: #f1f5f9;
     --btn-secondary-hover: #e2e8f0;
+
+    /* Alert Colors */
     --alert-success-bg: #ecfdf5;
     --alert-success-border: #a7f3d0;
     --alert-success-text: #065f46;
     --alert-danger-bg: #fef2f2;
     --alert-danger-border: #fecaca;
     --alert-danger-text: #991b1b;
-    --badge-admin-bg: #e0e7ff;
-    --badge-admin-text: #4338ca;
+    --alert-warning-bg: #fffbeb;
+    --alert-warning-border: #fde68a;
+    --alert-warning-text: #92400e;
+    --alert-info-bg: #f0f9ff;
+    --alert-info-border: #bae6fd;
+    --alert-info-text: #075985;
+
+    /* Badge Colors */
+    --badge-admin-bg: #ede7f8;
+    --badge-admin-text: #48238f;
     --badge-operator-bg: #ccfbf1;
     --badge-operator-text: #0f766e;
     --badge-guru-bg: #fef3c7;
     --badge-guru-text: #b45309;
+    --badge-siswa-bg: #dbeafe;
+    --badge-siswa-text: #1e40af;
+
+    /* Layout */
+    --sidebar-width: 260px;
+    --header-height: 70px;
+    --sidebar-bg: #090d16;
+    --sidebar-border: rgba(255, 255, 255, 0.05);
+
+    /* Spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Transitions */
+    --transition: all 0.2s ease;
+    --transition-slow: all 0.3s ease;
+
+    /* Font Tokens */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.85rem;
+    --font-size-base: 0.95rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
 }
 
+/* ==========================================
+   Dark Mode
+   ========================================== */
 body[data-theme="dark"] {
     color-scheme: dark;
-    --primary: #6366f1;
-    --primary-hover: #818cf8;
-    --secondary: #475569;
-    --secondary-hover: #64748b;
+
+    --primary-light: rgba(124, 82, 216, 0.2);
+
+    /* Backgrounds */
     --bg-main: #0b0f19;
     --bg-card: #111827;
     --bg-hover: #1f2937;
+
+    /* Text */
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
+
+    /* Border */
     --border: #1f2937;
+
+    /* Semantic */
     --danger: #f87171;
     --danger-hover: #ef4444;
+    --danger-light: rgba(248, 113, 113, 0.15);
     --success: #34d399;
-    --btn-edit-bg: rgba(99, 102, 241, 0.15);
+    --success-light: rgba(52, 211, 153, 0.15);
+    --warning: #fbbf24;
+    --warning-light: rgba(251, 191, 36, 0.15);
+    --info: #38bdf8;
+    --info-light: rgba(56, 189, 248, 0.15);
+
+    /* Buttons */
+    --btn-edit-bg: rgba(124, 82, 216, 0.15);
     --btn-delete-bg: rgba(248, 113, 113, 0.15);
     --btn-secondary-bg: #1f2937;
     --btn-secondary-hover: #374151;
+
+    /* Alerts */
     --alert-success-bg: rgba(16, 185, 129, 0.1);
     --alert-success-border: rgba(16, 185, 129, 0.2);
     --alert-success-text: #34d399;
     --alert-danger-bg: rgba(239, 68, 68, 0.1);
     --alert-danger-border: rgba(239, 68, 68, 0.2);
     --alert-danger-text: #f87171;
-    --badge-admin-bg: rgba(99, 102, 241, 0.2);
-    --badge-admin-text: #818cf8;
+    --alert-warning-bg: rgba(245, 158, 11, 0.1);
+    --alert-warning-border: rgba(245, 158, 11, 0.2);
+    --alert-warning-text: #fbbf24;
+    --alert-info-bg: rgba(14, 165, 233, 0.1);
+    --alert-info-border: rgba(14, 165, 233, 0.2);
+    --alert-info-text: #38bdf8;
+
+    /* Badges */
+    --badge-admin-bg: rgba(92, 52, 164, 0.25);
+    --badge-admin-text: #c4a9f8;
     --badge-operator-bg: rgba(20, 184, 166, 0.2);
     --badge-operator-text: #2dd4bf;
     --badge-guru-bg: rgba(245, 158, 11, 0.2);
     --badge-guru-text: #fbbf24;
+    --badge-siswa-bg: rgba(59, 130, 246, 0.2);
+    --badge-siswa-text: #60a5fa;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }

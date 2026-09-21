@@ -8,6 +8,7 @@ use App\Web\Rbac\Controller\UserController;
 use App\Web\Rbac\Controller\RoleController;
 use App\Web\Rbac\Controller\PermissionController;
 use App\Web\Rbac\Controller\RoutePermissionController;
+use App\Web\Staf\Controller\StafController;
 use App\Web\Middleware\RbacAccessControlMiddleware;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
@@ -152,6 +153,36 @@ return [
             Route::get('/rekap')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'rekap'])
                 ->name('perpustakaan/rekap'),
+            Route::get('/api/detail-kunjungan')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'apiDetail'])
+                ->name('perpustakaan/api/detail-kunjungan'),
+        ),
+
+    // Modul Manajemen Staf Group (Khusus Super Admin)
+    Group::create('/staf')
+        ->middleware(RbacAccessControlMiddleware::class)
+        ->routes(
+            Route::get('')
+                ->action([StafController::class, 'index'])
+                ->name('staf/index'),
+            Route::get('/create')
+                ->action([StafController::class, 'create'])
+                ->name('staf/create'),
+            Route::post('/create')
+                ->action([StafController::class, 'create'])
+                ->name('staf/create/post'),
+            Route::get('/update/{id:\d+}')
+                ->action([StafController::class, 'update'])
+                ->name('staf/update'),
+            Route::post('/update/{id:\d+}')
+                ->action([StafController::class, 'update'])
+                ->name('staf/update/post'),
+            Route::post('/toggle/{id:\d+}')
+                ->action([StafController::class, 'toggle'])
+                ->name('staf/toggle'),
+            Route::post('/delete/{id:\d+}')
+                ->action([StafController::class, 'delete'])
+                ->name('staf/delete'),
         ),
 
 ];

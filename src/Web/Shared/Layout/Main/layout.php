@@ -78,18 +78,21 @@
                 : $aliases->get('@baseUrl/images/kutubia_logo.svg');
             ?>
             <div class="sidebar-brand">
-                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" width="38" height="38" style="width: 38px; height: 38px; object-fit: contain; background: #ffffff; border-radius: 8px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-full" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
+                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-icon" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: none;">
                 <span class="brand-text fw-bold">KUTUBIA</span>
             </div>
 
             <!-- Sidebar Navigation -->
             <div class="sidebar-nav">
-
                 <?php foreach ($sidebarMenu as $group): ?>
 
                 <div class="nav-group">
 
                     <span class="nav-group-title">
+                        <?php if (!empty($group['icon'])): ?>
+                            <i class="<?php echo Html::encode($group['icon']); ?>"></i>
+                        <?php endif; ?>
                         <?php echo Html::encode($group['group']) ?>
                     </span>
 
@@ -97,9 +100,14 @@
 
                         <?php foreach ($group['items'] as $item): ?>
 
-
-
                         <?php
+
+                            if (
+                                isset($item['role']) &&
+                                $userSession->getUserRole() !== $item['role']
+                            ) {
+                                continue;
+                            }
 
                             if (
                                 isset($item['permission']) &&
@@ -114,10 +122,18 @@
 
                         <?php if (!$hasChildren): ?>
 
+                        <?php
+                            $itemIcon = (string)($item['icon'] ?? '');
+                            if ($itemIcon !== '' && !str_ends_with($itemIcon, '-fill') && !str_ends_with($itemIcon, '-line')) {
+                                $itemIcon .= '-line';
+                            }
+                        ?>
                         <a href="<?php echo $urlGenerator->generate($item['route']) ?>"
                             class="<?php echo str_starts_with((string) ($currentRoute->getName() ?? ''), explode('/', $item['route'])[0]) ? 'active' : '' ?>">
 
-                            <i class="<?php echo $item['icon'] ?>-fill"></i>
+                            <?php if ($itemIcon !== ''): ?>
+                                <i class="<?php echo Html::encode($itemIcon); ?>"></i>
+                            <?php endif; ?>
 
                             <span><?php echo Html::encode($item['label']) ?></span>
                         </a>
@@ -141,13 +157,20 @@
                                     break;
                                 }
                             }
+
+                            $parentIcon = (string)($item['icon'] ?? '');
+                            if ($parentIcon !== '' && !str_ends_with($parentIcon, '-fill') && !str_ends_with($parentIcon, '-line')) {
+                                $parentIcon .= '-line';
+                            }
                         ?>
                         <div class="sidebar-dropdown <?php echo $dropdownActive ? 'open' : '' ?>">
 
                             <button class="sidebar-dropdown-toggle <?php echo $dropdownActive ? 'active' : '' ?>">
 
                                 <div class="sidebar-dropdown-left">
-                                    <i class="<?php echo $item['icon'] ?>-fill"></i>
+                                    <?php if ($parentIcon !== ''): ?>
+                                        <i class="<?php echo Html::encode($parentIcon); ?>"></i>
+                                    <?php endif; ?>
                                     <span><?php echo Html::encode($item['label']) ?></span>
                                 </div>
 
@@ -160,6 +183,13 @@
                                 <?php foreach ($item['children'] as $child): ?>
 
                                 <?php
+
+                                    if (
+                                        isset($child['role']) &&
+                                        $userSession->getUserRole() !== $child['role']
+                                    ) {
+                                        continue;
+                                    }
 
                                     if (
                                         isset($child['permission']) &&
@@ -175,13 +205,17 @@
                                         (string) ($currentRoute->getName() ?? ''),
                                         explode('/', $child['route'])[0]
                                     );
+                                    $childIcon = (string)($child['icon'] ?? '');
+                                    if ($childIcon !== '' && !str_ends_with($childIcon, '-fill') && !str_ends_with($childIcon, '-line')) {
+                                        $childIcon .= '-line';
+                                    }
                                 ?>
 
                                 <a href="<?php echo $urlGenerator->generate($child['route']) ?>"
                                     class="<?php echo $childActive ? 'active' : '' ?>">
 
-                                    <?php if (!empty($child['icon'])): ?>
-                                    <i class="<?php echo Html::encode($child['icon']) ?>-line"></i>
+                                    <?php if ($childIcon !== ''): ?>
+                                        <i class="<?php echo Html::encode($childIcon); ?>"></i>
                                     <?php endif; ?>
 
                                     <span><?php echo Html::encode($child['label']) ?></span>
@@ -252,11 +286,7 @@
                         <form action="<?php echo $urlGenerator->generate('logout') ?>" method="POST" style="margin: 0;">
                             <input type="hidden" name="_csrf" value="<?php echo Html::encode($csrf) ?>">
                             <button type="submit" class="logout-btn-nav" title="Keluar">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                </svg>
+                                <i class="ri-logout-box-r-line" style="font-size: 1.15rem;"></i>
                             </button>
                         </form>
                     </div>

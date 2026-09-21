@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Web\Perpustakaan\Controller;
 
+use App\Web\Auth\Model\AuthRepository;
 use App\Web\Auth\Model\UserSession;
 use App\Web\Perpustakaan\Model\KunjunganRepository;
 use App\Web\Perpustakaan\Model\SiswaRepository;
+use App\Web\Staf\Model\StafRepository;
 use HttpSoft\Message\Stream;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -29,14 +31,16 @@ final class PerpustakaanController
         private SiswaRepository $siswaRepository,
         private ResponseFactoryInterface $responseFactory,
         private UserSession $userSession,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private ?AuthRepository $authRepository = null,
+        private ?StafRepository $stafRepository = null
     ) {
     }
 
     /**
      * Halaman Dashboard Perpustakaan:
      * Menyajikan data statistik agregat kunjungan hari ini, minggu ini,
-     * serta rekapitulasi kunjungan per kelas untuk divisualisasikan via Chart.js.
+     * serta 3 set data agregasi (Kelas, Rayon, Konsulat) untuk visualisasi Multi-Chart (Chart.js).
      */
     public function dashboard(): ResponseInterface
     {
@@ -46,9 +50,23 @@ final class PerpustakaanController
         $totalHariIni = count($kunjunganHariIni);
         $totalMingguIni = count($kunjunganMingguIni);
 
-        // Agregasi kunjungan per kelas untuk chart
-        $chartPerKelasMingguIni = $this->kunjunganRepository->getRekapPerKelas('minggu_ini');
-        $chartPerKelasHariIni = $this->kunjunganRepository->getRekapPerKelas('hari_ini');
+        // 3 Query agregasi terpisah: Kelas, Rayon, dan Konsulat
+        $rawKelas = $this->kunjunganRepository->getRekapAgregasi('kelas');
+        $rawRayon = $this->kunjunganRepository->getRekapAgregasi('rayon');
+        $rawKonsulat = $this->kunjunganRepository->getRekapAgregasi('konsulat');
+
+        $chartKelas = [
+            'labels' => array_column($rawKelas, 'nama'),
+            'totals' => array_column($rawKelas, 'total'),
+        ];
+        $chartRayon = [
+            'labels' => array_column($rawRayon, 'nama'),
+            'totals' => array_column($rawRayon, 'total'),
+        ];
+        $chartKonsulat = [
+            'labels' => array_column($rawKonsulat, 'nama'),
+            'totals' => array_column($rawKonsulat, 'total'),
+        ];
 
         // Santri terakhir berkunjung hari ini
         $kunjunganTerbaru = array_slice($kunjunganHariIni, 0, 10);
@@ -56,8 +74,12 @@ final class PerpustakaanController
         return $this->viewRenderer->render(__DIR__ . '/../View/dashboard', [
             'totalHariIni' => $totalHariIni,
             'totalMingguIni' => $totalMingguIni,
-            'chartPerKelasMingguIni' => $chartPerKelasMingguIni,
-            'chartPerKelasHariIni' => $chartPerKelasHariIni,
+            'chartKelas' => $chartKelas,
+            'chartRayon' => $chartRayon,
+            'chartKonsulat' => $chartKonsulat,
+            'chartPerKelasMingguIni' => (!empty($chartKelas['labels']) && count($chartKelas['labels']) === count($chartKelas['totals']))
+                ? array_combine($chartKelas['labels'], $chartKelas['totals'])
+                : [],
             'kunjunganTerbaru' => $kunjunganTerbaru,
         ]);
     }
@@ -77,8 +99,22 @@ final class PerpustakaanController
         // GET: Tampilkan halaman form scanner
         $kunjunganHariIni = $this->kunjunganRepository->getKunjunganHariIni();
 
+        // Ambil daftar staf aktif dikelompokkan berdasarkan divisi ('Library' & 'Staff')
+        if ($this->stafRepository !== null) {
+            $groupedStaff = $this->stafRepository->findActiveGroupedByDivisi();
+        } else {
+            $db = $this->kunjunganRepository->getDatabase();
+            $rows = $db->query("SELECT * FROM `list_staf` WHERE `is_active` = 1 ORDER BY `divisi` ASC, `nama_staf` ASC")->fetchAll();
+            $groupedStaff = ['Library' => [], 'Staff' => []];
+            foreach ($rows as $row) {
+                $div = ($row['divisi'] ?? '') === 'Staff' ? 'Staff' : 'Library';
+                $groupedStaff[$div][] = $row;
+            }
+        }
+
         return $this->viewRenderer->render(__DIR__ . '/../View/scan', [
             'kunjunganHariIni' => $kunjunganHariIni,
+            'groupedStaff'     => $groupedStaff,
         ]);
     }
 
@@ -108,8 +144,9 @@ final class PerpustakaanController
                 ], 404);
             }
 
-            // 2. Tentukan nama penginput dari user yang sedang login
-            $penginput = $this->userSession->getUsername() ?? 'Petugas Perpustakaan';
+            // 2. Tentukan nama penginput: utamakan dari parameter POST petugas piket, fallback ke user session
+            $petugasPiket = trim((string) ($body['petugas_piket'] ?? ''));
+            $penginput = $petugasPiket !== '' ? $petugasPiket : ($this->userSession->getUsername() ?? 'Petugas Perpustakaan');
 
             // 3. Catat kunjungan ke tabel record_perpustakaan_kunjungan
             $santriId = (int) ($santri['santri_id'] ?? $santri['kds'] ?? 0);
@@ -154,23 +191,90 @@ final class PerpustakaanController
 
     /**
      * Halaman Rekap Kunjungan:
-     * Menampilkan riwayat lengkap santri yang telah melakukan presensi/scan barcode di perpustakaan.
-     * Mengambil 100 data kunjungan terbaru (atau sesuai query param limit).
+     * Mendukung 4 mode tampilan (Nav Pills):
+     * - 'input'    : Riwayat data mentah kunjungan (urutkan waktu_kunjungan DESC).
+     * - 'kelas'    : Agregasi per kelas (GROUP BY kelas ORDER BY kelas ASC).
+     * - 'rayon'    : Agregasi per rayon (GROUP BY rayon ORDER BY rayon ASC).
+     * - 'konsulat' : Agregasi per konsulat (GROUP BY konsulat ORDER BY konsulat ASC).
      */
     public function rekap(CurrentRoute $route, Request $request): ResponseInterface
     {
         $queryParams = $request->getQueryParams();
+        $mode = (string) ($queryParams['mode'] ?? 'input');
+        if (!in_array($mode, ['input', 'kelas', 'rayon', 'konsulat'], true)) {
+            $mode = 'input';
+        }
+
         $limit = isset($queryParams['limit']) ? (int) $queryParams['limit'] : 100;
         if ($limit <= 0 || $limit > 500) {
             $limit = 100;
         }
 
-        $kunjunganList = $this->kunjunganRepository->getRiwayatKunjungan($limit);
+        if ($mode === 'input') {
+            $data = $this->kunjunganRepository->getRiwayatKunjungan($limit);
+        } else {
+            $data = $this->kunjunganRepository->getRekapAgregasi($mode);
+        }
 
         return $this->viewRenderer->render(__DIR__ . '/../View/rekap', [
-            'kunjunganList' => $kunjunganList,
+            'mode' => $mode,
+            'data' => $data,
+            'kunjunganList' => $mode === 'input' ? $data : [],
             'limit' => $limit,
             'route' => $route,
+        ]);
+    }
+
+    /**
+     * Endpoint API AJAX: Detail kunjungan santri untuk fitur Drill-Down Chart.
+     * Mengembalikan daftar santri yang berkunjung berdasarkan kategori ('kelas', 'rayon', 'konsulat') dan nilainya.
+     */
+    public function apiDetail(Request $request): ResponseInterface
+    {
+        $queryParams = $request->getQueryParams();
+        $type = strtolower(trim((string) ($queryParams['type'] ?? '')));
+        $value = trim((string) ($queryParams['value'] ?? ''));
+
+        if (!in_array($type, ['kelas', 'rayon', 'konsulat'], true) || $value === '') {
+            return $this->json([
+                'success' => false,
+                'message' => 'Parameter "type" (kelas/rayon/konsulat) dan "value" wajib diisi.',
+                'data' => [],
+            ], 400);
+        }
+
+        $records = $this->kunjunganRepository->getDetailKunjunganBy($type, $value);
+
+        $data = array_map(static function (array $row) {
+            $waktu = $row['waktu_kunjungan'] ?? null;
+            if ($waktu instanceof \DateTimeInterface) {
+                $waktuFormatted = $waktu->format('d M Y, H:i');
+            } elseif (is_string($waktu) && $waktu !== '') {
+                $time = strtotime($waktu);
+                $waktuFormatted = $time ? date('d M Y, H:i', $time) : $waktu;
+            } else {
+                $waktuFormatted = '-';
+            }
+
+            return [
+                'id'              => (int) ($row['id'] ?? 0),
+                'stambuk'         => (string) ($row['stambuk'] ?? '-'),
+                'nama_santri'     => (string) ($row['nama_santri'] ?? '-'),
+                'kelas'           => (string) ($row['kelas'] ?? '-'),
+                'rayon'           => (string) ($row['rayon'] ?? '-'),
+                'konsulat'        => (string) ($row['konsulat'] ?? '-'),
+                'waktu_kunjungan' => $waktuFormatted,
+                'penginput'       => (string) ($row['penginput'] ?? '-'),
+                'petugas'         => (string) ($row['penginput'] ?? '-'),
+            ];
+        }, $records);
+
+        return $this->json([
+            'success' => true,
+            'type'    => $type,
+            'value'   => $value,
+            'total'   => count($data),
+            'data'    => $data,
         ]);
     }
 
