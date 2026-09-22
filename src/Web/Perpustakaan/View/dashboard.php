@@ -271,7 +271,7 @@ $tanggalLengkap = "{$hariIni}, {$tgl} {$bln} {$thn}";
                                 <i class="ri-cursor-line me-1"></i>Klik batang untuk drill-down
                             </span>
                         </h5>
-                        <p class="text-body-secondary small mb-0">Visualisasi volume presensi santri perpustakaan</p>
+                        <p class="text-body-secondary small mb-0">Visualisasi volume presensi santri perpustakaan minggu ini (Sabtu - Jumat).</p>
                     </div>
 
                     <!-- Bootstrap Nav Pills Switcher (Kelas, Rayon, Konsulat) -->

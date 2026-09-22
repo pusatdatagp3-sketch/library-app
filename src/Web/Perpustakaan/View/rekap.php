@@ -14,11 +14,17 @@ use Yiisoft\View\WebView;
  * @var array<KunjunganEntity|array<string, mixed>> $data
  * @var KunjunganEntity[] $kunjunganList
  * @var int $limit
+ * @var string $rentangWaktu 'semua' | 'minggu_ini' | 'bulan_ini'
+ * @var string $searchQuery
+ * @var string $labelRentang
+ * @var string $periodeDetail
  * @var CurrentRoute $route
  * @var UrlGeneratorInterface $urlGenerator
  */
 
 $mode = $mode ?? 'input';
+$rentangWaktu = $rentangWaktu ?? 'semua';
+$searchQuery = $searchQuery ?? '';
 $totalItems = count($data);
 
 // Mapping judul kategori dan ikon untuk mode agregasi
@@ -39,10 +45,24 @@ if ($mode !== 'input') {
         $grandTotalAgregasi += (int)($row['total'] ?? 0);
     }
 }
+
+// Generate URL untuk Export Excel dan PDF dengan parameter aktif
+$baseExportParams = [
+    'mode'          => $mode,
+    'rentang_waktu' => $rentangWaktu,
+    'action'        => 'export',
+];
+if ($searchQuery !== '') {
+    $baseExportParams['q'] = $searchQuery;
+}
+
+$urlExportExcel = '?' . http_build_query(array_merge($baseExportParams, ['format' => 'excel']));
+$urlExportPdf   = '?' . http_build_query(array_merge($baseExportParams, ['format' => 'pdf']));
 ?>
 
-<!-- Bootstrap 5 CSS CDN -->
+<!-- Bootstrap 5 CSS & JS CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
 /* KUTUBIA Custom Color Scheme & Dark/Light Mode Tokens */
@@ -190,42 +210,47 @@ if ($mode !== 'input') {
     </div>
 
     <!-- ── 2. TAB NAV PILLS (MODE SWITCHER) ───────────────────────────────── -->
+    <?php
+    $tabQueryStr = ($rentangWaktu !== 'semua' ? '&rentang_waktu=' . urlencode($rentangWaktu) : '')
+        . ($searchQuery !== '' ? '&q=' . urlencode($searchQuery) : '');
+    ?>
     <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
-        <a href="?mode=input"
+        <a href="?mode=input<?= $tabQueryStr ?>"
            class="btn nav-pill-btn rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 <?= $mode === 'input' ? 'btn-primary bg-kutubia border-0 text-white shadow-sm active' : 'btn-outline-secondary' ?>">
             <i class="ri-file-list-3-line"></i>
             <span>Rekap Per-Input</span>
         </a>
 
-        <a href="?mode=kelas"
+        <a href="?mode=kelas<?= $tabQueryStr ?>"
            class="btn nav-pill-btn rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 <?= $mode === 'kelas' ? 'btn-primary bg-kutubia border-0 text-white shadow-sm active' : 'btn-outline-secondary' ?>">
             <i class="ri-building-line"></i>
             <span>Rekap Per-Kelas</span>
         </a>
 
-        <a href="?mode=rayon"
+        <a href="?mode=rayon<?= $tabQueryStr ?>"
            class="btn nav-pill-btn rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 <?= $mode === 'rayon' ? 'btn-primary bg-kutubia border-0 text-white shadow-sm active' : 'btn-outline-secondary' ?>">
             <i class="ri-community-line"></i>
             <span>Rekap Per-Rayon</span>
         </a>
 
-        <a href="?mode=konsulat"
+        <a href="?mode=konsulat<?= $tabQueryStr ?>"
            class="btn nav-pill-btn rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 <?= $mode === 'konsulat' ? 'btn-primary bg-kutubia border-0 text-white shadow-sm active' : 'btn-outline-secondary' ?>">
             <i class="ri-global-line"></i>
             <span>Rekap Per-Konsulat</span>
         </a>
     </div>
 
-    <!-- ── 3. METRIC / FILTER BAR ────────────────────────────────────────── -->
+    <!-- ── 3. METRIC & FILTER CONTROLS BAR ───────────────────────────────── -->
     <div class="row g-3 align-items-center mb-3">
-        <div class="col-12 col-md-auto d-flex align-items-center gap-2 flex-wrap">
+        <!-- Kolom Kiri: Badge Metrik Data & Filter Aktif -->
+        <div class="col-12 col-lg-auto d-flex align-items-center gap-2 flex-wrap">
             <?php if ($mode === 'input'): ?>
                 <span class="badge bg-k-purple-subtle text-k-purple px-3 py-2 rounded-pill fw-semibold fs-6">
                     <i class="ri-user-follow-line me-1"></i>
                     <span id="rekap-total-badge"><?= $totalItems ?></span> Data Terkini
                 </span>
-                <span class="text-secondary small d-none d-sm-inline">
-                    (Menampilkan maksimal <?= $limit ?> kunjungan terbaru)
+                <span class="badge bg-body-secondary text-body border px-3 py-2 rounded-pill fw-semibold fs-6" title="<?= Html::encode($periodeDetail ?? '') ?>">
+                    <i class="ri-calendar-line text-k-purple me-1"></i><?= Html::encode($labelRentang ?? 'Semua Waktu') ?>
                 </span>
             <?php else: ?>
                 <span class="badge bg-k-purple-subtle text-k-purple px-3 py-2 rounded-pill fw-semibold fs-6">
@@ -235,24 +260,68 @@ if ($mode !== 'input') {
                 <span class="badge bg-body-secondary text-body border px-3 py-2 rounded-pill fw-semibold fs-6">
                     <i class="ri-bar-chart-line me-1 text-k-purple"></i>Total: <?= number_format($grandTotalAgregasi) ?> Kunjungan
                 </span>
+                <span class="badge bg-body-secondary text-body border px-3 py-2 rounded-pill fw-semibold fs-6" title="<?= Html::encode($periodeDetail ?? '') ?>">
+                    <i class="ri-calendar-line text-k-purple me-1"></i><?= Html::encode($labelRentang ?? 'Semua Waktu') ?>
+                </span>
             <?php endif; ?>
         </div>
 
-        <div class="col-12 col-md-auto ms-md-auto d-flex align-items-center gap-2">
-            <!-- Live Search Bar -->
-            <div class="search-input-group">
-                <i class="ri-search-line"></i>
-                <input
-                    type="text"
-                    class="form-control form-control-sm border-secondary-subtle"
-                    id="table-search-input"
-                    placeholder="<?= $mode === 'input' ? 'Cari stambuk, nama, kelas...' : 'Cari nama ' . strtolower($activeModeConfig['label'] ?? '') . '...' ?>"
-                    autocomplete="off"
-                >
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-secondary rounded-3" onclick="window.print()" title="Cetak / Simpan PDF">
-                <i class="ri-printer-line me-1"></i>Cetak
-            </button>
+        <!-- Kolom Kanan: Form Filter Waktu, Search Input, & Dropdown Export Data -->
+        <div class="col-12 col-lg-auto ms-lg-auto">
+            <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Parameter Mode Aktif -->
+                <input type="hidden" name="mode" value="<?= Html::encode($mode) ?>">
+
+                <!-- 1. Dropdown Filter Rentang Waktu (Sabtu-Jumat, Bulan Ini, Semua) -->
+                <select name="rentang_waktu" class="form-select form-select-sm w-auto border-secondary-subtle rounded-3 py-1.5" onchange="this.form.submit()" title="Pilih Rentang Waktu Rekap">
+                    <option value="semua" <?= $rentangWaktu === 'semua' ? 'selected' : '' ?>>Semua Waktu</option>
+                    <option value="minggu_ini" <?= $rentangWaktu === 'minggu_ini' ? 'selected' : '' ?>>Minggu Ini (Sabtu - Jumat)</option>
+                    <option value="bulan_ini" <?= $rentangWaktu === 'bulan_ini' ? 'selected' : '' ?>>Bulan Ini</option>
+                </select>
+
+                <!-- 2. Input Pencarian Data -->
+                <div class="search-input-group">
+                    <i class="ri-search-line"></i>
+                    <input
+                        type="text"
+                        name="q"
+                        value="<?= Html::encode($searchQuery) ?>"
+                        class="form-control form-control-sm border-secondary-subtle"
+                        id="table-search-input"
+                        placeholder="<?= $mode === 'input' ? 'Cari stambuk, nama, kelas...' : 'Cari nama ' . strtolower($activeModeConfig['label'] ?? '') . '...' ?>"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <!-- 3. Bootstrap Dropdown Export Data (Excel & PDF) -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-inline-flex align-items-center gap-1 rounded-3 px-3 py-1.5" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Export Rekap Kunjungan">
+                        <i class="ri-download-2-line"></i>
+                        <span>Export Data</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 py-2">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="<?= Html::encode($urlExportExcel) ?>">
+                                <i class="ri-file-excel-2-line text-success fs-5"></i>
+                                <div>
+                                    <div class="fw-semibold">Export ke Excel (.xlsx)</div>
+                                    <small class="text-secondary" style="font-size: 0.75rem;">Unduh berkas spreadsheet Microsoft Excel</small>
+                                </div>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="<?= Html::encode($urlExportPdf) ?>" target="_blank">
+                                <i class="ri-file-pdf-2-line text-danger fs-5"></i>
+                                <div>
+                                    <div class="fw-semibold">Export ke PDF</div>
+                                    <small class="text-secondary" style="font-size: 0.75rem;">Cetak dokumen &bull; Layout bersih</small>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
         </div>
     </div>
 

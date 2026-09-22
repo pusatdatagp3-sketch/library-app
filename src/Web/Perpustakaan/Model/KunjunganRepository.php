@@ -55,20 +55,38 @@ class KunjunganRepository extends Repository
     }
 
     /**
-     * Mengambil semua daftar kunjungan untuk minggu ini (Senin - Minggu),
+     * Mengambil instance database koneksi aktif dari loader Cycle ORM.
+     */
+    public function getDatabase()
+    {
+        return $this->select()->getBuilder()->getLoader()->getSource()->getDatabase();
+    }
+
+    /**
+     * Mengambil semua daftar kunjungan untuk minggu ini (Sabtu - Jumat atau kustom),
      * diurutkan dari yang paling baru.
      *
      * @return KunjunganEntity[]
      */
-    public function getKunjunganMingguIni(): array
+    public function getKunjunganMingguIni(?string $startStr = null, ?string $endStr = null): array
     {
-        $startOfWeek = (new DateTimeImmutable('monday this week'))->format('Y-m-d 00:00:00');
-        $endOfWeek = (new DateTimeImmutable('sunday this week 23:59:59'))->format('Y-m-d 23:59:59');
+        if ($startStr === null || $endStr === null) {
+            $now = new DateTimeImmutable('now', new \DateTimeZone('Asia/Jakarta'));
+            $startOfWeek = ($now->format('w') == 6)
+                ? $now->setTime(0, 0, 0)
+                : $now->modify('last saturday')->setTime(0, 0, 0);
+            $endOfWeek = ($now->format('w') == 5)
+                ? $now->setTime(23, 59, 59)
+                : $now->modify('next friday')->setTime(23, 59, 59);
+
+            $startStr = $startOfWeek->format('Y-m-d H:i:s');
+            $endStr = $endOfWeek->format('Y-m-d H:i:s');
+        }
 
         /** @var KunjunganEntity[] $results */
         $results = $this->select()
-            ->where('waktu_kunjungan', '>=', $startOfWeek)
-            ->where('waktu_kunjungan', '<=', $endOfWeek)
+            ->where('waktu_kunjungan', '>=', $startStr)
+            ->where('waktu_kunjungan', '<=', $endStr)
             ->orderBy('waktu_kunjungan', 'DESC')
             ->fetchAll();
 
@@ -161,15 +179,43 @@ class KunjunganRepository extends Repository
     }
 
     /**
-     * Mengambil daftar riwayat kunjungan perpustakaan terbaru dengan batas limit.
+     * Mengambil daftar riwayat kunjungan perpustakaan terbaru dengan batas limit,
+     * filter rentang waktu, dan opsi pencarian kata kunci.
      *
      * @param int $limit Batas maksimal rekaman yang diambil (default: 100)
+     * @param string|null $startStr Waktu awal rentang (Y-m-d H:i:s)
+     * @param string|null $endStr Waktu akhir rentang (Y-m-d H:i:s)
+     * @param string|null $search Kata kunci pencarian santri
      * @return KunjunganEntity[]
      */
-    public function getRiwayatKunjungan(int $limit = 100): array
-    {
+    public function getRiwayatKunjungan(
+        int $limit = 100,
+        ?string $startStr = null,
+        ?string $endStr = null,
+        ?string $search = null
+    ): array {
+        $select = $this->select();
+
+        if ($startStr !== null && $endStr !== null) {
+            $select = $select
+                ->where('waktu_kunjungan', '>=', $startStr)
+                ->where('waktu_kunjungan', '<=', $endStr);
+        }
+
+        if ($search !== null && $search !== '') {
+            $kw = '%' . trim($search) . '%';
+            $select = $select->where(static function ($s) use ($kw) {
+                $s->where('stambuk', 'LIKE', $kw)
+                    ->orWhere('nama_santri', 'LIKE', $kw)
+                    ->orWhere('kelas', 'LIKE', $kw)
+                    ->orWhere('rayon', 'LIKE', $kw)
+                    ->orWhere('konsulat', 'LIKE', $kw)
+                    ->orWhere('penginput', 'LIKE', $kw);
+            });
+        }
+
         /** @var KunjunganEntity[] $results */
-        $results = $this->select()
+        $results = $select
             ->orderBy('waktu_kunjungan', 'DESC')
             ->limit($limit)
             ->fetchAll();
@@ -178,26 +224,52 @@ class KunjunganRepository extends Repository
     }
 
     /**
-     * Mengambil data agregasi kunjungan per group kolom (kelas, rayon, konsulat).
+     * Mengambil data agregasi kunjungan per group kolom (kelas, rayon, konsulat),
+     * dengan opsi filter rentang waktu tertentu dan pencarian kategori.
      *
      * @param string $field 'kelas' | 'rayon' | 'konsulat'
+     * @param string|null $startStr Waktu awal rentang (Y-m-d H:i:s)
+     * @param string|null $endStr Waktu akhir rentang (Y-m-d H:i:s)
+     * @param string|null $search Kata kunci pencarian nama kategori
      * @return array<array<string, mixed>>
      */
-    public function getRekapAgregasi(string $field): array
-    {
-        $allowed = ['kelas', 'rayon', 'konsulat'];
-        if (!in_array($field, $allowed, true)) {
-            $field = 'kelas';
-        }
+     public function getRekapAgregasi(
+         string $field,
+         ?string $startStr = null,
+         ?string $endStr = null,
+         ?string $search = null
+     ): array {
+         $allowed = ['kelas', 'rayon', 'konsulat'];
+         if (!in_array($field, $allowed, true)) {
+             $field = 'kelas';
+         }
 
-        $db = $this->select()->getBuilder()->getLoader()->getSource()->getDatabase();
-        $sql = "SELECT `{$field}`, COUNT(`id`) AS `total` 
-                FROM `record_perpustakaan_kunjungan` 
-                GROUP BY `{$field}` 
-                ORDER BY `{$field}` ASC";
+         $db = $this->getDatabase();
 
-        /** @var array<array<string, mixed>> $rows */
-        $rows = $db->query($sql)->fetchAll();
+         $whereConditions = [];
+         $params = [];
+
+         if ($startStr !== null && $endStr !== null) {
+             $whereConditions[] = '`waktu_kunjungan` BETWEEN :start_str AND :end_str';
+             $params[':start_str'] = $startStr;
+             $params[':end_str'] = $endStr;
+         }
+
+         if ($search !== null && $search !== '') {
+             $whereConditions[] = "`{$field}` LIKE :search_kw";
+             $params[':search_kw'] = '%' . trim($search) . '%';
+         }
+
+         $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
+
+         $sql = "SELECT `{$field}`, COUNT(`id`) AS `total` 
+                 FROM `record_perpustakaan_kunjungan` 
+                 {$whereClause}
+                 GROUP BY `{$field}` 
+                 ORDER BY `{$field}` ASC";
+
+         /** @var array<array<string, mixed>> $rows */
+         $rows = $db->query($sql, $params)->fetchAll();
 
         return array_map(static function (array $row) use ($field) {
             $val = trim((string) ($row[$field] ?? ''));

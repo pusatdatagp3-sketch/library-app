@@ -106,12 +106,12 @@ foreach ($staffList as $staf) {
             </div>
         </div>
 
-        <!-- Card 2: Divisi Library -->
+        <!-- Card 2: Sektor (Ustadzah) -->
         <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted small fw-bold text-uppercase mb-1">Divisi Library</p>
+                        <p class="text-muted small fw-bold text-uppercase mb-1">Sektor (Ustadzah)</p>
                         <h3 class="fw-bold mb-0"><?= $totalLibrary ?></h3>
                     </div>
                     <div class="bg-info-subtle text-info p-3 rounded-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
@@ -121,16 +121,16 @@ foreach ($staffList as $staf) {
             </div>
         </div>
 
-        <!-- Card 3: Divisi Staff -->
+        <!-- Card 3: OPPM (Santriwati) -->
         <div class="col-12 col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted small fw-bold text-uppercase mb-1">Divisi Staff</p>
+                        <p class="text-muted small fw-bold text-uppercase mb-1">OPPM (Santriwati)</p>
                         <h3 class="fw-bold mb-0"><?= $totalStaff ?></h3>
                     </div>
                     <div class="bg-warning-subtle text-warning p-3 rounded-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
-                        <i class="ri-user-star-line fs-4"></i>
+                        <i class="ri-book-2-line fs-4"></i>
                     </div>
                 </div>
             </div>
@@ -205,13 +205,13 @@ foreach ($staffList as $staf) {
                                 <td>
                                     <?php if ($staf->divisi === 'Library'): ?>
                                         <span class="badge" style="background: rgba(139,92,246,0.12); color: #7c3aed; border: 1px solid rgba(139,92,246,0.25); font-size: 0.8rem; padding: 0.4rem 0.65rem;">
-                                            <i class="ri-book-line me-1"></i> Library
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="badge" style="background: rgba(14,165,233,0.12); color: #0284c7; border: 1px solid rgba(14,165,233,0.25); font-size: 0.8rem; padding: 0.4rem 0.65rem;">
-                                            <i class="ri-user-star-line me-1"></i> Staff
-                                        </span>
-                                    <?php endif; ?>
+                                             <i class="ri-book-line me-1"></i> Sektor
+                                         </span>
+                                     <?php else: ?>
+                                         <span class="badge" style="background: rgba(14,165,233,0.12); color: #0284c7; border: 1px solid rgba(14,165,233,0.25); font-size: 0.8rem; padding: 0.4rem 0.65rem;">
+                                             <i class="ri-book-2-line me-1"></i> OPPM
+                                         </span>
+                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($staf->is_active): ?>
@@ -305,8 +305,8 @@ foreach ($staffList as $staf) {
                             Divisi Penugasan <span class="text-danger">*</span>
                         </label>
                         <select id="modal_divisi" name="divisi" class="form-select" required>
-                            <option value="Library" selected>📚 Library (Staf Perpustakaan)</option>
-                            <option value="Staff">👥 Staff (Staf Umum / Pengawas)</option>
+                            <option value="Library" selected>📚 Sektor (Ustadzah Perpustakaan)</option>
+                            <option value="Staff">📖 OPPM (Bagian Perpustakaan)</option>
                         </select>
                         <div class="form-text small">Menentukan kelompok (optgroup) pada pop-up scanner kartu santri.</div>
                     </div>

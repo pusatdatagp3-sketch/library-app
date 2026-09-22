@@ -635,7 +635,7 @@ body[data-theme="dark"] .table td {
                             <select id="selectPetugas" name="nama_petugas" class="form-select form-select-lg rounded-end-3 border-start-0" required style="font-size: 0.95rem;">
                                 <option value="" selected disabled>-- Pilih Nama Petugas Piket --</option>
                                 <?php if (!empty($groupedStaff['Library'])): ?>
-                                    <optgroup label="DIVISI LIBRARY">
+                                    <optgroup label="📚 Sektor (Ustadzah Perpustakaan)">
                                         <?php foreach ($groupedStaff['Library'] as $staf): ?>
                                             <?php $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? ''); ?>
                                             <?php if ($namaStaf !== ''): ?>
@@ -645,7 +645,7 @@ body[data-theme="dark"] .table td {
                                     </optgroup>
                                 <?php endif; ?>
                                 <?php if (!empty($groupedStaff['Staff'])): ?>
-                                    <optgroup label="DIVISI STAFF">
+                                    <optgroup label="📖 OPPM (Bagian Perpustakaan)">
                                         <?php foreach ($groupedStaff['Staff'] as $staf): ?>
                                             <?php $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? ''); ?>
                                             <?php if ($namaStaf !== ''): ?>
