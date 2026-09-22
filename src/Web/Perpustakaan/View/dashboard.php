@@ -24,6 +24,7 @@ $this->setTitle('Dashboard Perpustakaan');
 $chartKelas = $chartKelas ?? ['labels' => [], 'totals' => []];
 $chartRayon = $chartRayon ?? ['labels' => [], 'totals' => []];
 $chartKonsulat = $chartKonsulat ?? ['labels' => [], 'totals' => []];
+$topVisitors = $topVisitors ?? [];
 
 // Total kelas aktif
 $totalKelasAktif = count($chartKelas['labels']);
@@ -261,7 +262,47 @@ $tanggalLengkap = "{$hariIni}, {$tgl} {$bln} {$thn}";
     <div class="row g-4">
         <!-- Kolom Kiri: Multi-Chart (75% lebar di desktop) -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <!-- Kartu Leaderboard: Top 3 Pengunjung Minggu Ini (Horizontal Podium) -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3 text-body-emphasis">
+                        <i class="ri-trophy-line text-warning me-1"></i> Top 3 Pengunjung Minggu Ini
+                    </h6>
+
+                    <?php if (empty($topVisitors)): ?>
+                        <p class="text-body-secondary small mb-0">Belum ada data kunjungan minggu ini.</p>
+                    <?php else: ?>
+                        <?php $medals = ['🥇', '🥈', '🥉']; ?>
+                        <div class="row g-3">
+                            <?php foreach ($topVisitors as $idx => $visitor): ?>
+                                <?php
+                                    $medal = $medals[$idx] ?? '🎖️';
+                                    $namaSantri = is_array($visitor) ? ($visitor['nama_santri'] ?? '-') : ($visitor->nama_santri ?? '-');
+                                    $kelas = is_array($visitor) ? ($visitor['kelas'] ?? '-') : ($visitor->kelas ?? '-');
+                                    $total = is_array($visitor) ? ($visitor['total_kunjungan'] ?? 0) : ($visitor->total_kunjungan ?? 0);
+                                ?>
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded text-center h-100 d-flex flex-column justify-content-center align-items-center bg-body-tertiary bg-opacity-50">
+                                        <div class="fs-2 mb-1"><?= $medal ?></div>
+                                        <div class="fw-bold text-truncate w-100 text-body-emphasis" title="<?= Html::encode((string)$namaSantri) ?>">
+                                            <?= Html::encode((string)$namaSantri) ?>
+                                        </div>
+                                        <div class="text-muted small mb-2">
+                                            Kelas: <?= Html::encode((string)$kelas) ?>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">
+                                            <?= (int)$total ?> Kali Kunjungan
+                                        </span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Card Grafik Statistik Kunjungan -->
+            <div class="card border-0 shadow-sm rounded-4">
                 <!-- Header Kartu dengan Nav Pills Switcher -->
                 <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                     <div>
@@ -381,7 +422,7 @@ $tanggalLengkap = "{$hariIni}, {$tgl} {$bln} {$thn}";
             </div>
 
             <!-- Kartu Pengunjung Terbaru -->
-            <div class="card border-0 shadow-sm rounded-4 flex-grow-1">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
                     <h6 class="card-title fw-bold mb-0 text-body-emphasis">
                         <i class="ri-time-line text-k-purple me-2"></i>Pengunjung Terbaru

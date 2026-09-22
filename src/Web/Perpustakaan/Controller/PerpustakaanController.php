@@ -91,6 +91,23 @@ final class PerpustakaanController
         // Santri terakhir berkunjung hari ini
         $kunjunganTerbaru = array_slice($kunjunganHariIni, 0, 10);
 
+        // Query Leaderboard: Top 3 Pengunjung Aktif Minggu Ini (Sabtu - Jumat)
+        try {
+            $db = $this->kunjunganRepository->getDatabase();
+            $sql = "SELECT `stambuk`, `nama_santri`, `kelas`, COUNT(`id`) AS `total_kunjungan`
+                    FROM `record_perpustakaan_kunjungan`
+                    WHERE `waktu_kunjungan` BETWEEN :start_str AND :end_str
+                    GROUP BY `stambuk`, `nama_santri`, `kelas`
+                    ORDER BY `total_kunjungan` DESC
+                    LIMIT 3";
+            $topVisitors = $db->query($sql, [
+                ':start_str' => $startStr,
+                ':end_str'   => $endStr,
+            ])->fetchAll();
+        } catch (\Throwable) {
+            $topVisitors = [];
+        }
+
         return $this->viewRenderer->render(__DIR__ . '/../View/dashboard', [
             'totalHariIni' => $totalHariIni,
             'totalMingguIni' => $totalMingguIni,
@@ -101,6 +118,7 @@ final class PerpustakaanController
                 ? array_combine($chartKelas['labels'], $chartKelas['totals'])
                 : [],
             'kunjunganTerbaru' => $kunjunganTerbaru,
+            'topVisitors' => $topVisitors,
         ]);
     }
 
