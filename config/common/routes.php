@@ -150,6 +150,12 @@ return [
             Route::methods(['GET', 'POST'], '/scan')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'scan'])
                 ->name('perpustakaan/scan'),
+            Route::post('/set-staff')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'setStaff'])
+                ->name('perpustakaan/set-staff'),
+            Route::post('/switch-staff')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'switchStaff'])
+                ->name('perpustakaan/switch-staff'),
             Route::get('/rekap')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'rekap'])
                 ->name('perpustakaan/rekap'),

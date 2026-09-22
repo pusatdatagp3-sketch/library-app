@@ -52,16 +52,16 @@ foreach ($staffList as $staf) {
                     <li class="breadcrumb-item active" aria-current="page">Manajemen Staf</li>
                 </ol>
             </nav>
-            <h2 class="h4 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+            <h2 class="h4 fw-bold text-body mb-1 d-flex align-items-center gap-2">
                 <i class="ri-team-line text-primary"></i> Manajemen Staf Perpustakaan
             </h2>
             <p class="text-muted small mb-0">Kelola daftar petugas piket dan divisi staf untuk pencatatan presensi scanner.</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+        <div class="d-flex justify-content-md-end gap-2 align-items-center mb-3 mb-md-0">
+            <a href="<?= $urlGenerator->generate('perpustakaan/scan') ?>" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
                 <i class="ri-barcode-box-line"></i> Ke Halaman Scan
             </a>
-            <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahStaf">
+            <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahStaf">
                 <i class="ri-add-line"></i> Tambah Staf
             </button>
         </div>
@@ -154,28 +154,28 @@ foreach ($staffList as $staf) {
 
     <!-- ── DATA TABLE CARD ───────────────────────────────────────────────────── -->
     <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
-        <div class="card-header bg-white py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom">
+        <div class="card-header bg-transparent py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom">
             <div class="d-flex align-items-center gap-2">
                 <i class="ri-list-check-2 text-primary"></i>
                 <h5 class="card-title mb-0 fw-bold">Daftar Staf & Petugas Piket</h5>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <div class="input-group input-group-sm" style="max-width: 250px;">
-                    <span class="input-group-text bg-light border-end-0"><i class="ri-search-line text-muted"></i></span>
-                    <input type="text" id="filter-staf-input" class="form-control border-start-0 bg-light" placeholder="Cari staf...">
+                    <span class="input-group-text bg-body-secondary border-end-0"><i class="ri-search-line text-muted"></i></span>
+                    <input type="text" id="filter-staf-input" class="form-control border-start-0 bg-body" placeholder="Cari staf...">
                 </div>
             </div>
         </div>
 
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="table-staf">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th class="ps-4" style="width: 60px;">No</th>
                         <th>Nama Staf</th>
                         <th style="width: 160px;">Divisi</th>
                         <th style="width: 140px;">Status Piket</th>
-                        <th class="pe-4 text-end" style="width: 180px;">Aksi</th>
+                        <th class="text-center" style="width: 160px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -197,7 +197,7 @@ foreach ($staffList as $staf) {
                                             <?= strtoupper(substr(trim($staf->nama_staf), 0, 1)) ?>
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark"><?= Html::encode($staf->nama_staf) ?></div>
+                                            <div class="fw-bold text-body"><?= Html::encode($staf->nama_staf) ?></div>
                                             <div class="text-muted small">ID Staf: #<?= $staf->id ?></div>
                                         </div>
                                     </div>
@@ -224,21 +224,21 @@ foreach ($staffList as $staf) {
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="pe-4 text-end">
-                                    <div class="btn-group btn-group-sm">
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
                                         <!-- Toggle Status Button -->
                                         <form method="POST" action="<?= $urlGenerator->generate('staf/toggle', ['id' => $staf->id]) ?>" class="d-inline">
                                             <?php if (!empty($csrf)): ?>
                                                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
                                             <?php endif; ?>
-                                            <button type="submit" class="btn btn-outline-secondary" title="<?= $staf->is_active ? 'Nonaktifkan Staf' : 'Aktifkan Staf' ?>">
-                                                <i class="<?= $staf->is_active ? 'ri-toggle-fill text-success' : 'ri-toggle-line text-muted' ?> fs-6"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="<?= $staf->is_active ? 'Nonaktifkan Staf' : 'Aktifkan Staf' ?>">
+                                                <i class="<?= $staf->is_active ? 'ri-toggle-fill text-success' : 'ri-toggle-line text-muted' ?>"></i>
                                             </button>
                                         </form>
 
                                         <!-- Edit Button -->
-                                        <a href="<?= $urlGenerator->generate('staf/update', ['id' => $staf->id]) ?>" class="btn btn-outline-primary" title="Ubah Data">
-                                            <i class="ri-pencil-line"></i>
+                                        <a href="<?= $urlGenerator->generate('staf/update', ['id' => $staf->id]) ?>" class="btn btn-sm btn-outline-primary" title="Ubah Data">
+                                            <i class="ri-edit-line"></i>
                                         </a>
 
                                         <!-- Delete Button with Confirmation -->
@@ -246,7 +246,7 @@ foreach ($staffList as $staf) {
                                             <?php if (!empty($csrf)): ?>
                                                 <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
                                             <?php endif; ?>
-                                            <button type="submit" class="btn btn-outline-danger" title="Hapus Staf">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Staf">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                         </form>
@@ -286,7 +286,7 @@ foreach ($staffList as $staf) {
                             Nama Lengkap Staf <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="ri-user-line text-muted"></i></span>
+                            <span class="input-group-text bg-body-secondary"><i class="ri-user-line text-muted"></i></span>
                             <input
                                 type="text"
                                 id="modal_nama_staf"
@@ -331,7 +331,7 @@ foreach ($staffList as $staf) {
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="modal-footer bg-light border-0 py-3 px-4 d-flex justify-content-between">
+                <div class="modal-footer bg-transparent border-top py-3 px-4 d-flex justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Batal
                     </button>

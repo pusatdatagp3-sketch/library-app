@@ -112,9 +112,61 @@ final class PerpustakaanController
             }
         }
 
+        $currentPetugas = $this->userSession->getPetugasPiket();
+        $hasStaffActive = !empty($currentPetugas);
+
         return $this->viewRenderer->render(__DIR__ . '/../View/scan', [
             'kunjunganHariIni' => $kunjunganHariIni,
             'groupedStaff'     => $groupedStaff,
+            'currentPetugas'   => $currentPetugas,
+            'hasStaffActive'   => $hasStaffActive,
+        ]);
+    }
+
+    /**
+     * Menetapkan petugas piket aktif ke dalam sesi user (AJAX).
+     */
+    public function setStaff(ServerRequestInterface $request): ResponseInterface
+    {
+        $body = (array) ($request->getParsedBody() ?? []);
+        if (empty($body)) {
+            $raw = (string) $request->getBody();
+            if ($raw !== '') {
+                $jsonData = json_decode($raw, true);
+                if (is_array($jsonData)) {
+                    $body = $jsonData;
+                }
+            }
+        }
+
+        $namaPetugas = trim((string) ($body['nama_petugas'] ?? ''));
+
+        if (mb_strlen($namaPetugas) < 2) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Silakan pilih nama petugas yang valid dari daftar staf.',
+            ], 400);
+        }
+
+        $this->userSession->setPetugasPiket($namaPetugas);
+
+        return $this->json([
+            'success'    => true,
+            'staff_name' => $namaPetugas,
+            'message'    => "Petugas piket aktif berhasil disetel: {$namaPetugas}",
+        ]);
+    }
+
+    /**
+     * Mereset sesi petugas piket aktif (AJAX).
+     */
+    public function switchStaff(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->userSession->clearPetugasPiket();
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Sesi petugas piket berhasil di-reset. Silakan tentukan petugas baru.',
         ]);
     }
 
@@ -144,9 +196,22 @@ final class PerpustakaanController
                 ], 404);
             }
 
-            // 2. Tentukan nama penginput: utamakan dari parameter POST petugas piket, fallback ke user session
-            $petugasPiket = trim((string) ($body['petugas_piket'] ?? ''));
-            $penginput = $petugasPiket !== '' ? $petugasPiket : ($this->userSession->getUsername() ?? 'Petugas Perpustakaan');
+            // 2. Tentukan nama penginput: utamakan dari sesi petugas piket
+            $sessionPetugas = $this->userSession->getPetugasPiket();
+            $postPetugas    = trim((string) ($body['petugas_piket'] ?? ''));
+
+            if ($sessionPetugas !== null && $sessionPetugas !== '') {
+                $penginput = $sessionPetugas;
+            } elseif ($postPetugas !== '') {
+                $this->userSession->setPetugasPiket($postPetugas);
+                $penginput = $postPetugas;
+            } else {
+                return $this->json([
+                    'success' => false,
+                    'require_staff' => true,
+                    'message' => 'Petugas piket belum ditentukan. Silakan tentukan petugas yang bertugas terlebih dahulu.',
+                ], 400);
+            }
 
             // 3. Catat kunjungan ke tabel record_perpustakaan_kunjungan
             $santriId = (int) ($santri['santri_id'] ?? $santri['kds'] ?? 0);

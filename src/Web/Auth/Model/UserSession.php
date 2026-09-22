@@ -17,6 +17,7 @@ final class UserSession
     private const SESSION_KEY_ROLE             = 'user_auth_role';
     private const SESSION_KEY_ALLOWED_CAMPUSES = 'user_auth_allowed_campuses';
     private const SESSION_KEY_ACTIVE_CAMPUS    = 'user_auth_active_campus';
+    public const SESSION_KEY_PETUGAS_PIKET     = 'perpustakaan_petugas_piket';
 
     public function __construct(
         private SessionInterface $session,
@@ -27,6 +28,7 @@ final class UserSession
     public function login(array $user): void
     {
         $this->session->regenerateID();
+        $this->session->remove(self::SESSION_KEY_PETUGAS_PIKET);
         $this->session->set(self::SESSION_KEY_USER_ID, (int) $user['id']);
         $this->session->set(self::SESSION_KEY_USERNAME, (string) $user['username']);
         $this->session->set(self::SESSION_KEY_ROLE, (string) $user['role']);
@@ -36,6 +38,7 @@ final class UserSession
 
     public function logout(): void
     {
+        $this->session->remove(self::SESSION_KEY_PETUGAS_PIKET);
         $this->session->remove(self::SESSION_KEY_USER_ID);
         $this->session->remove(self::SESSION_KEY_USERNAME);
         $this->session->remove(self::SESSION_KEY_ROLE);
@@ -100,5 +103,33 @@ final class UserSession
             return true;
         }
         return $this->rbacRepository->hasPermission($role, $permission);
+    }
+
+    /**
+     * Mengambil nama petugas perpustakaan yang sedang piket dari sesi.
+     */
+    public function getPetugasPiket(): ?string
+    {
+        $petugas = $this->session->get(self::SESSION_KEY_PETUGAS_PIKET);
+        if ($petugas !== null && trim((string) $petugas) !== '') {
+            return trim((string) $petugas);
+        }
+        return null;
+    }
+
+    /**
+     * Menyimpan nama petugas perpustakaan yang sedang piket ke dalam sesi.
+     */
+    public function setPetugasPiket(string $petugas): void
+    {
+        $this->session->set(self::SESSION_KEY_PETUGAS_PIKET, trim($petugas));
+    }
+
+    /**
+     * Menghapus sesi petugas perpustakaan yang sedang piket.
+     */
+    public function clearPetugasPiket(): void
+    {
+        $this->session->remove(self::SESSION_KEY_PETUGAS_PIKET);
     }
 }

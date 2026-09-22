@@ -115,3 +115,38 @@
 .filter-row .gap-1 {
     gap: 4px;
 }
+
+/* Dark Mode & Bootstrap 5 Table Compatibility */
+body[data-theme="dark"] .table,
+[data-bs-theme="dark"] .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border);
+    --bs-table-hover-bg: var(--bg-hover);
+    --bs-table-hover-color: var(--text-main);
+    color: var(--text-main);
+}
+
+body[data-theme="dark"] .table th,
+[data-bs-theme="dark"] .table th,
+body[data-theme="dark"] .table thead th,
+[data-bs-theme="dark"] .table thead th {
+    background-color: var(--bg-hover) !important;
+    color: var(--text-muted) !important;
+    border-bottom-color: var(--border) !important;
+    box-shadow: none !important;
+}
+
+body[data-theme="dark"] .table td,
+[data-bs-theme="dark"] .table td {
+    color: var(--text-main) !important;
+    border-bottom-color: var(--border) !important;
+    box-shadow: none !important;
+}
+
+body[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > *,
+[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+    --bs-table-accent-bg: rgba(255, 255, 255, 0.02) !important;
+    color: var(--text-main) !important;
+}
+

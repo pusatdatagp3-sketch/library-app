@@ -162,3 +162,26 @@ body[data-theme="dark"] .dokumentasi-item {
         display: none !important;
     }
 }
+
+/* Dark Mode & Bootstrap 5 Card Compatibility */
+body[data-theme="dark"] .card,
+[data-bs-theme="dark"] .card {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border) !important;
+    color: var(--text-main) !important;
+}
+
+body[data-theme="dark"] .card-header,
+[data-bs-theme="dark"] .card-header {
+    background-color: transparent !important;
+    border-bottom-color: var(--border) !important;
+    color: var(--text-main) !important;
+}
+
+body[data-theme="dark"] .card-footer,
+[data-bs-theme="dark"] .card-footer {
+    background-color: transparent !important;
+    border-top-color: var(--border) !important;
+    color: var(--text-main) !important;
+}
+

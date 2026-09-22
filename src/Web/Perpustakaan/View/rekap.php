@@ -232,7 +232,7 @@ if ($mode !== 'input') {
                     <i class="<?= $activeModeConfig['icon'] ?> me-1"></i>
                     <span id="rekap-total-badge"><?= $totalItems ?></span> <?= Html::encode($activeModeConfig['label']) ?>
                 </span>
-                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold fs-6">
+                <span class="badge bg-body-secondary text-body border px-3 py-2 rounded-pill fw-semibold fs-6">
                     <i class="ri-bar-chart-line me-1 text-k-purple"></i>Total: <?= number_format($grandTotalAgregasi) ?> Kunjungan
                 </span>
             <?php endif; ?>
@@ -263,7 +263,7 @@ if ($mode !== 'input') {
             <?php if ($mode === 'input'): ?>
                 <!-- ── 4A. TABEL MODE: PER-INPUT (DETAIL DATA) ──────────────── -->
                 <table class="table table-hover table-striped align-middle mb-0" id="table-rekap-kunjungan">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th class="text-center" style="width: 60px;">No</th>
                             <th style="width: 175px;">Waktu Kunjungan</th>
@@ -326,7 +326,7 @@ if ($mode !== 'input') {
                                         <?= Html::encode((string)($item->rayon ?? '-')) ?>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
+                                        <span class="badge bg-body-secondary text-body border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
                                             <i class="ri-user-line text-secondary"></i>
                                             <?= Html::encode((string)$item->penginput) ?>
                                         </span>
@@ -340,7 +340,7 @@ if ($mode !== 'input') {
             <?php else: ?>
                 <!-- ── 4B. TABEL MODE: AGREGASI (KELAS / RAYON / KONSULAT) ─────── -->
                 <table class="table table-hover table-striped align-middle mb-0" id="table-rekap-kunjungan">
-                    <thead class="table-light">
+                    <thead>
                         <tr>
                             <th class="text-center" style="width: 70px;">NO</th>
                             <th>
@@ -394,7 +394,7 @@ if ($mode !== 'input') {
                         <?php endif; ?>
                     </tbody>
                     <?php if (!empty($data)): ?>
-                        <tfoot class="table-light">
+                        <tfoot>
                             <tr>
                                 <th colspan="2" class="text-end fw-bold text-body-emphasis" style="padding-right: 1rem;">
                                     TOTAL KESELURUHAN:

@@ -13,11 +13,15 @@ use Yiisoft\View\WebView;
  * @var array{Library: array, Staff: array} $groupedStaff
  * @var UrlGeneratorInterface $urlGenerator
  * @var string|null $csrf
+ * @var string|null $currentPetugas
+ * @var bool|null $hasStaffActive
  */
 
 $this->setTitle('Scan Kunjungan Perpustakaan');
 $totalHariIni = count($kunjunganHariIni);
 $groupedStaff = $groupedStaff ?? ['Library' => [], 'Staff' => []];
+$currentPetugas = $currentPetugas ?? null;
+$hasStaffActive = $hasStaffActive ?? (!empty($currentPetugas));
 ?>
 
 <!-- Bootstrap 5 CSS & JS CDN -->
@@ -388,19 +392,41 @@ $groupedStaff = $groupedStaff ?? ['Library' => [], 'Staff' => []];
 }
 
 /* Penyesuaian Elemen Dark Mode */
-[data-bs-theme="dark"] .petugas-piket-box {
+[data-bs-theme="dark"] .petugas-piket-box,
+body[data-theme="dark"] .petugas-piket-box {
     background: rgba(255, 255, 255, 0.04);
     border-color: #1f2937;
 }
-[data-bs-theme="dark"] .modal-content {
+[data-bs-theme="dark"] .modal-content,
+body[data-theme="dark"] .modal-content {
     background-color: #111827 !important;
     border-color: #1f2937 !important;
     color: #f1f5f9;
 }
-[data-bs-theme="dark"] .form-select {
+[data-bs-theme="dark"] .form-select,
+body[data-theme="dark"] .form-select {
     background-color: #1f2937;
     border-color: #374151;
     color: #f1f5f9;
+}
+[data-bs-theme="dark"] .table,
+body[data-theme="dark"] .table {
+    --bs-table-bg: transparent !important;
+    --bs-table-color: var(--text-main, #f8fafc) !important;
+}
+[data-bs-theme="dark"] .table th,
+body[data-theme="dark"] .table th {
+    background-color: var(--bg-hover, #1f2937) !important;
+    color: var(--text-muted, #94a3b8) !important;
+    border-bottom-color: var(--border, #1f2937) !important;
+    box-shadow: none !important;
+}
+[data-bs-theme="dark"] .table td,
+body[data-theme="dark"] .table td {
+    background-color: transparent !important;
+    color: var(--text-main, #f8fafc) !important;
+    border-bottom-color: var(--border, #1f2937) !important;
+    box-shadow: none !important;
 }
 </style>
 
@@ -561,7 +587,7 @@ $groupedStaff = $groupedStaff ?? ['Library' => [], 'Staff' => []];
                                 <td style="color: var(--text-muted); font-size: 0.85rem;"><?= Html::encode((string)($item->rayon ?? '-')) ?></td>
                                 <td style="color: var(--text-muted); font-size: 0.85rem;"><?= Html::encode((string)($item->konsulat ?? '-')) ?></td>
                                 <td style="padding-right: 1.5rem; color: var(--text-muted); font-size: 0.85rem;">
-                                    <span class="badge bg-light text-dark border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
+                                    <span class="badge bg-body-secondary text-body border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
                                         <i class="ri-user-line text-secondary"></i>
                                         <?= Html::encode((string)$item->penginput) ?>
                                     </span>
@@ -576,58 +602,80 @@ $groupedStaff = $groupedStaff ?? ['Library' => [], 'Staff' => []];
 
 </div><!-- /.scan-page -->
 
-<!-- ── MODAL IDENTIFIKASI PETUGAS PIKET (STATIC BACKDROP) ──────────────── -->
+<!-- ── MODAL IDENTIFIKASI PETUGAS PIKET (GATEKEEPER MODAL SEPERTI DI AWDA) ── -->
 <div class="modal fade" id="modalPetugas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalPetugasTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-body p-4 text-center">
-                <!-- User Icon Badge -->
-                <div class="d-inline-flex align-items-center justify-content-center mb-3 rounded-circle" style="width: 72px; height: 72px; background: rgba(139, 92, 246, 0.12); color: #8b5cf6;">
-                    <i class="ri-user-shared-2-line" style="font-size: 2.25rem;"></i>
-                </div>
+            <div class="modal-header border-0 pb-0 pt-3 px-4 d-flex justify-content-between align-items-center">
+                <span class="badge rounded-pill" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; font-size: 0.75rem; font-weight: 600; padding: 5px 12px;">
+                    <i class="ri-shield-user-line me-1"></i>Piket Perpustakaan
+                </span>
+                <button type="button" class="btn-close" id="btnModalClose" onclick="closePetugasModal()" style="display: none;" aria-label="Tutup"></button>
+            </div>
+            <form id="formPetugasPiket" autocomplete="off">
+                <div class="modal-body px-4 pt-2 pb-4 text-center">
+                    <!-- User Icon Badge -->
+                    <div class="d-inline-flex align-items-center justify-content-center mb-3 rounded-circle shadow-sm" style="width: 68px; height: 68px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(129, 140, 248, 0.2) 100%); color: #8b5cf6;">
+                        <i class="ri-user-star-line" style="font-size: 2.2rem;"></i>
+                    </div>
 
-                <h4 class="fw-bold mb-1 text-body-emphasis" id="modalPetugasTitle">Siapa yang Sedang Bertugas?</h4>
-                <p class="text-secondary small mb-4">
-                    Pilih nama Anda dari daftar staf untuk mencatat riwayat transaksi kunjungan santri.
-                </p>
+                    <h4 class="fw-bold mb-1 text-body-emphasis" id="modalPetugasTitle">Siapa yang Sedang Bertugas?</h4>
+                    <p class="text-secondary small mb-4" id="modalPetugasSubtitle">
+                        Pilih nama Anda dari daftar staf untuk mencatat riwayat transaksi kunjungan santri dengan akurat.
+                    </p>
 
-                <div class="mb-4 text-start">
-                    <label for="selectPetugas" class="form-label small fw-semibold text-secondary">
-                        Nama Staf / Petugas Perpustakaan:
-                    </label>
-                    <select id="selectPetugas" class="form-select form-select-lg rounded-3" required>
-                        <option value="" selected disabled>-- Pilih Nama Anda --</option>
-                        <optgroup label="Library">
-                            <?php foreach ($groupedStaff['Library'] ?? [] as $staf): ?>
-                                <?php
-                                $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? '');
-                                ?>
-                                <?php if ($namaStaf !== ''): ?>
-                                    <option value="<?= Html::encode($namaStaf) ?>"><?= Html::encode($namaStaf) ?></option>
+                    <div class="mb-3 text-start">
+                        <label for="selectPetugas" class="form-label small fw-semibold text-secondary">
+                            Pilih Staf / Petugas Piket <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-body-tertiary border-end-0" style="color: var(--text-muted);">
+                                <i class="ri-user-line"></i>
+                            </span>
+                            <select id="selectPetugas" name="nama_petugas" class="form-select form-select-lg rounded-end-3 border-start-0" required style="font-size: 0.95rem;">
+                                <option value="" selected disabled>-- Pilih Nama Petugas Piket --</option>
+                                <?php if (!empty($groupedStaff['Library'])): ?>
+                                    <optgroup label="DIVISI LIBRARY">
+                                        <?php foreach ($groupedStaff['Library'] as $staf): ?>
+                                            <?php $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? ''); ?>
+                                            <?php if ($namaStaf !== ''): ?>
+                                                <option value="<?= Html::encode($namaStaf) ?>" <?= ($currentPetugas === $namaStaf) ? 'selected' : '' ?>><?= Html::encode($namaStaf) ?></option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                 <?php endif; ?>
-                            <?php endforeach; ?>
-                        </optgroup>
-                        <optgroup label="Staff">
-                            <?php foreach ($groupedStaff['Staff'] ?? [] as $staf): ?>
-                                <?php
-                                $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? '');
-                                ?>
-                                <?php if ($namaStaf !== ''): ?>
-                                    <option value="<?= Html::encode($namaStaf) ?>"><?= Html::encode($namaStaf) ?></option>
+                                <?php if (!empty($groupedStaff['Staff'])): ?>
+                                    <optgroup label="DIVISI STAFF">
+                                        <?php foreach ($groupedStaff['Staff'] as $staf): ?>
+                                            <?php $namaStaf = is_array($staf) ? ($staf['nama_staf'] ?? '') : (string)($staf->nama_staf ?? ''); ?>
+                                            <?php if ($namaStaf !== ''): ?>
+                                                <option value="<?= Html::encode($namaStaf) ?>" <?= ($currentPetugas === $namaStaf) ? 'selected' : '' ?>><?= Html::encode($namaStaf) ?></option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                 <?php endif; ?>
-                            <?php endforeach; ?>
-                        </optgroup>
-                    </select>
-                    <div class="invalid-feedback" id="selectPetugasFeedback">
-                        Silakan pilih nama petugas terlebih dahulu sebelum memindai.
+                            </select>
+                        </div>
+                        <div class="form-text text-muted small mt-1.5" style="font-size: 0.76rem;">
+                            Data bersumber dari modul Manajemen Staf dan dikelompokkan berdasarkan divisi.
+                        </div>
+                        <div class="invalid-feedback" id="selectPetugasFeedback">
+                            Silakan pilih nama petugas terlebih dahulu sebelum memindai.
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 pt-2">
+                        <button type="button" class="btn btn-secondary px-3 py-2.5 rounded-3 fw-semibold" id="btnBatalPetugas" onclick="closePetugasModal()" style="display: none;">
+                            Batal
+                        </button>
+                        <button id="btnMulaiBertugas" type="submit" class="btn btn-primary bg-kutubia border-0 w-100 py-2.5 rounded-3 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #8b5cf6 !important;">
+                            <span class="spinner-border spinner-border-sm" id="spinnerPetugas" style="display: none;" role="status" aria-hidden="true"></span>
+                            <i class="ri-check-line fs-5" id="iconPetugas"></i>
+                            <span id="btnSubmitPetugasText">Mulai Bertugas</span>
+                        </button>
                     </div>
                 </div>
-
-                <button id="btnMulaiBertugas" type="button" class="btn btn-primary bg-kutubia border-0 w-100 py-2.5 rounded-3 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" style="background-color: #8b5cf6 !important;">
-                    <i class="ri-check-line fs-5"></i>
-                    <span>Mulai Bertugas</span>
-                </button>
-            </div>
+            </form>
         </div>
     </div>
 </div>
@@ -699,70 +747,170 @@ document.addEventListener('DOMContentLoaded', function () {
     const btn               = document.getElementById('btn-submit-scan');
     const csrfInput         = document.getElementById('csrf-token');
 
+    // ── Bersihkan localStorage legacy agar tidak membypass sesi login ────
+    try {
+        localStorage.removeItem('petugas_piket');
+    } catch (e) {}
+
+    // State sesi dari server
+    let hasStaffActive  = <?= json_encode($hasStaffActive) ?>;
+    let currentStaff    = <?= json_encode($currentPetugas ?? '') ?>;
+    let isSwitchingMode = false;
+
+    const setStaffUrl    = '<?= $urlGenerator->generate('perpustakaan/set-staff') ?>';
+    const switchStaffUrl = '<?= $urlGenerator->generate('perpustakaan/switch-staff') ?>';
+    const scanUrl        = '<?= $urlGenerator->generate('perpustakaan/scan') ?>';
+
     // ── Elemen Petugas Piket & Modal ──────────────────────────────────────
     const modalEl           = document.getElementById('modalPetugas');
     const modalPetugas      = modalEl && typeof bootstrap !== 'undefined' ? bootstrap.Modal.getOrCreateInstance(modalEl) : null;
+    const formPetugas       = document.getElementById('formPetugasPiket');
     const selectPetugas     = document.getElementById('selectPetugas');
-    const btnMulaiBertugas  = document.getElementById('btnMulaiBertugas');
+    const btnModalClose     = document.getElementById('btnModalClose');
+    const btnBatalPetugas   = document.getElementById('btnBatalPetugas');
+    const modalTitle        = document.getElementById('modalPetugasTitle');
+    const modalSubtitle     = document.getElementById('modalPetugasSubtitle');
+    const btnSubmitPetugas  = document.getElementById('btnMulaiBertugas');
+    const btnSubmitText     = document.getElementById('btnSubmitPetugasText');
+    const spinnerPetugas    = document.getElementById('spinnerPetugas');
+    const iconPetugas       = document.getElementById('iconPetugas');
     const btnGantiPetugas   = document.getElementById('btn-ganti-petugas');
     const labelPetugasAktif = document.getElementById('label-petugas-aktif');
 
     let total = <?= $totalHariIni ?>;
 
     function updatePetugasUI(name) {
+        currentStaff   = (name || '').trim();
+        hasStaffActive = Boolean(currentStaff);
+
         if (labelPetugasAktif) {
-            labelPetugasAktif.textContent = name || 'Belum Dipilih';
+            labelPetugasAktif.textContent = currentStaff || 'Belum Dipilih';
         }
-        if (selectPetugas && name) {
-            selectPetugas.value = name;
+        if (selectPetugas && currentStaff) {
+            selectPetugas.value = currentStaff;
         }
     }
 
-    // Cek apakah petugas sudah tersimpan di localStorage
-    const savedPetugas = localStorage.getItem('petugas_piket');
-    if (!savedPetugas) {
+    window.openPetugasModal = function(isSwitching = false) {
+        isSwitchingMode = isSwitching;
+
+        if (isSwitching && hasStaffActive) {
+            if (btnModalClose) btnModalClose.style.display = 'inline-block';
+            if (btnBatalPetugas) btnBatalPetugas.style.display = 'inline-block';
+            if (modalTitle) modalTitle.textContent = 'Ganti Petugas Piket';
+            if (modalSubtitle) modalSubtitle.textContent = 'Pilih staf baru yang akan menggantikan tugas piket perpustakaan.';
+            if (btnSubmitText) btnSubmitText.textContent = 'Simpan & Ganti Petugas';
+        } else {
+            if (btnModalClose) btnModalClose.style.display = 'none';
+            if (btnBatalPetugas) btnBatalPetugas.style.display = 'none';
+            if (modalTitle) modalTitle.textContent = 'Siapa yang Sedang Bertugas?';
+            if (modalSubtitle) modalSubtitle.textContent = 'Pilih nama Anda dari daftar staf untuk mencatat riwayat transaksi kunjungan santri dengan akurat.';
+            if (btnSubmitText) btnSubmitText.textContent = 'Mulai Bertugas';
+        }
+
+        if (selectPetugas) {
+            selectPetugas.classList.remove('is-invalid');
+            if (currentStaff) {
+                selectPetugas.value = currentStaff;
+            }
+        }
+
         if (modalPetugas) {
             modalPetugas.show();
         }
-    } else {
-        updatePetugasUI(savedPetugas);
-    }
 
-    // Handler konfirmasi petugas bertugas
-    if (btnMulaiBertugas) {
-        btnMulaiBertugas.addEventListener('click', function() {
+        setTimeout(() => {
+            if (selectPetugas) selectPetugas.focus();
+        }, 250);
+    };
+
+    window.closePetugasModal = function() {
+        if (isSwitchingMode && hasStaffActive && modalPetugas) {
+            modalPetugas.hide();
+            setTimeout(() => {
+                if (input) input.focus();
+            }, 300);
+        }
+    };
+
+    // Handler form penetapan petugas piket (AJAX ke set-staff)
+    if (formPetugas) {
+        formPetugas.addEventListener('submit', function (e) {
+            e.preventDefault();
             const selected = selectPetugas ? selectPetugas.value.trim() : '';
             if (!selected) {
                 if (selectPetugas) selectPetugas.classList.add('is-invalid');
                 return;
             }
             if (selectPetugas) selectPetugas.classList.remove('is-invalid');
-            localStorage.setItem('petugas_piket', selected);
-            updatePetugasUI(selected);
-            if (modalPetugas) {
-                modalPetugas.hide();
-            }
-            setTimeout(() => {
-                if (input) input.focus();
-            }, 350);
+
+            // Loading state tombol modal
+            if (btnSubmitPetugas) btnSubmitPetugas.disabled = true;
+            if (spinnerPetugas) spinnerPetugas.style.display = 'inline-block';
+            if (iconPetugas) iconPetugas.style.display = 'none';
+
+            const payload = new URLSearchParams({ nama_petugas: selected });
+            if (csrfInput?.value) payload.append('_csrf', csrfInput.value);
+
+            fetch(setStaffUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: payload.toString()
+            })
+            .then(res => res.json().catch(() => ({ success: false, message: 'Format respon server tidak valid.' })))
+            .then(data => {
+                if (data.success) {
+                    const activeName = data.staff_name || selected;
+                    updatePetugasUI(activeName);
+                    isSwitchingMode = false;
+                    if (modalPetugas) {
+                        modalPetugas.hide();
+                    }
+                    setTimeout(() => {
+                        if (input) input.focus();
+                    }, 350);
+                } else {
+                    alert(data.message || 'Gagal menyimpan petugas piket.');
+                }
+            })
+            .catch(err => {
+                alert('Terjadi kesalahan komunikasi server: ' + err.message);
+            })
+            .finally(() => {
+                if (btnSubmitPetugas) btnSubmitPetugas.disabled = false;
+                if (spinnerPetugas) spinnerPetugas.style.display = 'none';
+                if (iconPetugas) iconPetugas.style.display = 'inline-block';
+            });
         });
     }
 
-    // Handler tombol Ganti Petugas
+    // Handler tombol Ganti Petugas di kartu scanner
     if (btnGantiPetugas) {
         btnGantiPetugas.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            localStorage.removeItem('petugas_piket');
-            updatePetugasUI('');
-            if (selectPetugas) {
-                selectPetugas.value = '';
-                selectPetugas.classList.remove('is-invalid');
-            }
-            if (modalPetugas) {
-                modalPetugas.show();
+            openPetugasModal(true);
+        });
+    }
+
+    // Modal dismiss preventer saat mode wajib (gatekeeper)
+    if (modalEl) {
+        modalEl.addEventListener('hide.bs.modal', function (e) {
+            if (!isSwitchingMode && !hasStaffActive) {
+                e.preventDefault();
             }
         });
+    }
+
+    // ── Inisialisasi status awal saat halaman dimuat ──────────────────────
+    if (!hasStaffActive) {
+        updatePetugasUI('');
+        openPetugasModal(false);
+    } else {
+        updatePetugasUI(currentStaff);
     }
 
     // ── Auto-focus: selalu fokus kecuali klik tombol/link/input/modal ─────
@@ -776,33 +924,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ── Submit handler ────────────────────────────────────────────────────
+    // ── Submit handler pemindaian barcode ─────────────────────────────────
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const stambuk = input.value.trim();
         if (!stambuk) return;
 
-        // Validasi petugas piket: jika belum ada, munculkan modal
-        const currentPetugas = localStorage.getItem('petugas_piket') || '';
-        if (!currentPetugas) {
-            if (modalPetugas) modalPetugas.show();
+        // Gatekeeper: jika belum ada petugas aktif, langsung buka modal
+        if (!hasStaffActive || !currentStaff) {
+            openPetugasModal(false);
             return;
         }
 
         // Loading state
-        btn.disabled         = true;
+        btn.disabled          = true;
         spinner.style.display = 'inline-block';
         btnText.textContent   = 'Mencatat…';
         btnIcon.style.display = 'none';
 
         const payload = new URLSearchParams({
             stambuk: stambuk,
-            petugas_piket: currentPetugas
+            petugas_piket: currentStaff
         });
         if (csrfInput?.value) payload.append('_csrf', csrfInput.value);
 
-        fetch('<?= $urlGenerator->generate('perpustakaan/scan') ?>', {
+        fetch(scanUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -818,6 +965,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return { ok: res.ok, data };
         })
         .then(({ ok, data }) => {
+            if (data.require_staff) {
+                AudioFeedback.error();
+                hasStaffActive = false;
+                currentStaff = '';
+                updatePetugasUI('');
+                openPetugasModal(false);
+                return;
+            }
+
             if (data.success && data.data) {
                 AudioFeedback.success();
 
@@ -864,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td style="color:var(--text-muted);font-size:0.85rem;">${escapeHtml(s.rayon || '-')}</td>
                     <td style="color:var(--text-muted);font-size:0.85rem;">${escapeHtml(s.konsulat || '-')}</td>
                     <td style="padding-right:1.5rem;color:var(--text-muted);font-size:0.85rem;">
-                        <span class="badge bg-light text-dark border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
+                        <span class="badge bg-body-secondary text-body border px-2 py-1 small fw-normal d-inline-flex align-items-center gap-1">
                             <i class="ri-user-line text-secondary"></i>${escapeHtml(s.penginput)}
                         </span>
                     </td>

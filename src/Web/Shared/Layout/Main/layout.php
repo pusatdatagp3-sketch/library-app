@@ -56,6 +56,8 @@
     (function() {
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.body.setAttribute('data-theme', savedTheme);
+        document.body.setAttribute('data-bs-theme', savedTheme);
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
 
         const sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
         if (sidebarCollapsed && window.innerWidth > 1024) {
@@ -123,13 +125,25 @@
                         <?php if (!$hasChildren): ?>
 
                         <?php
+                            $currentRouteName = (string) ($currentRoute->getName() ?? '');
+                            $isActive = false;
+                            if (isset($item['active']) && is_callable($item['active'])) {
+                                $isActive = (bool) call_user_func($item['active'], $currentRouteName, $currentRoute);
+                            } elseif (isset($item['active']) && is_string($item['active'])) {
+                                $isActive = ($currentRouteName === $item['active']);
+                            } elseif (isset($item['active']) && is_array($item['active'])) {
+                                $isActive = in_array($currentRouteName, $item['active'], true);
+                            } else {
+                                $isActive = ($currentRouteName === $item['route']);
+                            }
+
                             $itemIcon = (string)($item['icon'] ?? '');
                             if ($itemIcon !== '' && !str_ends_with($itemIcon, '-fill') && !str_ends_with($itemIcon, '-line')) {
                                 $itemIcon .= '-line';
                             }
                         ?>
                         <a href="<?php echo $urlGenerator->generate($item['route']) ?>"
-                            class="<?php echo str_starts_with((string) ($currentRoute->getName() ?? ''), explode('/', $item['route'])[0]) ? 'active' : '' ?>">
+                            class="<?php echo $isActive ? 'active' : '' ?>">
 
                             <?php if ($itemIcon !== ''): ?>
                                 <i class="<?php echo Html::encode($itemIcon); ?>"></i>
@@ -142,17 +156,22 @@
                         <?php
 
                             $dropdownActive = false;
+                            $currentRouteName = (string) ($currentRoute->getName() ?? '');
 
                             foreach ($item['children'] as $child) {
+                                $childRoute = (string) ($child['route'] ?? '');
+                                $isThisChildActive = false;
+                                if (isset($child['active']) && is_callable($child['active'])) {
+                                    $isThisChildActive = (bool) call_user_func($child['active'], $currentRouteName, $currentRoute);
+                                } elseif (isset($child['active']) && is_string($child['active'])) {
+                                    $isThisChildActive = ($currentRouteName === $child['active']);
+                                } elseif (isset($child['active']) && is_array($child['active'])) {
+                                    $isThisChildActive = in_array($currentRouteName, $child['active'], true);
+                                } else {
+                                    $isThisChildActive = ($currentRouteName === $childRoute || str_starts_with($currentRouteName, $childRoute . '/'));
+                                }
 
-                                $prefix = explode('/', $child['route'])[0];
-
-                                if (
-                                    str_starts_with(
-                                        (string) ($currentRoute->getName() ?? ''),
-                                        $prefix
-                                    )
-                                ) {
+                                if ($isThisChildActive) {
                                     $dropdownActive = true;
                                     break;
                                 }
@@ -201,10 +220,18 @@
                                 ?>
 
                                 <?php
-                                    $childActive = str_starts_with(
-                                        (string) ($currentRoute->getName() ?? ''),
-                                        explode('/', $child['route'])[0]
-                                    );
+                                    $childRoute = (string) ($child['route'] ?? '');
+                                    $childActive = false;
+                                    if (isset($child['active']) && is_callable($child['active'])) {
+                                        $childActive = (bool) call_user_func($child['active'], $currentRouteName, $currentRoute);
+                                    } elseif (isset($child['active']) && is_string($child['active'])) {
+                                        $childActive = ($currentRouteName === $child['active']);
+                                    } elseif (isset($child['active']) && is_array($child['active'])) {
+                                        $childActive = in_array($currentRouteName, $child['active'], true);
+                                    } else {
+                                        $childActive = ($currentRouteName === $childRoute || str_starts_with($currentRouteName, $childRoute . '/'));
+                                    }
+
                                     $childIcon = (string)($child['icon'] ?? '');
                                     if ($childIcon !== '' && !str_ends_with($childIcon, '-fill') && !str_ends_with($childIcon, '-line')) {
                                         $childIcon .= '-line';
@@ -340,6 +367,8 @@
         themeToggle.addEventListener('click', function() {
             const activeTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             document.body.setAttribute('data-theme', activeTheme);
+            document.body.setAttribute('data-bs-theme', activeTheme);
+            document.documentElement.setAttribute('data-bs-theme', activeTheme);
             localStorage.setItem('theme', activeTheme);
             updateToggleIcons(activeTheme);
         });

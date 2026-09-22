@@ -65,7 +65,7 @@ $this->setTitle('Ubah Data Staf - Manajemen Staf');
                         Nama Lengkap Staf <span class="text-danger">*</span>
                     </label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light"><i class="ri-user-line text-muted"></i></span>
+                        <span class="input-group-text bg-body-secondary"><i class="ri-user-line text-muted"></i></span>
                         <input
                             type="text"
                             id="nama_staf"
