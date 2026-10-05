@@ -269,10 +269,19 @@ final class PerpustakaanController
                 ], 500);
             }
 
+            // Peringatan jika santri berstatus tidak aktif di SIDAS
+            $warning = null;
+            $isAktif = $santri['aktif'] ?? true;
+            if (!$isAktif) {
+                $statusText = $santri['status'] ?? 'Tidak Aktif';
+                $warning = "Perhatian: Santri berstatus \"{$statusText}\" di SIDAS. Kunjungan tetap dicatat.";
+            }
+
             // 4. Return respon sukses JSON untuk AJAX frontend
             return $this->json([
                 'success' => true,
                 'message' => 'Kunjungan berhasil dicatat atas nama ' . $santri['nama'] . ' (Kelas ' . $santri['kelas'] . ').',
+                'warning' => $warning,
                 'data' => [
                     'santri_id' => $santriId,
                     'stambuk' => $santri['stambuk'],
@@ -282,6 +291,8 @@ final class PerpustakaanController
                     'konsulat' => $santri['konsulat'],
                     'waktu' => date('H:i:s'),
                     'penginput' => $penginput,
+                    'aktif' => $isAktif,
+                    'status' => $santri['status'] ?? 'Aktif',
                 ],
             ]);
         } catch (Throwable $e) {

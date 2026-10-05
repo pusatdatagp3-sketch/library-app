@@ -37,8 +37,12 @@ final class Environment
         self::setString('HAWI_SSO_URL', 'http://localhost');
         self::setString('HAWI_SSO_CLIENT_ID', '');
         self::setString('HAWI_SSO_CLIENT_SECRET', '');
-        self::setString('HAWI_SSO_REDIRECT_URI', 'http://localhost/auth/callback');
+        self::setString('HAWI_SSO_REDIRECT_URI', 'http://localhost/teqic-yii3/public/auth/callback');
         self::setString('DOREH_URL', 'http://localhost:3000');
+        self::setString('SIDAS_BASE_URL', 'http://localhost/sidas');
+        self::setString('SIDAS_APP_ID', 'kutubia-yii3');
+        self::setString('SIDAS_SECRET', 'ab50165c55d44e57c7adc641bf65fb7e0b98da9d1a6c93cb38a92d5237bb49b7');
+        self::setInteger('SIDAS_TIMEOUT', 5);
     }
 
     /**
@@ -134,6 +138,26 @@ final class Environment
     public static function dorehUrl(): string
     {
         return (string) self::$values['DOREH_URL'];
+    }
+
+    public static function sidasBaseUrl(): string
+    {
+        return (string) self::$values['SIDAS_BASE_URL'];
+    }
+
+    public static function sidasAppId(): string
+    {
+        return (string) self::$values['SIDAS_APP_ID'];
+    }
+
+    public static function sidasSecret(): string
+    {
+        return (string) self::$values['SIDAS_SECRET'];
+    }
+
+    public static function sidasTimeout(): int
+    {
+        return (int) self::$values['SIDAS_TIMEOUT'];
     }
 
     private static function setEnvironment(): void

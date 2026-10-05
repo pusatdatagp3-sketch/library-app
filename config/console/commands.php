@@ -6,4 +6,5 @@ use App\Console;
 
 return [
     'hello' => Console\HelloCommand::class,
+    'santri:sync' => Console\SyncSantriCommand::class,
 ];

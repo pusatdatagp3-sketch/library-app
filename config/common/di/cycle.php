@@ -28,9 +28,10 @@ return [
     },
 
     \App\Web\Perpustakaan\Model\SiswaRepository::class => static function (
-        DatabaseInterface $db
+        DatabaseInterface $db,
+        \App\Shared\Service\SidasApiClient $sidasClient
     ): \App\Web\Perpustakaan\Model\SiswaRepository {
-        return new \App\Web\Perpustakaan\Model\SiswaRepository($db);
+        return new \App\Web\Perpustakaan\Model\SiswaRepository($db, $sidasClient);
     },
 
     \App\Web\Staf\Model\StafRepository::class => static function (

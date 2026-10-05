@@ -978,11 +978,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 AudioFeedback.success();
 
                 const s = data.data;
+                const isWarning = !!data.warning;
+                const alertBg = isWarning ? 'rgba(245, 158, 11, 0.10)' : 'rgba(34,197,94,0.08)';
+                const alertBorder = isWarning ? 'rgba(245, 158, 11, 0.35)' : 'rgba(34,197,94,0.25)';
+                const iconHtml = isWarning
+                    ? '<div class="scan-alert-icon" style="background:#f59e0b;color:#fff;"><i class="ri-alert-line"></i></div>'
+                    : '<div class="scan-alert-icon success"><i class="ri-check-double-line"></i></div>';
+                const metaText = isWarning
+                    ? '<span style="font-size:0.7rem; color: #d97706; font-weight:600;">✓ Tercatat (Peringatan)</span>'
+                    : '<span style="font-size:0.7rem; color: #16a34a; font-weight:600;">✓ Tercatat</span>';
+                const warningSubtext = isWarning
+                    ? `<div style="margin-top:0.35rem; color:#b45309; font-size:0.8rem; font-weight:600;"><i class="ri-error-warning-line"></i> ${escapeHtml(data.warning)}</div>`
+                    : '';
 
-                // ── Alert sukses ────────────────────────────────────
+                // ── Alert feedback ──────────────────────────────────
                 alertBox.innerHTML = `
-                    <div class="scan-alert" style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25);">
-                        <div class="scan-alert-icon success"><i class="ri-check-double-line"></i></div>
+                    <div class="scan-alert" style="background: ${alertBg}; border: 1px solid ${alertBorder};">
+                        ${iconHtml}
                         <div class="scan-alert-body" style="flex: 1; min-width: 0;">
                             <h6>${escapeHtml(s.nama)}</h6>
                             <p>
@@ -992,10 +1004,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${s.konsulat ? '&bull; Konsulat: ' + escapeHtml(s.konsulat) : ''}
                                 &bull; Petugas: <strong>${escapeHtml(s.penginput)}</strong>
                             </p>
+                            ${warningSubtext}
                         </div>
                         <div class="scan-alert-meta">
                             <span class="scan-alert-time">${escapeHtml(s.waktu)}</span>
-                            <span style="font-size:0.7rem; color: #16a34a; font-weight:600;">✓ Tercatat</span>
+                            ${metaText}
                         </div>
                     </div>`;
 
@@ -1004,6 +1017,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (emptyRow) emptyRow.remove();
 
                 // ── Tambahkan baris baru di atas tabel ──────────────
+                const statusBadge = (s.aktif === false)
+                    ? `<span class="badge text-warning-emphasis bg-warning-subtle border border-warning ms-1" style="font-size:0.7rem;">Non-Aktif</span>`
+                    : '';
+
                 const tr = document.createElement('tr');
                 tr.className = 'row-newly-scanned';
                 tr.innerHTML = `
@@ -1013,7 +1030,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>
                         <span style="font-family:monospace;font-weight:700;color:#8b5cf6;font-size:0.95rem;">${escapeHtml(s.stambuk)}</span>
                     </td>
-                    <td style="font-weight:600;color:var(--text-main);">${escapeHtml(s.nama)}</td>
+                    <td style="font-weight:600;color:var(--text-main);">
+                        ${escapeHtml(s.nama)} ${statusBadge}
+                    </td>
                     <td>
                         <span class="badge" style="background:rgba(139,92,246,0.1);color:#8b5cf6;border:1px solid rgba(139,92,246,0.2);font-size:0.78rem;">${escapeHtml(s.kelas)}</span>
                     </td>
