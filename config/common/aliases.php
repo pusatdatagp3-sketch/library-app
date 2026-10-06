@@ -8,7 +8,7 @@ return [
     '@assets' => '@root/public/assets',
     '@assetsUrl' => '@baseUrl/assets',
     '@assetsSource' => '@root/assets',
-    '@baseUrl' => '/librarytest',
+    '@baseUrl' => '/kutubia',
     '@public' => '@root/public',
     '@runtime' => '@root/runtime',
     '@vendor' => '@root/vendor',

@@ -32,7 +32,7 @@ $this->beginPage()
     }
     $faviconData = file_exists($faviconFilePath)
         ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($faviconFilePath))
-        : '/librarytest/public/images/kutubia_logo.svg';
+        : '/kutubia/public/images/kutubia_logo.svg';
     ?>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
