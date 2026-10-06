@@ -61,6 +61,11 @@ final class SidasApiClient
             return null;
         }
 
+        // Normalisasi 8 digit tanpa titik ke format X.XX.XXXXX
+        if (preg_match('/^\d{8}$/', $stambuk)) {
+            $stambuk = substr($stambuk, 0, 1) . '.' . substr($stambuk, 1, 2) . '.' . substr($stambuk, 3);
+        }
+
         $r = $this->get('/api/santri/by-stambuk', ['stambuk' => $stambuk]);
         return ($r['success'] ?? false) && is_array($r['data'] ?? null) ? $r['data'] : null;
     }

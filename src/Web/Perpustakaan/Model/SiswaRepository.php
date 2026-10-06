@@ -63,6 +63,12 @@ class SiswaRepository
             return null;
         }
 
+        // Normalisasi input barcode scanner: jika 8 digit angka tanpa titik (contoh 24038666),
+        // ubah ke format standar stambuk dengan titik X.XX.XXXXX (contoh 2.40.38666)
+        if (preg_match('/^\d{8}$/', $stambuk)) {
+            $stambuk = substr($stambuk, 0, 1) . '.' . substr($stambuk, 1, 2) . '.' . substr($stambuk, 3);
+        }
+
         // ── 1. Coba ambil dari SIDAS API (Real-Time) ─────────────────────
         if ($this->sidasClient !== null) {
             try {
@@ -128,6 +134,11 @@ class SiswaRepository
     {
         if ($this->db === null) {
             return null;
+        }
+
+        $stambuk = trim($stambuk);
+        if (preg_match('/^\d{8}$/', $stambuk)) {
+            $stambuk = substr($stambuk, 0, 1) . '.' . substr($stambuk, 1, 2) . '.' . substr($stambuk, 3);
         }
 
         $this->ensureTableExists();
