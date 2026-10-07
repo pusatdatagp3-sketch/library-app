@@ -727,6 +727,80 @@ final class PerpustakaanController
     }
 
     /**
+     * Endpoint API pencarian santri via AJAX untuk Select2 Autocomplete di halaman Scan Kunjungan.
+     * Menerima query parameter ?q=keyword (minimal 3 karakter).
+     *
+     * Format respon JSON kompatibel Select2:
+     * {
+     *   "results": [
+     *     {
+     *       "id": "2.40.38666",
+     *       "text": "Ahmad Dahlan (Kelas 5-B) - 2.40.38666",
+     *       "stambuk": "2.40.38666",
+     *       "nama": "Ahmad Dahlan",
+     *       "kelas": "5-B",
+     *       "rayon": "Gedung 1",
+     *       "konsulat": "Jakarta"
+     *     }
+     *   ]
+     * }
+     */
+    public function cariSantri(ServerRequestInterface $request): ResponseInterface
+    {
+        $queryParams = $request->getQueryParams();
+        $q = trim((string) ($queryParams['q'] ?? ''));
+
+        if (mb_strlen($q) < 3) {
+            return $this->json([
+                'results' => [],
+            ]);
+        }
+
+        try {
+            $santriList = $this->siswaRepository->searchByName($q, 25);
+            $results = [];
+
+            foreach ($santriList as $santri) {
+                $stambuk = trim((string) ($santri['stambuk'] ?? ''));
+                $nama = trim((string) ($santri['nama'] ?? ''));
+                $kelas = trim((string) ($santri['kelas'] ?? '-'));
+
+                if ($stambuk === '' || $nama === '') {
+                    continue;
+                }
+
+                $kelasLabel = ($kelas !== '' && $kelas !== '-') ? " (Kelas {$kelas})" : '';
+                $results[] = [
+                    'id'       => $stambuk,
+                    'text'     => "{$nama}{$kelasLabel} - {$stambuk}",
+                    'stambuk'  => $stambuk,
+                    'nama'     => $nama,
+                    'kelas'    => $kelas,
+                    'rayon'    => (string) ($santri['rayon'] ?? ''),
+                    'konsulat' => (string) ($santri['konsulat'] ?? ''),
+                ];
+            }
+
+            return $this->json([
+                'results' => $results,
+            ]);
+        } catch (Throwable $e) {
+            return $this->json([
+                'results' => [],
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Alias method actionCariSantri
+     */
+    public function actionCariSantri(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->cariSantri($request);
+    }
+
+    /**
      * Helper untuk menghasilkan respon JSON yang bersih dan sesuai standar PSR-7.
      */
     private function json(array $payload, int $statusCode = 200): ResponseInterface

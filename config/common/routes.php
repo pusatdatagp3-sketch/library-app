@@ -156,6 +156,9 @@ return [
             Route::post('/switch-staff')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'switchStaff'])
                 ->name('perpustakaan/switch-staff'),
+            Route::get('/cari-santri')
+                ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'cariSantri'])
+                ->name('perpustakaan/cari-santri'),
             Route::get('/rekap')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'rekap'])
                 ->name('perpustakaan/rekap'),

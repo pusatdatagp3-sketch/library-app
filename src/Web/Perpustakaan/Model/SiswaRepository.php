@@ -113,6 +113,100 @@ class SiswaRepository
     }
 
     /**
+     * Mencari data santri berdasarkan keyword nama atau stambuk (Autocomplete / Live Search).
+     * Melakukan query LIKE %keyword% ke tabel database lokal `santri_cache` dan fallback/melengkapi via SIDAS API jika tersedia.
+     *
+     * @return array<int, array{
+     *     santri_id: int,
+     *     kds: int,
+     *     stambuk: string,
+     *     nama: string,
+     *     kelas: string,
+     *     rayon: string,
+     *     kamar: string,
+     *     konsulat: string,
+     *     kampus: string,
+     *     status: string,
+     *     aktif: bool
+     * }>
+     */
+    public function searchByName(string $keyword, int $limit = 25): array
+    {
+        $keyword = trim($keyword);
+        if ($keyword === '') {
+            return [];
+        }
+
+        $results = [];
+        $seenStambuk = [];
+
+        // 1. Query ke tabel cache lokal santri_cache
+        if ($this->db !== null) {
+            $this->ensureTableExists();
+            try {
+                $rows = $this->db->select()
+                    ->from('santri_cache')
+                    ->where('nama', 'LIKE', '%' . $keyword . '%')
+                    ->orWhere('stambuk', 'LIKE', '%' . $keyword . '%')
+                    ->limit($limit)
+                    ->run()
+                    ->fetchAll();
+
+                foreach ($rows as $row) {
+                    $stambuk = (string) ($row['stambuk'] ?? '');
+                    if ($stambuk === '' || isset($seenStambuk[$stambuk])) {
+                        continue;
+                    }
+                    $seenStambuk[$stambuk] = true;
+                    $results[] = [
+                        'santri_id' => (int) ($row['santri_id'] ?? 0),
+                        'kds' => (int) ($row['kds'] ?? $row['santri_id'] ?? 0),
+                        'stambuk' => $stambuk,
+                        'nama' => (string) ($row['nama'] ?? ''),
+                        'kelas' => (string) ($row['kelas'] ?? '-'),
+                        'rayon' => (string) ($row['rayon'] ?? '-'),
+                        'kamar' => (string) ($row['kamar'] ?? '-'),
+                        'konsulat' => (string) ($row['konsulat'] ?? '-'),
+                        'kampus' => (string) ($row['kampus'] ?? '-'),
+                        'status' => (string) ($row['status'] ?? 'Aktif'),
+                        'aktif' => (bool) ($row['aktif'] ?? true),
+                    ];
+                }
+            } catch (Throwable $e) {
+                error_log('[SiswaRepository] Error searchByName lokal: ' . $e->getMessage());
+            }
+        }
+
+        // 2. Jika hasil lokal masih sedikit dan SIDAS API aktif, lengkapi dari SIDAS API
+        if (count($results) < $limit && $this->sidasClient !== null) {
+            try {
+                $sidasResults = $this->sidasClient->search($keyword, $limit);
+                foreach ($sidasResults as $item) {
+                    if (!is_array($item)) {
+                        continue;
+                    }
+                    $normalized = $this->normalizeSantriData($item);
+                    $this->saveToCache($normalized);
+
+                    $stambuk = (string) ($normalized['stambuk'] ?? '');
+                    if ($stambuk !== '' && !isset($seenStambuk[$stambuk])) {
+                        $seenStambuk[$stambuk] = true;
+                        $results[] = $normalized;
+                        if (count($results) >= $limit) {
+                            break;
+                        }
+                    }
+                }
+            } catch (Throwable $e) {
+                error_log('[SiswaRepository] Error searchByName via SIDAS API: ' . $e->getMessage());
+            }
+        }
+
+        return $results;
+    }
+
+
+    /**
      * Mencari data santri langsung di tabel cache lokal.
      * Mendukung pencarian exact match maupun suffix stambuk (misal '51125' cocok dengan '2.46.51125').
      *

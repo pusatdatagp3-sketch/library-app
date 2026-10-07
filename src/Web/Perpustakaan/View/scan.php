@@ -28,6 +28,12 @@ $hasStaffActive = $hasStaffActive ?? (!empty($currentPetugas));
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- jQuery & Select2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <style>
 /* ── Scan Page Styles ───────────────────────────────────────────────────── */
 .scan-page { display: flex; flex-direction: column; gap: 1.5rem; }
@@ -211,6 +217,170 @@ $hasStaffActive = $hasStaffActive ?? (!empty($currentPetugas));
 }
 .scan-submit-btn:hover { background: #7c3aed; }
 .scan-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Mode Toggle Button (Pill Style) ────────────────────────────────────── */
+.mode-toggle-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 480px;
+    margin: -0.25rem 0 0.15rem 0;
+}
+.mode-toggle-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.45rem 1.15rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid rgba(139, 92, 246, 0.35);
+    background: rgba(139, 92, 246, 0.08);
+    color: #8b5cf6;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(139, 92, 246, 0.08);
+    user-select: none;
+    text-decoration: none;
+}
+.mode-toggle-pill:hover {
+    background: #8b5cf6;
+    color: #ffffff;
+    border-color: #8b5cf6;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+    transform: translateY(-1px);
+}
+.mode-toggle-pill:active {
+    transform: translateY(0);
+}
+.mode-toggle-pill.active-mode-nama {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: #ffffff;
+    border-color: #7c3aed;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+}
+.mode-toggle-pill.active-mode-nama:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border-color: #6d28d9;
+}
+
+/* ── Container Mode Nama & Select2 Styling ─────────────────────────────── */
+.nama-input-wrapper {
+    width: 100%;
+    max-width: 480px;
+}
+.select2-container--bootstrap-5 .select2-selection,
+.select2-container--default .select2-selection--single {
+    min-height: 52px !important;
+    border: 2px solid var(--border, #cbd5e1) !important;
+    border-radius: 12px !important;
+    background-color: var(--bg-main, #ffffff) !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.35rem 0.85rem !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection,
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18) !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--text-main, #0f172a) !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    line-height: 48px !important;
+    padding-left: 0.25rem !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--text-muted, #94a3b8) !important;
+    font-weight: 400 !important;
+    font-size: 0.95rem !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 48px !important;
+    right: 12px !important;
+}
+.select2-dropdown {
+    border: 1px solid var(--border, #cbd5e1) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06) !important;
+    overflow: hidden !important;
+    background: var(--bg-card, #ffffff) !important;
+    z-index: 1060 !important;
+}
+.select2-search--dropdown {
+    padding: 10px !important;
+    background: var(--bg-hover, #f8fafc) !important;
+    border-bottom: 1px solid var(--border, #e2e8f0) !important;
+}
+.select2-search--dropdown .select2-search__field {
+    border: 1.5px solid var(--border, #cbd5e1) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.95rem !important;
+    outline: none !important;
+    background: var(--bg-card, #ffffff) !important;
+    color: var(--text-main, #0f172a) !important;
+}
+.select2-search--dropdown .select2-search__field:focus {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+}
+.select2-results__option {
+    padding: 9px 14px !important;
+    font-size: 0.92rem !important;
+    border-bottom: 1px solid var(--border, #f1f5f9) !important;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #8b5cf6 !important;
+    color: #ffffff !important;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] .text-muted,
+.select2-container--default .select2-results__option--highlighted[aria-selected] .text-body-secondary,
+.select2-container--default .select2-results__option--highlighted[aria-selected] .text-body-emphasis {
+    color: #ffffff !important;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] .badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+.select2-results__option[aria-selected="true"] {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+    color: #8b5cf6 !important;
+    font-weight: 600 !important;
+}
+
+/* Dark Mode support for Select2 */
+body[data-theme="dark"] .select2-container--bootstrap-5 .select2-selection,
+body[data-theme="dark"] .select2-container--default .select2-selection--single {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+body[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #f8fafc !important;
+}
+body[data-theme="dark"] .select2-dropdown {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+body[data-theme="dark"] .select2-search--dropdown {
+    background: #0f172a !important;
+    border-bottom-color: #334155 !important;
+}
+body[data-theme="dark"] .select2-search--dropdown .select2-search__field {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+body[data-theme="dark"] .select2-results__option {
+    color: #e2e8f0 !important;
+    border-bottom-color: #334155 !important;
+}
 
 /* Quick fill badges */
 .quick-fill-row {
@@ -481,8 +651,15 @@ body[data-theme="dark"] .table td {
                 </button>
             </div>
 
-            <!-- Input Form -->
-            <div class="scan-input-wrapper">
+            <!-- Mode Toggle Pill Button -->
+            <div class="mode-toggle-wrap">
+                <button type="button" class="mode-toggle-pill" id="btn-toggle-mode" title="Klik untuk beralih mode pencarian">
+                    <span id="toggle-mode-icon-text">🔍 Cari Manual via Nama</span>
+                </button>
+            </div>
+
+            <!-- Container A (Mode Scan - Default) -->
+            <div class="scan-input-wrapper" id="container-mode-scan">
                 <form id="barcode-scan-form" autocomplete="off">
                     <?php if (!empty($csrf)): ?>
                         <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>" id="csrf-token">
@@ -506,6 +683,18 @@ body[data-theme="dark"] .table td {
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Container B (Mode Nama - Hidden default) -->
+            <div class="nama-input-wrapper" id="container-mode-nama" style="display: none;">
+                <div class="nama-select-box">
+                    <select id="input-nama" class="form-control" style="width: 100%;"></select>
+                </div>
+                <div class="text-center mt-2">
+                    <small class="text-body-secondary" style="font-size: 0.78rem;">
+                        <i class="ri-information-line me-1"></i>Ketik minimal 3 huruf nama santri untuk pencarian otomatis
+                    </small>
+                </div>
             </div>
 
             <!-- Quick Fill -->
@@ -727,6 +916,10 @@ function escapeHtml(text) {
 }
 
 function quickFill(stambuk) {
+    if (typeof window.catatKunjunganGlobal === 'function') {
+        window.catatKunjunganGlobal(stambuk);
+        return;
+    }
     const input = document.getElementById('stambuk-input');
     if (!input) return;
     input.value = stambuk;
@@ -760,6 +953,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const setStaffUrl    = '<?= $urlGenerator->generate('perpustakaan/set-staff') ?>';
     const switchStaffUrl = '<?= $urlGenerator->generate('perpustakaan/switch-staff') ?>';
     const scanUrl        = '<?= $urlGenerator->generate('perpustakaan/scan') ?>';
+    const cariSantriUrl  = '<?= $urlGenerator->generate('perpustakaan/cari-santri') ?>';
+
+    // ── Mode Input State (Scan Barcode vs Pencarian Nama) ─────────────────
+    let currentMode = 'scan'; // 'scan' | 'nama'
+    const btnToggleMode       = document.getElementById('btn-toggle-mode');
+    const toggleIconText      = document.getElementById('toggle-mode-icon-text');
+    const containerModeScan   = document.getElementById('container-mode-scan');
+    const containerModeNama   = document.getElementById('container-mode-nama');
+    const quickFillContainer  = document.querySelector('.quick-fill-row');
 
     // ── Elemen Petugas Piket & Modal ──────────────────────────────────────
     const modalEl           = document.getElementById('modalPetugas');
@@ -913,22 +1115,9 @@ document.addEventListener('DOMContentLoaded', function () {
         updatePetugasUI(currentStaff);
     }
 
-    // ── Auto-focus: selalu fokus kecuali klik tombol/link/input/modal ─────
-    input.focus();
-    document.addEventListener('click', function (e) {
-        if (document.body.classList.contains('modal-open') || (modalEl && modalEl.classList.contains('show'))) {
-            return;
-        }
-        if (!e.target.closest('a, button, input, select, textarea, .modal')) {
-            input.focus();
-        }
-    });
-
-    // ── Submit handler pemindaian barcode ─────────────────────────────────
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const stambuk = input.value.trim();
+    // ── Fungsi Inti Pencatatan Kunjungan (Modular untuk Scan & Autocomplete) ──
+    function catatKunjungan(stambuk) {
+        stambuk = (stambuk || '').toString().trim();
         if (!stambuk) return;
 
         // Gatekeeper: jika belum ada petugas aktif, langsung buka modal
@@ -937,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Loading state
+        // Loading state tombol submit
         btn.disabled          = true;
         spinner.style.display = 'inline-block';
         btnText.textContent   = 'Mencatat…';
@@ -1057,7 +1246,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="scan-alert" style="background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);">
                         <div class="scan-alert-icon error"><i class="ri-error-warning-line"></i></div>
                         <div class="scan-alert-body">
-                            <h6>Barcode Tidak Dikenali</h6>
+                            <h6>Pencatatan Gagal</h6>
                             <p>${escapeHtml(data.message || 'Santri tidak ditemukan dalam database.')}</p>
                         </div>
                     </div>`;
@@ -1080,8 +1269,164 @@ document.addEventListener('DOMContentLoaded', function () {
             btnText.textContent   = 'Catat';
             btnIcon.style.display = '';
             input.value           = '';
-            input.focus();
+
+            if (currentMode === 'scan') {
+                input.focus();
+            } else {
+                setTimeout(() => {
+                    if (typeof $ !== 'undefined' && $('#input-nama').length) {
+                        $('#input-nama').select2('open');
+                    }
+                }, 120);
+            }
         });
+    }
+
+    // Expose fungsi catatKunjungan secara global agar bisa dipanggil quickFill
+    window.catatKunjunganGlobal = catatKunjungan;
+
+    // ── Toggle Visibility Mode (Scan Barcode <-> Cari Manual via Nama) ───
+    function switchMode(mode) {
+        currentMode = mode;
+        if (mode === 'nama') {
+            if (containerModeScan) containerModeScan.style.display = 'none';
+            if (containerModeNama) containerModeNama.style.display = 'block';
+            if (btnToggleMode) btnToggleMode.classList.add('active-mode-nama');
+            if (toggleIconText) toggleIconText.textContent = '📷 Kembali ke Scan Barcode';
+            if (quickFillContainer) quickFillContainer.style.display = 'none';
+
+            setTimeout(() => {
+                if (typeof $ !== 'undefined' && $('#input-nama').length) {
+                    $('#input-nama').select2('open');
+                }
+            }, 100);
+        } else {
+            if (containerModeNama) containerModeNama.style.display = 'none';
+            if (containerModeScan) containerModeScan.style.display = 'block';
+            if (btnToggleMode) btnToggleMode.classList.remove('active-mode-nama');
+            if (toggleIconText) toggleIconText.textContent = '🔍 Cari Manual via Nama';
+            if (quickFillContainer) quickFillContainer.style.display = 'flex';
+
+            setTimeout(() => {
+                input.focus();
+            }, 50);
+        }
+    }
+
+    if (btnToggleMode) {
+        btnToggleMode.addEventListener('click', function (e) {
+            e.preventDefault();
+            switchMode(currentMode === 'scan' ? 'nama' : 'scan');
+        });
+    }
+
+    // ── Inisialisasi Select2 AJAX Autocomplete untuk Pencarian Nama ──────
+    if (typeof $ !== 'undefined' && $('#input-nama').length) {
+        $('#input-nama').select2({
+            theme: 'bootstrap-5',
+            placeholder: '🔍 Ketik minimal 3 huruf nama santri...',
+            allowClear: true,
+            minimumInputLength: 3,
+            width: '100%',
+            ajax: {
+                url: cariSantriUrl,
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results || []
+                    };
+                },
+                cache: true
+            },
+            templateResult: function (santri) {
+                if (santri.loading) {
+                    return santri.text;
+                }
+                if (!santri.id) {
+                    return santri.text;
+                }
+                const nama = escapeHtml(santri.nama || santri.text);
+                const kelas = escapeHtml(santri.kelas || '-');
+                const stambuk = escapeHtml(santri.stambuk || santri.id);
+                const rayon = santri.rayon ? ` • Rayon: ${escapeHtml(santri.rayon)}` : '';
+                const konsulat = santri.konsulat ? ` • Konsulat: ${escapeHtml(santri.konsulat)}` : '';
+
+                return $(`
+                    <div class="d-flex align-items-center justify-content-between py-1">
+                        <div style="min-width: 0;">
+                            <div class="fw-bold text-body-emphasis text-truncate">${nama}</div>
+                            <div class="small text-body-secondary font-monospace" style="font-size:0.78rem;">
+                                Stambuk: <strong>${stambuk}</strong>${rayon}${konsulat}
+                            </div>
+                        </div>
+                        <div class="ms-2 flex-shrink-0">
+                            <span class="badge rounded-pill" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); font-size: 0.75rem;">
+                                Kelas ${kelas}
+                            </span>
+                        </div>
+                    </div>
+                `);
+            },
+            templateSelection: function (santri) {
+                return santri.text || santri.nama || 'Pilih Santri';
+            },
+            language: {
+                inputTooShort: function (args) {
+                    const remaining = args.minimum - args.input.length;
+                    return `Ketik minimal ${remaining} huruf lagi untuk mencari...`;
+                },
+                searching: function () {
+                    return 'Mencari data santri...';
+                },
+                noResults: function () {
+                    return 'Tidak ada santri yang cocok';
+                },
+                errorLoading: function () {
+                    return 'Gagal mengambil data santri dari server';
+                }
+            }
+        });
+
+        // Trigger pencatatan otomatis saat satu nama dipilih & reset dropdown
+        $('#input-nama').on('select2:select', function (e) {
+            const data = e.params.data;
+            const stambuk = (data.id || data.stambuk || '').toString().trim();
+
+            // Reset dropdown Select2 agar siap untuk input berikutnya
+            $('#input-nama').val(null).trigger('change');
+
+            if (stambuk) {
+                catatKunjungan(stambuk);
+            }
+        });
+    }
+
+    // ── Auto-focus scanner: hanya fokus otomatis saat Mode Scan aktif ────
+    input.focus();
+    document.addEventListener('click', function (e) {
+        if (currentMode !== 'scan') {
+            return;
+        }
+        if (document.body.classList.contains('modal-open') || (modalEl && modalEl.classList.contains('show'))) {
+            return;
+        }
+        if (!e.target.closest('a, button, input, select, textarea, .modal, .select2, .select2-container, .mode-toggle-pill')) {
+            input.focus();
+        }
+    });
+
+    // ── Submit handler pemindaian barcode ─────────────────────────────────
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const stambuk = input.value.trim();
+        if (!stambuk) return;
+        catatKunjungan(stambuk);
     });
 });
 </script>
