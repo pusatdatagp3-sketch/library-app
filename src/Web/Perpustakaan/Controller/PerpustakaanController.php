@@ -11,6 +11,12 @@ use App\Web\Perpustakaan\Model\SiswaRepository;
 use App\Web\Staf\Model\StafRepository;
 use HttpSoft\Message\Stream;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\Legend;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -289,7 +295,7 @@ final class PerpustakaanController
                     'kelas' => $santri['kelas'],
                     'rayon' => $santri['rayon'],
                     'konsulat' => $santri['konsulat'],
-                    'waktu' => date('H:i:s'),
+                    'waktu' => (new \DateTimeImmutable('now', new \DateTimeZone('Asia/Jakarta')))->format('H:i:s'),
                     'penginput' => $penginput,
                     'aktif' => $isAktif,
                     'status' => $santri['status'] ?? 'Aktif',
@@ -316,22 +322,29 @@ final class PerpustakaanController
      */
     public function rekap(CurrentRoute $route, Request $request): ResponseInterface
     {
+        $isPost = $request->getMethod() === 'POST';
+        $postBody = $isPost ? (array) ($request->getParsedBody() ?? []) : [];
         $queryParams = $request->getQueryParams();
-        $mode = (string) ($queryParams['mode'] ?? 'input');
+
+        $mode = (string) ($postBody['mode'] ?? $queryParams['mode'] ?? 'input');
         if (!in_array($mode, ['input', 'kelas', 'rayon', 'konsulat'], true)) {
             $mode = 'input';
         }
 
-        $rentangWaktu = (string) ($queryParams['rentang_waktu'] ?? 'semua');
-        if (!in_array($rentangWaktu, ['semua', 'minggu_ini', 'bulan_ini'], true)) {
+        $rentangWaktu = (string) ($postBody['rentang_waktu'] ?? $queryParams['rentang_waktu'] ?? 'semua');
+        if (!in_array($rentangWaktu, ['semua', 'minggu_ini', 'bulan_ini', 'custom'], true)) {
             $rentangWaktu = 'semua';
         }
 
-        $searchQuery = trim((string) ($queryParams['q'] ?? ''));
-        $action = strtolower(trim((string) ($queryParams['action'] ?? '')));
-        $format = strtolower(trim((string) ($queryParams['format'] ?? '')));
+        $startDate = trim((string) ($postBody['start_date'] ?? $queryParams['start_date'] ?? ''));
+        $endDate = trim((string) ($postBody['end_date'] ?? $queryParams['end_date'] ?? ''));
 
-        // 1. Tentukan Filter Rentang Waktu (Sabtu - Jumat untuk kalender pesantren)
+        $searchQuery = trim((string) ($postBody['q'] ?? $queryParams['q'] ?? ''));
+        $action = strtolower(trim((string) ($postBody['action'] ?? $queryParams['action'] ?? '')));
+        $format = strtolower(trim((string) ($postBody['format'] ?? $queryParams['format'] ?? '')));
+        $chartImage = trim((string) ($postBody['chart_image'] ?? $queryParams['chart_image'] ?? ''));
+
+        // 1. Tentukan Filter Rentang Waktu (Sabtu - Jumat untuk kalender pesantren, Bulan Ini, atau Rentang Kustom)
         $startStr = null;
         $endStr = null;
         $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Jakarta'));
@@ -354,6 +367,39 @@ final class PerpustakaanController
 
             $startStr = $startOfMonth->format('Y-m-d H:i:s');
             $endStr = $endOfMonth->format('Y-m-d H:i:s');
+        } elseif ($rentangWaktu === 'custom') {
+            $validStart = false;
+            $validEnd = false;
+            if ($startDate !== '') {
+                try {
+                    $dtStart = new \DateTimeImmutable($startDate);
+                    $startDate = $dtStart->format('Y-m-d');
+                    $startStr = $startDate . ' 00:00:00';
+                    $validStart = true;
+                } catch (\Throwable) {
+                    $startDate = '';
+                    $startStr = null;
+                }
+            }
+            if ($endDate !== '') {
+                try {
+                    $dtEnd = new \DateTimeImmutable($endDate);
+                    $endDate = $dtEnd->format('Y-m-d');
+                    $endStr = $endDate . ' 23:59:59';
+                    $validEnd = true;
+                } catch (\Throwable) {
+                    $endDate = '';
+                    $endStr = null;
+                }
+            }
+            // Jika kedua tanggal valid dan urutan terbalik, balikkan agar query valid
+            if ($validStart && $validEnd && $startDate > $endDate) {
+                $temp = $startDate;
+                $startDate = $endDate;
+                $endDate = $temp;
+                $startStr = $startDate . ' 00:00:00';
+                $endStr = $endDate . ' 23:59:59';
+            }
         }
 
         $limit = isset($queryParams['limit']) ? (int) $queryParams['limit'] : 100;
@@ -392,12 +438,25 @@ final class PerpustakaanController
         $labelRentang = match ($rentangWaktu) {
             'minggu_ini' => 'Minggu Ini (Sabtu - Jumat)',
             'bulan_ini'  => "Bulan Ini ({$namaBulan} {$tahun})",
+            'custom'     => 'Rentang Tanggal Kustom',
             default      => 'Semua Waktu',
         };
 
-        $periodeDetail = ($startStr !== null && $endStr !== null)
-            ? (new \DateTimeImmutable($startStr))->format('d M Y') . ' s.d. ' . (new \DateTimeImmutable($endStr))->format('d M Y')
-            : 'Seluruh Riwayat';
+        if ($rentangWaktu === 'custom') {
+            if ($startStr !== null && $endStr !== null) {
+                $periodeDetail = (new \DateTimeImmutable($startStr))->format('d M Y') . ' s.d. ' . (new \DateTimeImmutable($endStr))->format('d M Y');
+            } elseif ($startStr !== null) {
+                $periodeDetail = 'Mulai ' . (new \DateTimeImmutable($startStr))->format('d M Y');
+            } elseif ($endStr !== null) {
+                $periodeDetail = 'Sampai ' . (new \DateTimeImmutable($endStr))->format('d M Y');
+            } else {
+                $periodeDetail = 'Rentang Kustom (Belum Ditentukan)';
+            }
+        } else {
+            $periodeDetail = ($startStr !== null && $endStr !== null)
+                ? (new \DateTimeImmutable($startStr))->format('d M Y') . ' s.d. ' . (new \DateTimeImmutable($endStr))->format('d M Y')
+                : 'Seluruh Riwayat';
+        }
 
         // 3. Logika Ekspor Berkas (Excel .XLSX / .CSV & PDF Standalone View)
         if ($action === 'export') {
@@ -413,7 +472,14 @@ final class PerpustakaanController
             }
 
             if ($format === 'pdf') {
-                return $this->handleExportPdf($data, $mode, $rentangWaktu, $labelRentang, $periodeDetail);
+                return $this->handleExportPdf(
+                    $data,
+                    $mode,
+                    $rentangWaktu,
+                    $labelRentang,
+                    $periodeDetail,
+                    $chartImage !== '' ? $chartImage : null
+                );
             }
         }
 
@@ -423,6 +489,8 @@ final class PerpustakaanController
             'kunjunganList' => $mode === 'input' ? $data : [],
             'limit'         => $limit,
             'rentangWaktu'  => $rentangWaktu,
+            'startDate'     => $startDate,
+            'endDate'       => $endDate,
             'searchQuery'   => $searchQuery,
             'labelRentang'  => $labelRentang,
             'periodeDetail' => $periodeDetail,
@@ -556,9 +624,142 @@ final class PerpustakaanController
             $sheet->getColumnDimension($colID)->setAutoSize(true);
         }
 
+        // ── Buat Komponen Grafik Batang Native PhpSpreadsheet berdasarkan rentang data sel ──
+        if ($mode !== 'input') {
+            $dataStartRow = $startRow + 1;
+            $dataEndRow = $endRow - 1; // baris sebelum total keseluruhan
+            $dataRowCount = max(1, $dataEndRow - $dataStartRow + 1);
+
+            if ($dataEndRow >= $dataStartRow) {
+                $titleModeStr = match ($mode) {
+                    'kelas'    => 'Kelas',
+                    'rayon'    => 'Rayon',
+                    'konsulat' => 'Konsulat',
+                    default    => 'Kategori',
+                };
+
+                $dataSeriesLabels = [
+                    new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'Rekap Kunjungan'!\$C\${$startRow}", null, 1),
+                ];
+                $xAxisTickValues = [
+                    new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'Rekap Kunjungan'!\$B\${$dataStartRow}:\$B\${$dataEndRow}", null, $dataRowCount),
+                ];
+                $dataSeriesValues = [
+                    new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'Rekap Kunjungan'!\$C\${$dataStartRow}:\$C\${$dataEndRow}", null, $dataRowCount),
+                ];
+
+                $series = new DataSeries(
+                    DataSeries::TYPE_BARCHART,
+                    DataSeries::GROUPING_CLUSTERED,
+                    range(0, count($dataSeriesValues) - 1),
+                    $dataSeriesLabels,
+                    $xAxisTickValues,
+                    $dataSeriesValues
+                );
+                $series->setPlotDirection(DataSeries::DIRECTION_COL);
+
+                $plotArea = new PlotArea(null, [$series]);
+                $legend = new Legend(Legend::POSITION_TOPRIGHT, null, false);
+                $chartTitle = new Title("Grafik Rekapitulasi Kunjungan Santri per-{$titleModeStr}");
+
+                $chart = new Chart(
+                    'chart_rekap_kunjungan',
+                    $chartTitle,
+                    $legend,
+                    $plotArea,
+                    true,
+                    DataSeries::EMPTY_AS_GAP,
+                    null,
+                    new Title('Jumlah Santri')
+                );
+
+                $chart->setTopLeftPosition('E' . $startRow);
+                $chart->setBottomRightPosition('P' . ($startRow + 18));
+
+                $sheet->addChart($chart);
+            }
+        } elseif (!empty($data)) {
+            // Mode Detail (Input): Rekap ringkasan kunjungan per-kelas untuk grafik sel
+            $kelasSummary = [];
+            foreach ($data as $item) {
+                $k = trim((string)($item->kelas ?? 'Lainnya'));
+                if ($k === '') {
+                    $k = 'Lainnya';
+                }
+                $kelasSummary[$k] = ($kelasSummary[$k] ?? 0) + 1;
+            }
+            arsort($kelasSummary);
+            $topKelas = array_slice($kelasSummary, 0, 8, true);
+
+            if (!empty($topKelas)) {
+                $sumStartRow = $startRow;
+                $sheet->setCellValue('J' . $sumStartRow, 'Kelas');
+                $sheet->setCellValue('K' . $sumStartRow, 'Kunjungan');
+                $sheet->getStyle('J' . $sumStartRow . ':K' . $sumStartRow)->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+                $sheet->getStyle('J' . $sumStartRow . ':K' . $sumStartRow)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('4338CA');
+
+                $sumCurrentRow = $sumStartRow + 1;
+                foreach ($topKelas as $kName => $kTotal) {
+                    $sheet->setCellValue('J' . $sumCurrentRow, (string)$kName);
+                    $sheet->setCellValue('K' . $sumCurrentRow, (int)$kTotal);
+                    $sumCurrentRow++;
+                }
+                $sumEndRow = $sumCurrentRow - 1;
+                $sumCount = count($topKelas);
+
+                $sheet->getStyle('J' . $sumStartRow . ':K' . $sumEndRow)->getBorders()->getAllBorders()
+                    ->setBorderStyle(Border::BORDER_THIN)
+                    ->getColor()->setRGB('CBD5E1');
+
+                $sumDataStartRow = $sumStartRow + 1;
+                $dataSeriesLabels = [
+                    new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'Rekap Kunjungan'!\$K\${$sumStartRow}", null, 1),
+                ];
+                $xAxisTickValues = [
+                    new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'Rekap Kunjungan'!\$J\${$sumDataStartRow}:\$J\${$sumEndRow}", null, $sumCount),
+                ];
+                $dataSeriesValues = [
+                    new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'Rekap Kunjungan'!\$K\${$sumDataStartRow}:\$K\${$sumEndRow}", null, $sumCount),
+                ];
+
+                $series = new DataSeries(
+                    DataSeries::TYPE_BARCHART,
+                    DataSeries::GROUPING_CLUSTERED,
+                    range(0, count($dataSeriesValues) - 1),
+                    $dataSeriesLabels,
+                    $xAxisTickValues,
+                    $dataSeriesValues
+                );
+                $series->setPlotDirection(DataSeries::DIRECTION_COL);
+
+                $plotArea = new PlotArea(null, [$series]);
+                $legend = new Legend(Legend::POSITION_TOPRIGHT, null, false);
+                $chartTitle = new Title('Grafik Kunjungan per-Kelas Teraktif');
+
+                $chart = new Chart(
+                    'chart_rekap_input_kelas',
+                    $chartTitle,
+                    $legend,
+                    $plotArea,
+                    true,
+                    DataSeries::EMPTY_AS_GAP,
+                    null,
+                    new Title('Jumlah Santri')
+                );
+
+                $chart->setTopLeftPosition('M' . $startRow);
+                $chart->setBottomRightPosition('W' . ($startRow + 18));
+
+                $sheet->addChart($chart);
+            }
+        }
+
         // Simpan ke temp stream & kembalikan response PSR-7
         $tempStream = fopen('php://temp', 'r+');
         $writer = new Xlsx($spreadsheet);
+        $writer->setIncludeCharts(true);
         $writer->save($tempStream);
         rewind($tempStream);
 
@@ -652,7 +853,8 @@ final class PerpustakaanController
         string $mode,
         string $rentangWaktu,
         string $labelRentang,
-        string $periodeDetail
+        string $periodeDetail,
+        ?string $chartImage = null
     ): ResponseInterface {
         $grandTotalAgregasi = 0;
         if ($mode !== 'input') {
@@ -670,6 +872,7 @@ final class PerpustakaanController
                 'labelRentang'       => $labelRentang,
                 'periodeDetail'      => $periodeDetail,
                 'grandTotalAgregasi' => $grandTotalAgregasi,
+                'chartImage'         => $chartImage,
             ]);
     }
 

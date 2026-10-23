@@ -159,7 +159,7 @@ return [
             Route::get('/cari-santri')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'cariSantri'])
                 ->name('perpustakaan/cari-santri'),
-            Route::get('/rekap')
+            Route::methods(['GET', 'POST'], '/rekap')
                 ->action([Web\Perpustakaan\Controller\PerpustakaanController::class, 'rekap'])
                 ->name('perpustakaan/rekap'),
             Route::get('/api/detail-kunjungan')

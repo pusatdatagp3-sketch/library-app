@@ -51,8 +51,12 @@ return [
                     connection: new \Cycle\Database\Config\MySQL\DsnConnectionConfig(
                         dsn: 'mysql:host=' . \App\Environment::dbHost() . ';port=' . \App\Environment::dbPort() . ';dbname=' . \App\Environment::dbName() . ';charset=utf8mb4',
                         user: \App\Environment::dbUser(),
-                        password: \App\Environment::dbPassword()
+                        password: \App\Environment::dbPassword(),
+                        options: [
+                            \PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '+07:00'",
+                        ],
                     ),
+                    timezone: 'Asia/Jakarta',
                     queryCache: true
                 ),
             ],

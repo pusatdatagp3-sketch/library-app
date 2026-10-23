@@ -14,7 +14,9 @@ use Yiisoft\View\WebView;
  * @var array<KunjunganEntity|array<string, mixed>> $data
  * @var KunjunganEntity[] $kunjunganList
  * @var int $limit
- * @var string $rentangWaktu 'semua' | 'minggu_ini' | 'bulan_ini'
+ * @var string $rentangWaktu 'semua' | 'minggu_ini' | 'bulan_ini' | 'custom'
+ * @var string $startDate
+ * @var string $endDate
  * @var string $searchQuery
  * @var string $labelRentang
  * @var string $periodeDetail
@@ -24,6 +26,8 @@ use Yiisoft\View\WebView;
 
 $mode = $mode ?? 'input';
 $rentangWaktu = $rentangWaktu ?? 'semua';
+$startDate = $startDate ?? '';
+$endDate = $endDate ?? '';
 $searchQuery = $searchQuery ?? '';
 $totalItems = count($data);
 
@@ -46,12 +50,47 @@ if ($mode !== 'input') {
     }
 }
 
+// Persiapan data grafik batang untuk visualisasi dan ekspor PDF
+$chartLabels = [];
+$chartTotals = [];
+$chartHeading = 'Statistik Kunjungan';
+
+if ($mode === 'input') {
+    $kelasCounts = [];
+    foreach ($data as $item) {
+        $k = trim((string)($item->kelas ?? 'Lainnya'));
+        if ($k === '') {
+            $k = 'Lainnya';
+        }
+        $kelasCounts[$k] = ($kelasCounts[$k] ?? 0) + 1;
+    }
+    arsort($kelasCounts);
+    $kelasCounts = array_slice($kelasCounts, 0, 10, true);
+    $chartLabels = array_keys($kelasCounts);
+    $chartTotals = array_values($kelasCounts);
+    $chartHeading = 'Grafik Top 10 Kelas Kunjungan Santri';
+} else {
+    foreach ($data as $row) {
+        $chartLabels[] = (string)($row['nama'] ?? $row[$mode] ?? 'Tidak Terdata');
+        $chartTotals[] = (int)($row['total'] ?? 0);
+    }
+    $chartHeading = 'Grafik Rekapitulasi Kunjungan Santri per-' . ($activeModeConfig['label'] ?? 'Kategori');
+}
+
 // Generate URL untuk Export Excel dan PDF dengan parameter aktif
 $baseExportParams = [
     'mode'          => $mode,
     'rentang_waktu' => $rentangWaktu,
     'action'        => 'export',
 ];
+if ($rentangWaktu === 'custom') {
+    if ($startDate !== '') {
+        $baseExportParams['start_date'] = $startDate;
+    }
+    if ($endDate !== '') {
+        $baseExportParams['end_date'] = $endDate;
+    }
+}
 if ($searchQuery !== '') {
     $baseExportParams['q'] = $searchQuery;
 }
@@ -272,12 +311,21 @@ $urlExportPdf   = '?' . http_build_query(array_merge($baseExportParams, ['format
                 <!-- Parameter Mode Aktif -->
                 <input type="hidden" name="mode" value="<?= Html::encode($mode) ?>">
 
-                <!-- 1. Dropdown Filter Rentang Waktu (Sabtu-Jumat, Bulan Ini, Semua) -->
-                <select name="rentang_waktu" class="form-select form-select-sm w-auto border-secondary-subtle rounded-3 py-1.5" onchange="this.form.submit()" title="Pilih Rentang Waktu Rekap">
+                <!-- 1. Dropdown Filter Rentang Waktu (Sabtu-Jumat, Bulan Ini, Semua, Kustom) -->
+                <select name="rentang_waktu" id="filter-rentang-waktu" class="form-select form-select-sm w-auto border-secondary-subtle rounded-3 py-1.5" onchange="handleRentangWaktuChange(this)" title="Pilih Rentang Waktu Rekap">
                     <option value="semua" <?= $rentangWaktu === 'semua' ? 'selected' : '' ?>>Semua Waktu</option>
                     <option value="minggu_ini" <?= $rentangWaktu === 'minggu_ini' ? 'selected' : '' ?>>Minggu Ini (Sabtu - Jumat)</option>
                     <option value="bulan_ini" <?= $rentangWaktu === 'bulan_ini' ? 'selected' : '' ?>>Bulan Ini</option>
+                    <option value="custom" <?= $rentangWaktu === 'custom' ? 'selected' : '' ?>>Rentang Tanggal Kustom...</option>
                 </select>
+
+                <!-- 1b. Input Rentang Tanggal Kustom (Hidden by default, tampil jika opsi kustom dipilih) -->
+                <div id="custom-date-filter" class="<?= $rentangWaktu === 'custom' ? 'd-flex' : 'd-none' ?> align-items-center gap-1.5 flex-wrap">
+                    <input type="date" name="start_date" value="<?= Html::encode($startDate) ?>" class="form-control form-control-sm w-auto border-secondary-subtle rounded-3 py-1.5" title="Tanggal Mulai">
+                    <span class="text-secondary small">s.d.</span>
+                    <input type="date" name="end_date" value="<?= Html::encode($endDate) ?>" class="form-control form-control-sm w-auto border-secondary-subtle rounded-3 py-1.5" title="Tanggal Selesai">
+                    <button type="submit" class="btn btn-sm btn-primary rounded-3 px-2.5 py-1.5 text-nowrap">Terapkan</button>
+                </div>
 
                 <!-- 2. Input Pencarian Data -->
                 <div class="search-input-group">
@@ -311,11 +359,11 @@ $urlExportPdf   = '?' . http_build_query(array_merge($baseExportParams, ['format
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="<?= Html::encode($urlExportPdf) ?>" target="_blank">
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="exportPdfWithChart(event)">
                                 <i class="ri-file-pdf-2-line text-danger fs-5"></i>
                                 <div>
                                     <div class="fw-semibold">Export ke PDF</div>
-                                    <small class="text-secondary" style="font-size: 0.75rem;">Cetak dokumen &bull; Layout bersih</small>
+                                    <small class="text-secondary" style="font-size: 0.75rem;">Cetak dokumen &bull; Menyertakan grafik batang</small>
                                 </div>
                             </a>
                         </li>
@@ -324,6 +372,47 @@ $urlExportPdf   = '?' . http_build_query(array_merge($baseExportParams, ['format
             </form>
         </div>
     </div>
+
+    <!-- Hidden Form untuk Export PDF dengan Grafik Base64 -->
+    <form id="form-export-pdf" method="POST" action="?action=export&format=pdf" target="_blank" style="display: none;">
+        <input type="hidden" name="mode" value="<?= Html::encode($mode) ?>">
+        <input type="hidden" name="rentang_waktu" value="<?= Html::encode($rentangWaktu) ?>">
+        <input type="hidden" name="start_date" value="<?= Html::encode($startDate) ?>">
+        <input type="hidden" name="end_date" value="<?= Html::encode($endDate) ?>">
+        <input type="hidden" name="q" value="<?= Html::encode($searchQuery) ?>">
+        <input type="hidden" name="action" value="export">
+        <input type="hidden" name="format" value="pdf">
+        <input type="hidden" name="chart_image" id="pdf-chart-image" value="">
+        <?php if (!empty($csrf)): ?>
+            <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
+        <?php endif; ?>
+    </form>
+
+    <!-- ── 3B. KARTU VISUALISASI GRAFIK BATANG (BAR CHART) ──────────────── -->
+    <?php if (!empty($chartLabels)): ?>
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-transparent border-0 pt-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-k-purple-subtle text-k-purple p-2 rounded-3">
+                        <i class="ri-bar-chart-grouped-line fs-5"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-body-emphasis"><?= Html::encode($chartHeading) ?></h6>
+                        <small class="text-secondary" style="font-size: 0.78rem;">Visualisasi grafik batang interaktif &bull; Disertakan otomatis dalam ekspor laporan PDF &amp; Excel</small>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5" onclick="exportPdfWithChart(event)" title="Ekspor Grafik & Tabel ke PDF">
+                    <i class="ri-file-pdf-2-line text-danger"></i>
+                    <span>Ekspor PDF + Grafik</span>
+                </button>
+            </div>
+            <div class="card-body px-4 pb-4 pt-1">
+                <div style="position: relative; width: 100%; height: 280px;">
+                    <canvas id="rekapBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- ── 4. KARTU TABEL DATA REKAP KUNJUNGAN ───────────────────────────── -->
     <div class="card border-0 shadow-sm rounded-4">
@@ -511,6 +600,23 @@ $urlExportPdf   = '?' . http_build_query(array_merge($baseExportParams, ['format
     observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
 })();
 
+// Toggle Filter Rentang Tanggal Kustom
+function handleRentangWaktuChange(selectElement) {
+    const customDiv = document.getElementById('custom-date-filter');
+    if (selectElement.value === 'custom') {
+        if (customDiv) {
+            customDiv.classList.remove('d-none');
+            customDiv.classList.add('d-flex');
+        }
+    } else {
+        if (customDiv) {
+            customDiv.classList.add('d-none');
+            customDiv.classList.remove('d-flex');
+        }
+        selectElement.form.submit();
+    }
+}
+
 // Client-side Instant Filter Search (Berlaku untuk semua mode)
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('table-search-input');
@@ -547,4 +653,125 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+</script>
+
+<!-- Load Chart.js CDN untuk Render Grafik Batang Frontend -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ── Inisialisasi Grafik Batang Chart.js ─────────────────────────────────────
+(function() {
+    const chartLabels = <?= json_encode($chartLabels, JSON_UNESCAPED_UNICODE) ?>;
+    const chartTotals = <?= json_encode($chartTotals, JSON_UNESCAPED_UNICODE) ?>;
+    const canvas = document.getElementById('rekapBarChart');
+
+    if (!canvas || !chartLabels || chartLabels.length === 0) {
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Jumlah Kunjungan',
+                data: chartTotals,
+                backgroundColor: 'rgba(124, 58, 237, 0.78)',
+                borderColor: '#7c3aed',
+                borderWidth: 1.5,
+                borderRadius: 6,
+                maxBarThickness: 45
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 600
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    padding: 10,
+                    titleFont: { weight: 'bold' },
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.parsed.y} Santri berkunjung`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        font: { family: 'monospace' }
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.15)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 0,
+                        font: { size: 11 }
+                    }
+                }
+            }
+        }
+    });
+})();
+
+// ── Fungsi JavaScript untuk Mengonversi Grafik ke Base64 & Submit ke Backend PDF ──
+function exportPdfWithChart(e) {
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+
+    const canvas = document.getElementById('rekapBarChart');
+    let chartBase64 = '';
+
+    if (canvas) {
+        try {
+            // Render ke canvas sementara dengan latar belakang putih solid
+            // agar grafik tidak menjadi hitam/transparan saat disisipkan ke DOM PDF
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            ctx.drawImage(canvas, 0, 0);
+            chartBase64 = tempCanvas.toDataURL('image/png');
+        } catch (err) {
+            console.warn('Konversi canvas ke gambar gagal, menggunakan dataURL langsung:', err);
+            try {
+                chartBase64 = canvas.toDataURL('image/png');
+            } catch (fallbackErr) {
+                console.error('Gagal membaca canvas:', fallbackErr);
+            }
+        }
+    }
+
+    const inputChart = document.getElementById('pdf-chart-image');
+    if (inputChart) {
+        inputChart.value = chartBase64;
+    }
+
+    const form = document.getElementById('form-export-pdf');
+    if (form) {
+        form.submit();
+    } else {
+        // Fallback jika form tidak ditemukan
+        window.open('<?= Html::encode($urlExportPdf) ?>', '_blank');
+    }
+}
 </script>

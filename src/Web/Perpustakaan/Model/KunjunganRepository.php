@@ -41,8 +41,9 @@ class KunjunganRepository extends Repository
      */
     public function getKunjunganHariIni(): array
     {
-        $startOfDay = (new DateTimeImmutable('today'))->format('Y-m-d 00:00:00');
-        $endOfDay = (new DateTimeImmutable('today'))->format('Y-m-d 23:59:59');
+        $tz = new \DateTimeZone('Asia/Jakarta');
+        $startOfDay = (new DateTimeImmutable('today', $tz))->format('Y-m-d 00:00:00');
+        $endOfDay = (new DateTimeImmutable('today', $tz))->format('Y-m-d 23:59:59');
 
         /** @var KunjunganEntity[] $results */
         $results = $this->select()
@@ -110,6 +111,7 @@ class KunjunganRepository extends Repository
      */
     public function catatKunjungan(int $santriId, array $data): bool
     {
+        $tz = new \DateTimeZone('Asia/Jakarta');
         $kunjungan = new KunjunganEntity();
         $kunjungan->santri_id = $santriId;
         $kunjungan->stambuk = trim((string) ($data['stambuk'] ?? ''));
@@ -123,13 +125,13 @@ class KunjunganRepository extends Repository
             if ($data['waktu_kunjungan'] instanceof DateTimeInterface) {
                 $kunjungan->waktu_kunjungan = DateTimeImmutable::createFromInterface($data['waktu_kunjungan']);
             } elseif (is_string($data['waktu_kunjungan']) && $data['waktu_kunjungan'] !== '') {
-                $kunjungan->waktu_kunjungan = new DateTimeImmutable($data['waktu_kunjungan']);
+                $kunjungan->waktu_kunjungan = new DateTimeImmutable($data['waktu_kunjungan'], $tz);
             }
         } else {
-            $kunjungan->waktu_kunjungan = new DateTimeImmutable();
+            $kunjungan->waktu_kunjungan = new DateTimeImmutable('now', $tz);
         }
 
-        $kunjungan->created_at = new DateTimeImmutable();
+        $kunjungan->created_at = new DateTimeImmutable('now', $tz);
 
         if ($this->entityManager !== null) {
             $this->entityManager->persist($kunjungan)->run();
@@ -196,10 +198,12 @@ class KunjunganRepository extends Repository
     ): array {
         $select = $this->select();
 
-        if ($startStr !== null && $endStr !== null) {
-            $select = $select
-                ->where('waktu_kunjungan', '>=', $startStr)
-                ->where('waktu_kunjungan', '<=', $endStr);
+        if ($startStr !== null && $startStr !== '') {
+            $select = $select->where('waktu_kunjungan', '>=', $startStr);
+        }
+
+        if ($endStr !== null && $endStr !== '') {
+            $select = $select->where('waktu_kunjungan', '<=', $endStr);
         }
 
         if ($search !== null && $search !== '') {
@@ -249,9 +253,13 @@ class KunjunganRepository extends Repository
          $whereConditions = [];
          $params = [];
 
-         if ($startStr !== null && $endStr !== null) {
-             $whereConditions[] = '`waktu_kunjungan` BETWEEN :start_str AND :end_str';
+         if ($startStr !== null && $startStr !== '') {
+             $whereConditions[] = '`waktu_kunjungan` >= :start_str';
              $params[':start_str'] = $startStr;
+         }
+
+         if ($endStr !== null && $endStr !== '') {
+             $whereConditions[] = '`waktu_kunjungan` <= :end_str';
              $params[':end_str'] = $endStr;
          }
 

@@ -74,20 +74,58 @@
         <aside class="admin-sidebar">
             <!-- Brand / Logo -->
             <?php
-            $sidebarLogoFilePath = $aliases->get('@public/images/kutubia_logo.svg');
-            $sidebarLogoSrc = file_exists($sidebarLogoFilePath)
-                ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($sidebarLogoFilePath))
-                : $aliases->get('@baseUrl/images/kutubia_logo.svg');
+            $logoPerpusPath = $aliases->get('@public/images/logo-perpus.png');
+            $sidebarLogoSrc = file_exists($logoPerpusPath)
+                ? $aliases->get('@baseUrl/images/logo-perpus.png')
+                : '/images/logo-perpus.png';
             ?>
             <div class="sidebar-brand">
-                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-full" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
-                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-icon" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: none;">
+                <img src="/images/logo-perpus.png" onerror="this.onerror=null; this.src='<?= $sidebarLogoSrc ?>';" alt="Logo KUTUBIA" class="logo-full" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
+                <img src="/images/logo-perpus.png" onerror="this.onerror=null; this.src='<?= $sidebarLogoSrc ?>';" alt="Logo KUTUBIA" class="logo-icon" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: none;">
                 <span class="brand-text fw-bold">KUTUBIA</span>
             </div>
 
             <!-- Sidebar Navigation -->
             <div class="sidebar-nav">
                 <?php foreach ($sidebarMenu as $group): ?>
+                <?php
+                    // 1. Header Pembatas "SISTEM": izinkan role super-admin ATAU library
+                    $groupName = (string) ($group['group'] ?? '');
+                    if (strcasecmp($groupName, 'Sistem') === 0) {
+                        if (!$userSession->hasRole(['super-admin', 'library'])) {
+                            continue;
+                        }
+                    } elseif (isset($group['role']) && !$userSession->hasRole($group['role'])) {
+                        continue;
+                    }
+
+                    if (isset($group['permission']) && !$userSession->hasPermission($group['permission'])) {
+                        continue;
+                    }
+
+                    $visibleGroupItems = array_filter($group['items'] ?? [], function ($item) use ($userSession) {
+                        $label = (string) ($item['label'] ?? '');
+                        // Menu Generator & RBAC: HANYA tampil untuk role super-admin
+                        if (in_array($label, ['Generator', 'RBAC'], true)) {
+                            return $userSession->hasRole('super-admin');
+                        }
+                        // Menu Manajemen Staf: diizinkan untuk super-admin ATAU library
+                        if ($label === 'Manajemen Staf') {
+                            return $userSession->hasRole(['super-admin', 'library']);
+                        }
+                        if (isset($item['role']) && !$userSession->hasRole($item['role'])) {
+                            return false;
+                        }
+                        if (isset($item['permission']) && !$userSession->hasPermission($item['permission'])) {
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (empty($visibleGroupItems)) {
+                        continue;
+                    }
+                ?>
 
                 <div class="nav-group">
 
@@ -103,10 +141,25 @@
                         <?php foreach ($group['items'] as $item): ?>
 
                         <?php
+                            $itemLabel = (string) ($item['label'] ?? '');
+
+                            // Menu Generator & RBAC: HANYA tampil untuk role super-admin
+                            if (in_array($itemLabel, ['Generator', 'RBAC'], true)) {
+                                if (!$userSession->hasRole('super-admin')) {
+                                    continue;
+                                }
+                            }
+
+                            // Menu Manajemen Staf: diizinkan untuk role super-admin ATAU library
+                            if ($itemLabel === 'Manajemen Staf') {
+                                if (!$userSession->hasRole(['super-admin', 'library'])) {
+                                    continue;
+                                }
+                            }
 
                             if (
                                 isset($item['role']) &&
-                                $userSession->getUserRole() !== $item['role']
+                                !$userSession->hasRole($item['role'])
                             ) {
                                 continue;
                             }
@@ -205,7 +258,7 @@
 
                                     if (
                                         isset($child['role']) &&
-                                        $userSession->getUserRole() !== $child['role']
+                                        !$userSession->hasRole($child['role'])
                                     ) {
                                         continue;
                                     }

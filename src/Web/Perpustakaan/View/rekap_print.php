@@ -12,6 +12,7 @@ use Yiisoft\Html\Html;
  * @var string $labelRentang
  * @var string $periodeDetail
  * @var int $grandTotalAgregasi
+ * @var string|null $chartImage
  */
 
 $totalItems = count($data);
@@ -242,6 +243,45 @@ $tanggalCetak = date('d F Y, H:i');
                 display: table-footer-group;
             }
         }
+
+        /* Styling Visualisasi Grafik Batang Cetak */
+        .chart-print-section {
+            margin: 15px 0 20px 0;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .chart-print-title {
+            font-size: 10.5pt;
+            font-weight: 700;
+            color: #4338ca;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-print-img-wrapper {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .chart-print-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 260px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -293,6 +333,18 @@ $tanggalCetak = date('d F Y, H:i');
             <td><strong><?= number_format($totalItems) ?></strong> <?= $mode === 'input' ? 'Transaksi' : 'Kelompok' ?></td>
         </tr>
     </table>
+
+    <!-- ── GRAFIK BATANG KUNJUNGAN (DISISIPKAN DALAM DOM PDF) ─────────────── -->
+    <?php if (!empty($chartImage)): ?>
+        <div class="chart-print-section">
+            <div class="chart-print-title">
+                📊 GRAFIK STATISTIK REKAPITULASI KUNJUNGAN (<?= Html::encode($titleMode) ?>)
+            </div>
+            <div class="chart-print-img-wrapper">
+                <img src="<?= $chartImage ?>" alt="Grafik Batang Kunjungan" class="chart-print-img">
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- ── TABEL DATA UTAMA ─────────────────────────────────────────────── -->
     <?php if ($mode === 'input'): ?>

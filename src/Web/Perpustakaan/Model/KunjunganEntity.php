@@ -52,8 +52,9 @@ class KunjunganEntity
 
     public function __construct()
     {
-        $this->waktu_kunjungan = new DateTimeImmutable();
-        $this->created_at = new DateTimeImmutable();
+        $tz = new \DateTimeZone('Asia/Jakarta');
+        $this->waktu_kunjungan = new DateTimeImmutable('now', $tz);
+        $this->created_at = new DateTimeImmutable('now', $tz);
     }
 
     public function toArray(): array

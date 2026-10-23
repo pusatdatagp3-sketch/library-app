@@ -71,6 +71,35 @@ final class UserSession
     }
 
     /**
+     * Memeriksa apakah pengguna memiliki role tertentu (bisa berupa string atau array role).
+     * Mendukung alias antara 'library' dan 'Perpustakaan' serta pengecekan case-insensitive.
+     *
+     * @param string|array<string> $role
+     */
+    public function hasRole(string|array $role): bool
+    {
+        $userRole = $this->getUserRole();
+        if ($userRole === null) {
+            return false;
+        }
+        $roles = is_array($role) ? $role : [$role];
+
+        foreach ($roles as $r) {
+            if (strcasecmp($userRole, $r) === 0) {
+                return true;
+            }
+            // Alias role library <=> perpustakaan
+            if (
+                in_array(strtolower($r), ['library', 'perpustakaan'], true) &&
+                in_array(strtolower($userRole), ['library', 'perpustakaan'], true)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Mengembalikan daftar kode kampus yang diizinkan untuk pengguna ini.
      */
     public function getAllowedCampuses(): array

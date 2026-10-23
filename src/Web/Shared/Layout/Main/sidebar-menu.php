@@ -51,6 +51,7 @@ return [
     [
         'group' => 'Sistem',
         'icon'  => 'ri-settings-4-line',
+        'role'  => ['super-admin', 'library'],
         'items' => [
 
             [
@@ -58,12 +59,13 @@ return [
                 'icon'   => 'ri-user-star-line',
                 'route'  => 'staf/index',
                 'active' => static fn(string $r): bool => str_starts_with($r, 'staf/'),
-                'role'   => 'super-admin',
+                'role'   => ['super-admin', 'library'],
             ],
 
             [
                 'label'    => 'Generator',
                 'icon'     => 'ri-code-box-line',
+                'role'     => 'super-admin',
 
                 'children' => [
                     [
@@ -71,6 +73,7 @@ return [
                         'icon'       => 'ri-magic-line',
                         'route'      => 'gii/index',
                         'active'     => static fn(string $r): bool => str_starts_with($r, 'gii/'),
+                        'role'       => 'super-admin',
                         'permission' => 'manage_gii',
                     ],
                 ],
@@ -79,6 +82,7 @@ return [
             [
                 'label'    => 'RBAC',
                 'icon'     => 'ri-shield-user-line',
+                'role'     => 'super-admin',
 
                 'children' => [
                     [
@@ -86,6 +90,7 @@ return [
                         'icon'       => 'ri-user-settings-line',
                         'route'      => 'users/index',
                         'active'     => static fn(string $r): bool => str_starts_with($r, 'users/'),
+                        'role'       => 'super-admin',
                         'permission' => 'manage_rbac',
                     ],
                     [
@@ -93,6 +98,7 @@ return [
                         'icon'       => 'ri-shield-keyhole-line',
                         'route'      => 'roles/index',
                         'active'     => static fn(string $r): bool => str_starts_with($r, 'roles/'),
+                        'role'       => 'super-admin',
                         'permission' => 'manage_rbac',
                     ],
                     [
@@ -100,6 +106,7 @@ return [
                         'icon'       => 'ri-key-2-line',
                         'route'      => 'permissions/index',
                         'active'     => static fn(string $r): bool => str_starts_with($r, 'permissions/'),
+                        'role'       => 'super-admin',
                         'permission' => 'manage_rbac',
                     ],
                     [
@@ -107,6 +114,7 @@ return [
                         'icon'       => 'ri-route-line',
                         'route'      => 'routes/index',
                         'active'     => 'routes/index',
+                        'role'       => 'super-admin',
                         'permission' => 'manage_rbac',
                     ],
                 ],

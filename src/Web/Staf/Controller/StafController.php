@@ -22,7 +22,7 @@ use Yiisoft\Yii\View\Renderer\WebViewRenderer;
  */
 final class StafController
 {
-    private const ALLOWED_ROLE = 'super-admin';
+    private const ALLOWED_ROLES = ['super-admin', 'library'];
     private const ALLOWED_DIVISI = ['Library', 'Staff'];
 
     public function __construct(
@@ -37,7 +37,7 @@ final class StafController
     }
 
     /**
-     * Memastikan hanya pengguna dengan role super-admin yang diizinkan mengakses modul ini.
+     * Memastikan hanya pengguna dengan role super-admin atau library yang diizinkan mengakses modul ini.
      */
     private function checkSuperAdmin(): ?ResponseInterface
     {
@@ -47,8 +47,8 @@ final class StafController
                 ->withHeader('Location', $this->urlGenerator->generate('login'));
         }
 
-        if ($this->userSession->getUserRole() !== self::ALLOWED_ROLE) {
-            $this->flash->set('errors', ['Akses ditolak. Modul Manajemen Staf hanya dapat diakses oleh Super Admin.']);
+        if (!$this->userSession->hasRole(self::ALLOWED_ROLES)) {
+            $this->flash->set('errors', ['Akses ditolak. Modul Manajemen Staf hanya dapat diakses oleh Super Admin dan Library.']);
             return $this->responseFactory->createResponse(302)
                 ->withHeader('Location', $this->urlGenerator->generate('perpustakaan/scan'));
         }
