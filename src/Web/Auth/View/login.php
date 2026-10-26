@@ -28,10 +28,13 @@ $this->setTitle('Masuk ke Sistem');
     <div class="login-card card" style="width: 100%; max-width: 420px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); background: var(--bg-card); border: 1px solid var(--border);">
         <div class="login-header" style="text-align: center; margin-bottom: 2rem;">
             <?php
-            $logoFilePath = $aliases->get('@public/images/kutubia_logo.svg');
+            $logoFilePath = $aliases->get('@public/images/library_center_transparentfix.svg');
+            if (!file_exists($logoFilePath)) {
+                $logoFilePath = $aliases->get('@public/images/kutubia_logo.svg');
+            }
             $loginLogoSrc = file_exists($logoFilePath)
                 ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($logoFilePath))
-                : $aliases->get('@baseUrl/images/kutubia_logo.svg');
+                : $aliases->get('@baseUrl/images/library_center_transparentfix.svg');
             ?>
             <img src="<?= $loginLogoSrc ?>" alt="Logo KUTUBIA" width="80" height="80" class="d-block mx-auto mb-3" style="width: 80px; height: 80px; object-fit: contain;">
             <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.25rem 0; letter-spacing: -0.025em;">KUTUBIA</h2>

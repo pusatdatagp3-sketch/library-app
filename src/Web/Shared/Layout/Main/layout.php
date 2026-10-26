@@ -33,13 +33,16 @@
 
 <head>
     <?php
-    $faviconFilePath = $aliases->get('@public/images/kutubia_favicon.svg');
+    $faviconFilePath = $aliases->get('@public/images/library_center_transparentfix.svg');
+    if (!file_exists($faviconFilePath)) {
+        $faviconFilePath = $aliases->get('@public/images/kutubia_favicon.svg');
+    }
     if (!file_exists($faviconFilePath)) {
         $faviconFilePath = $aliases->get('@public/images/kutubia_logo.svg');
     }
     $faviconData = file_exists($faviconFilePath)
         ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($faviconFilePath))
-        : '/kutubia/public/images/kutubia_logo.svg';
+        : $aliases->get('@baseUrl/images/library_center_transparentfix.svg');
     ?>
     <meta charset="<?php echo Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -74,14 +77,17 @@
         <aside class="admin-sidebar">
             <!-- Brand / Logo -->
             <?php
-            $logoPath = $aliases->get('@public/images/kutubia_logo.svg');
+            $logoPath = $aliases->get('@public/images/library_center_transparentfix.svg');
+            if (!file_exists($logoPath)) {
+                $logoPath = $aliases->get('@public/images/kutubia_logo.svg');
+            }
             $sidebarLogoSrc = file_exists($logoPath)
                 ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($logoPath))
-                : $aliases->get('@baseUrl/images/kutubia_logo.svg');
+                : $aliases->get('@baseUrl/images/library_center_transparentfix.svg');
             ?>
             <div class="sidebar-brand">
-                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-full" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
-                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-icon" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: #ffffff; border-radius: 9px; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25); display: none;">
+                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-full" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: transparent; flex-shrink: 0;">
+                <img src="<?= $sidebarLogoSrc ?>" alt="Logo KUTUBIA" class="logo-icon" width="36" height="36" style="width: 36px; height: 36px; object-fit: contain; background: transparent; flex-shrink: 0; display: none;">
                 <span class="brand-text fw-bold">KUTUBIA</span>
             </div>
 

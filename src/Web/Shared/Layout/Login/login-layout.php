@@ -26,13 +26,16 @@ $this->beginPage()
 <html lang="<?= Html::encode($applicationParams->locale) ?>">
 <head>
     <?php
-    $faviconFilePath = $aliases->get('@public/images/kutubia_favicon.svg');
+    $faviconFilePath = $aliases->get('@public/images/library_center_transparentfix.svg');
+    if (!file_exists($faviconFilePath)) {
+        $faviconFilePath = $aliases->get('@public/images/kutubia_favicon.svg');
+    }
     if (!file_exists($faviconFilePath)) {
         $faviconFilePath = $aliases->get('@public/images/kutubia_logo.svg');
     }
     $faviconData = file_exists($faviconFilePath)
         ? 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents($faviconFilePath))
-        : '/kutubia/public/images/kutubia_logo.svg';
+        : $aliases->get('@baseUrl/images/library_center_transparentfix.svg');
     ?>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
