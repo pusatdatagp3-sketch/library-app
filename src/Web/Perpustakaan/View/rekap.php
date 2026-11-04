@@ -10,7 +10,7 @@ use Yiisoft\View\WebView;
 
 /**
  * @var WebView $this
- * @var string $mode 'input' | 'kelas' | 'rayon' | 'konsulat'
+ * @var string $mode 'input' | 'kelas' | 'rayon' | 'konsulat' | 'angkatan'
  * @var array<KunjunganEntity|array<string, mixed>> $data
  * @var KunjunganEntity[] $kunjunganList
  * @var int $limit
@@ -36,6 +36,7 @@ $modeLabels = [
     'kelas'    => ['label' => 'Kelas', 'col' => 'NAMA KELAS', 'icon' => 'ri-building-line'],
     'rayon'    => ['label' => 'Rayon', 'col' => 'NAMA RAYON', 'icon' => 'ri-community-line'],
     'konsulat' => ['label' => 'Konsulat', 'col' => 'NAMA KONSULAT', 'icon' => 'ri-global-line'],
+    'angkatan' => ['label' => 'Angkatan', 'col' => 'ANGKATAN', 'icon' => 'ri-team-line'],
 ];
 
 $activeModeConfig = $modeLabels[$mode] ?? null;
@@ -276,6 +277,12 @@ $urlExportPdf   = '?' . http_build_query(array_merge($baseExportParams, ['format
            class="btn nav-pill-btn rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 <?= $mode === 'konsulat' ? 'btn-primary bg-kutubia border-0 text-white shadow-sm active' : 'btn-outline-secondary' ?>">
             <i class="ri-global-line"></i>
             <span>Rekap Per-Konsulat</span>
+        </a>
+
+        <a href="?mode=angkatan<?= $tabQueryStr ?>"
+           class="btn nav-pill-btn rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 <?= $mode === 'angkatan' ? 'btn-primary bg-kutubia border-0 text-white shadow-sm active' : 'btn-outline-secondary' ?>">
+            <i class="ri-team-line"></i>
+            <span>Rekap Per-Angkatan</span>
         </a>
     </div>
 

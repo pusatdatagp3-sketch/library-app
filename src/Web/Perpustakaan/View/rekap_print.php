@@ -22,6 +22,7 @@ $modeLabels = [
     'kelas'    => 'Rekapitulasi Per-Kelas',
     'rayon'    => 'Rekapitulasi Per-Rayon',
     'konsulat' => 'Rekapitulasi Per-Konsulat',
+    'angkatan' => 'Rekapitulasi Per-Angkatan',
 ];
 
 $titleMode = $modeLabels[$mode] ?? 'Rekapitulasi Kunjungan';
@@ -97,8 +98,30 @@ $tanggalCetak = date('d F Y, H:i');
 
         /* Kop Surat Institusi */
         .kop-surat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 12px;
+        }
+
+        .kop-logo {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kop-logo img {
+            width: 80px;
+            height: auto;
+            max-height: 85px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .kop-teks {
             text-align: center;
-            margin-bottom: 20px;
         }
 
         .kop-instansi {
@@ -129,6 +152,12 @@ $tanggalCetak = date('d F Y, H:i');
             height: 4px;
             margin: 10px 0 20px 0;
         }
+
+        /* Flexbox Utility Classes */
+        .d-flex { display: flex; }
+        .align-items-center { align-items: center; }
+        .justify-content-center { justify-content: center; }
+        .gap-3 { gap: 1rem; }
 
         /* Header Laporan */
         .report-header {
@@ -225,6 +254,16 @@ $tanggalCetak = date('d F Y, H:i');
             .no-print-bar {
                 display: none !important;
             }
+            .kop-surat {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 16px !important;
+            }
+            .kop-logo img {
+                width: 75px !important;
+                height: auto !important;
+            }
             @page {
                 size: A4 portrait;
                 margin: 15mm 15mm 15mm 15mm;
@@ -302,12 +341,18 @@ $tanggalCetak = date('d F Y, H:i');
     </div>
 
     <!-- ── KOP SURAT RESMI ──────────────────────────────────────────────── -->
-    <div class="kop-surat">
-        <div class="kop-instansi">KUTUBIA &bull; PERPUSTAKAAN PESANTREN</div>
-        <div class="kop-sub">SISTEM INFORMASI &amp; MANAJEMEN PRESENSI KUNJUNGAN SANTRI</div>
-        <div class="kop-alamat">Pondok Modern Darussalam &bull; Terintegrasi Database Santri &amp; Barcode Scanner</div>
-        <div class="kop-divider-double"></div>
+    <div class="kop-surat d-flex align-items-center justify-content-center gap-3">
+        <div class="kop-logo">
+            <img src="/images/kutubia_logo.svg" alt="Logo Perpustakaan" style="width: 80px; height: auto;">
+        </div>
+        <div class="kop-teks text-center">
+            <div class="kop-instansi">KUTUBIA • PERPUSTAKAAN GONTOR PUTRI KAMPUS 3</div>
+            <div class="kop-sub">SISTEM INFORMASI &amp; MANAJEMEN PRESENSI KUNJUNGAN SANTRI</div>
+            <div class="kop-alamat">Pondok Modern Darussalam Gontor Putri Kampus 3</div>
+            <div class="kop-alamat">- Terintegrasi Database Santri &amp; Barcode Scanner</div>
+        </div>
     </div>
+    <div class="kop-divider-double"></div>
 
     <!-- ── HEADER LAPORAN ───────────────────────────────────────────────── -->
     <div class="report-header">
@@ -397,6 +442,7 @@ $tanggalCetak = date('d F Y, H:i');
             'kelas'    => 'NAMA KELAS',
             'rayon'    => 'NAMA RAYON',
             'konsulat' => 'NAMA KONSULAT',
+            'angkatan' => 'ANGKATAN',
             default    => 'KATEGORI',
         };
         ?>
