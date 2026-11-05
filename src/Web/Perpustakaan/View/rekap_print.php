@@ -343,7 +343,7 @@ $tanggalCetak = date('d F Y, H:i');
     <!-- ── KOP SURAT RESMI ──────────────────────────────────────────────── -->
     <div class="kop-surat d-flex align-items-center justify-content-center gap-3">
         <div class="kop-logo">
-            <img src="/images/kutubia_logo.svg" alt="Logo Perpustakaan" style="width: 80px; height: auto;">
+            <img src="/kutubia/images/kutubia_logo.svg" alt="Logo Perpustakaan" style="width: 80px; height: auto;">
         </div>
         <div class="kop-teks text-center">
             <div class="kop-instansi">KUTUBIA • PERPUSTAKAAN GONTOR PUTRI KAMPUS 3</div>
